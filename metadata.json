@@ -1,0 +1,6 @@
+{
+  "name": "Bhakti",
+  "description": "Sacred Sadhana and devotional media vault for YouTube videos, photos, and audio (attached from local device or Google Drive) with categories, playback, and reflection notes.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

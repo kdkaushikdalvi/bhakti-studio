@@ -1,0 +1,33 @@
+{
+  "id": "/",
+  "short_name": "Bhakti",
+  "name": "Bhakti",
+  "description": "Sacred Sadhana and devotional media vault for YouTube videos, photos, and audio with categories, playback, and reflection notes.",
+  "icons": [
+    {
+      "src": "/BhaktiLogo.png",
+      "type": "image/png",
+      "sizes": "192x192 512x512",
+      "purpose": "any"
+    },
+    {
+      "src": "/BhaktiLogo.png",
+      "type": "image/png",
+      "sizes": "512x512",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/MyBhakti.png",
+      "type": "image/png",
+      "sizes": "512x512",
+      "purpose": "any"
+    }
+  ],
+  "start_url": "/",
+  "scope": "/",
+  "background_color": "#021815",
+  "theme_color": "#021815",
+  "display": "standalone",
+  "orientation": "portrait",
+  "categories": ["lifestyle", "music", "education"]
+}

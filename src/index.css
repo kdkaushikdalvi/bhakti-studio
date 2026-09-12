@@ -1,0 +1,75 @@
+@import "tailwindcss";
+
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+    touch-action: manipulation;
+    overflow-x: hidden;
+  }
+
+  body {
+    background-color: #FAF6EE;
+    color: #1A1A1A;
+    font-family: 'Plus Jakarta Sans', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    touch-action: manipulation;
+    overflow-x: hidden;
+    width: 100%;
+  }
+
+  /* Universal touch manipulation to prevent double-tap zoom across interactive elements */
+  button, input, select, textarea, a, [role="button"] {
+    touch-action: manipulation;
+  }
+
+  /* Force mobile inputs, selects, textareas to 16px minimum to completely prevent iOS auto-zooming */
+  input, select, textarea, [contenteditable="true"] {
+    font-size: 16px;
+  }
+
+  @media screen and (max-width: 768px) {
+    input, select, textarea, [contenteditable="true"] {
+      font-size: 16px !important;
+    }
+  }
+
+  .font-serif {
+    font-family: 'Cormorant Garamond', Georgia, Cambria, 'Times New Roman', Times, serif;
+  }
+}
+
+/* Ensure bottom sheet and modal inputs never trigger browser viewport zoom */
+@media screen and (max-width: 768px) {
+  input[type="text"],
+  input[type="url"],
+  input[type="search"],
+  input[type="email"],
+  input[type="password"],
+  input[type="number"],
+  textarea,
+  select {
+    font-size: 16px !important;
+    max-height: 100%;
+  }
+}
+
+/* Saffron & White Themed Scrollbars */
+::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+
+::-webkit-scrollbar-track {
+  background: #FFF8EE;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #FFBD80;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #FF8C00;
+}
+
