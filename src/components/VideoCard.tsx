@@ -69,8 +69,8 @@ export const VideoCard: React.FC<VideoCardProps> = ({
             }}
           />
 
-          {/* Top Quick Actions */}
-          <div className="absolute top-2 right-2 flex items-center gap-1">
+          {/* Top Quick Actions removed: media cards expose Remove from the menu only. */}
+          <div className="hidden">
             <button
               onClick={(e) => {
                 e.stopPropagation();
@@ -97,7 +97,6 @@ export const VideoCard: React.FC<VideoCardProps> = ({
               }`}
               title={video.isFavorite ? 'Starred Favorite' : 'Mark Favorite'}
             >
-              <Star className={`w-3 h-3 ${video.isFavorite ? 'fill-white' : ''}`} />
             </button>
           </div>
 

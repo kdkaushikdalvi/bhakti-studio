@@ -216,7 +216,7 @@ export const AudioPlayerModal: React.FC<AudioPlayerModalProps> = ({
           <div className="flex items-center gap-1.5">
             <button
               onClick={() => onToggleFavorite(audio.id)}
-              className={`p-2 rounded-xl transition-colors cursor-pointer ${
+              className={`hidden p-2 rounded-xl transition-colors cursor-pointer ${
                 audio.isFavorite
                   ? 'bg-amber-500 text-white'
                   : 'bg-stone-800/80 text-stone-400 hover:text-amber-400'

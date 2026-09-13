@@ -106,7 +106,6 @@ export const AudioCard: React.FC<AudioCardProps> = ({
               }`}
               title={audio.isFavorite ? 'Starred Favorite' : 'Mark Favorite'}
             >
-              <Star className={`w-3 h-3 ${audio.isFavorite ? 'fill-white' : ''}`} />
             </button>
           </div>
         </div>

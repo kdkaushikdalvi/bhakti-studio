@@ -31,17 +31,12 @@ interface CategoryPillsRowProps {
 // Canonical default categories in Marathi (मराठी भक्ती वर्गवारी)
 export const DEFAULT_PRESET_CATEGORIES: CategoryInfo[] = [
   { id: 'cat-all', name: 'सर्व', color: '#EA580C', iconName: 'Compass' },
-  { id: 'cat-bhajans', name: 'भजन', color: '#FF6F00', iconName: 'Music' },
-  { id: 'cat-abhang', name: 'अभंग', color: '#EA580C', iconName: 'Sparkles' },
-  { id: 'cat-kirtan', name: 'कीर्तन', color: '#E65100', iconName: 'Radio' },
-  { id: 'cat-lectures', name: 'प्रवचन', color: '#D97706', iconName: 'Mic' },
   { id: 'cat-aarti', name: 'आरती', color: '#F57C00', iconName: 'Flame' },
-  { id: 'cat-haripath', name: 'हरिपाठ', color: '#0D9488', iconName: 'BookOpen' },
-  { id: 'cat-stotra', name: 'स्तोत्र', color: '#059669', iconName: 'Sparkles' },
-  { id: 'cat-meditation', name: 'ध्यान', color: '#6366F1', iconName: 'Moon' },
-  { id: 'cat-mantras', name: 'मंत्र', color: '#10B981', iconName: 'Sparkles' },
-  { id: 'cat-darshan', name: 'दर्शन', color: '#EC4899', iconName: 'Eye' },
-  { id: 'cat-katha', name: 'कथा', color: '#8B5CF6', iconName: 'BookOpen' },
+  { id: 'cat-jkp', name: 'जेकेपी', color: '#0D9488', iconName: 'Sparkles' },
+  { id: 'cat-bhakti-marg', name: 'भक्ती मार्ग', color: '#8B5CF6', iconName: 'Compass' },
+  { id: 'cat-kirtan', name: 'कीर्तन', color: '#E65100', iconName: 'Radio' },
+  { id: 'cat-bhajan', name: 'भजन', color: '#FF6F00', iconName: 'Music' },
+  { id: 'cat-other', name: 'इतर', color: '#64748B', iconName: 'Tag' },
 ];
 
 export const normalizeCategory = (cat: string): string => {
@@ -258,26 +253,6 @@ export const CategoryPillsRow: React.FC<CategoryPillsRowProps> = ({
           );
         })}
 
-        {/* Manage / Edit Categories Action Pill */}
-        {onOpenCategoryManager && (
-          <button
-            onClick={onOpenCategoryManager}
-            className={`flex items-center gap-1 px-2.5 py-1.5 rounded-full text-xs font-semibold shrink-0 cursor-pointer transition-all duration-200 active:scale-95 border border-dashed ${
-              theme === 'blue'
-                ? 'bg-blue-950/40 border-cyan-500/40 text-cyan-300 hover:bg-blue-900/60 hover:text-white'
-                : theme === 'dark'
-                ? 'bg-stone-900/60 border-orange-500/40 text-orange-300 hover:bg-stone-800'
-                : theme === 'light'
-                ? 'bg-stone-50 border-stone-300 text-stone-600 hover:bg-stone-100 hover:text-stone-900'
-                : 'bg-orange-50/70 border-orange-300 text-orange-800 hover:bg-orange-100/80 hover:text-orange-950'
-            }`}
-            title="Add, rename, edit, or delete categories"
-            aria-label="Manage Categories"
-          >
-            <Settings2 className="w-3.5 h-3.5" />
-            <span className="text-[11px]">Edit Categories</span>
-          </button>
-        )}
       </div>
     </div>
   );

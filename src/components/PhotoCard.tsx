@@ -68,14 +68,13 @@ export const PhotoCard: React.FC<PhotoCardProps> = ({
             <button
               type="button"
               onClick={() => onToggleFavorite(photo.id)}
-              className={`p-1.5 rounded-lg transition-colors cursor-pointer ${
+              className={`hidden p-1.5 rounded-lg transition-colors cursor-pointer ${
                 photo.isFavorite
                   ? 'bg-orange-100 text-orange-600'
                   : 'hover:bg-orange-50 text-stone-400 hover:text-orange-500'
               }`}
               title={photo.isFavorite ? 'Remove Favorite' : 'Add to Favorites'}
             >
-              <Star className={`w-3.5 h-3.5 ${photo.isFavorite ? 'fill-orange-500 text-orange-500' : ''}`} />
             </button>
           </div>
 

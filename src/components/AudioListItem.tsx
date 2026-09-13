@@ -54,7 +54,7 @@ export const AudioListItem: React.FC<AudioListItemProps> = ({
   return (
     <div
       id={`audio-row-${audio.id}`}
-      className="group bg-white hover:bg-amber-50/40 border border-amber-200/80 p-3 transition-colors flex items-center justify-between gap-3 rounded-xl shadow-2xs relative"
+      className="group bg-white border border-orange-100 p-3 transition-colors flex items-center justify-between gap-3 rounded-xl shadow-2xs relative"
     >
       {/* Vinyl / Audio Icon + Title + Artist */}
       <div className="flex items-center gap-3 min-w-0 flex-1">
@@ -85,7 +85,6 @@ export const AudioListItem: React.FC<AudioListItemProps> = ({
                 {audio.fileSize}
               </span>
             )}
-            <span className="text-[9px] text-stone-400">Added {formattedDate}</span>
           </div>
 
           <h4
@@ -96,14 +95,8 @@ export const AudioListItem: React.FC<AudioListItemProps> = ({
             {audio.title}
           </h4>
 
-          {/* Category & Tag */}
+          {/* Notes */}
           <div className="flex items-center gap-1.5 mt-1 flex-wrap">
-            {audio.category && (
-              <span className="text-[9.5px] font-semibold text-amber-900 bg-amber-50 border border-amber-200/90 px-1.5 py-0.2 rounded-md flex items-center gap-1 shrink-0">
-                <Tag className="w-2.5 h-2.5 text-amber-600" />
-                <span>{translateCategoryToMarathi(audio.category)}</span>
-              </span>
-            )}
             {audio.notes && (
               <span className="text-[9px] text-stone-400 italic truncate max-w-[120px]">
                 "{audio.notes}"
@@ -124,7 +117,6 @@ export const AudioListItem: React.FC<AudioListItemProps> = ({
           }`}
           title={audio.isFavorite ? 'Starred Favorite' : 'Mark as Favorite'}
         >
-          <Star className={`w-3 h-3 ${audio.isFavorite ? 'fill-white' : ''}`} />
         </button>
 
         {/* More Menu */}

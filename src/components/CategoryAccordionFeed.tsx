@@ -1,10 +1,10 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { ChevronDown, Plus, Video as VideoIcon, Search, Sparkles } from 'lucide-react';
 import { VideoItem, CategoryInfo } from '../types';
 import { VideoCard } from './VideoCard';
 import { VideoListItem } from './VideoListItem';
-import { normalizeCategory, getCategoryIconComponent, translateCategoryToMarathi } from './CategoryPillsRow';
+import { normalizeCategory, translateCategoryToMarathi } from './CategoryPillsRow';
 
 interface CategoryAccordionFeedProps {
   categories: CategoryInfo[];
@@ -70,6 +70,15 @@ export const CategoryAccordionFeed: React.FC<CategoryAccordionFeedProps> = ({
     }));
   }, [categories, videos]);
 
+  useEffect(() => {
+    const expanded = expandedCategory ? expandedCategory.split('|').map(normalizeCategory) : [];
+    const firstWithItems = accordionCategories.find((category) =>
+      !expanded.includes(normalizeCategory(category.name)) &&
+      videos.some((video) => normalizeCategory(video.category || '') === normalizeCategory(category.name))
+    );
+    if (firstWithItems) onToggleCategory(firstWithItems.name);
+  }, [accordionCategories, videos, expandedCategory, onToggleCategory]);
+
   // Helper to filter videos for a specific category based on current filters
   const getVideosForCategory = (catName: string): VideoItem[] => {
     const targetNorm = normalizeCategory(catName);
@@ -116,16 +125,11 @@ export const CategoryAccordionFeed: React.FC<CategoryAccordionFeedProps> = ({
     <div className="space-y-2.5 select-none" id="video-categories-accordion-feed">
       {accordionCategories.map((category) => {
         const catVideos = getVideosForCategory(category.name);
-        const totalCategoryVideosCount = videos.filter(
-          (v) => normalizeCategory(v.category || '') === normalizeCategory(category.name)
-        ).length;
-
         // Check if this category is currently expanded
-        const isExpanded =
-          expandedCategory !== null &&
-          normalizeCategory(expandedCategory) === normalizeCategory(category.name);
+        const isExpanded = expandedCategory !== null && expandedCategory.split('|').some(
+          (name) => normalizeCategory(name) === normalizeCategory(category.name)
+        );
 
-        const IconComponent = getCategoryIconComponent(category.name);
         const catColor = category.color || '#0D9488';
 
         return (
@@ -146,45 +150,19 @@ export const CategoryAccordionFeed: React.FC<CategoryAccordionFeedProps> = ({
               className="w-full flex items-center justify-between px-3.5 sm:px-4 py-3 cursor-pointer text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-400 transition-colors"
             >
               {/* Left: Category Icon + Title */}
-              <div className="flex items-center gap-3 min-w-0 pr-2">
-                <div
-                  className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0 border transition-transform shadow-xs"
-                  style={{
-                    backgroundColor: `${catColor}18`,
-                    borderColor: `${catColor}40`,
-                    color: catColor,
-                  }}
-                >
-                  <IconComponent className="w-4 h-4" />
-                </div>
-
+              <div className="flex items-center min-w-0 pr-2">
                 <div className="min-w-0">
-                  <h3 className="text-sm sm:text-base font-serif font-bold text-teal-50 truncate tracking-wide">
+                  <h3 className="text-sm sm:text-base font-sans font-semibold text-teal-50 truncate tracking-wide">
                     {category.name}
                   </h3>
-                  <p className="text-[11px] text-teal-300/60 truncate">
-                    {catVideos.length === 1
-                      ? '1 video'
-                      : `${catVideos.length} videos`}
-                    {searchQuery && totalCategoryVideosCount !== catVideos.length && (
-                      <span className="opacity-75"> (of {totalCategoryVideosCount})</span>
-                    )}
-                  </p>
                 </div>
               </div>
 
               {/* Right: Pill Badge + Animated Chevron */}
               <div className="flex items-center gap-2 shrink-0">
-                <span
-                  className={`text-[11px] font-semibold px-2.5 py-0.5 rounded-full border transition-colors ${
-                    isExpanded
-                      ? 'bg-teal-500/20 text-teal-200 border-teal-500/40 shadow-xs'
-                      : 'bg-teal-950/70 text-teal-300/80 border-teal-800/40'
-                  }`}
-                >
+                <span className="w-8 h-8 flex items-center justify-center text-[11px] font-semibold rounded-full border bg-teal-950/70 text-teal-300/80 border-teal-800/40">
                   {catVideos.length}
                 </span>
-
                 <div
                   className={`w-7 h-7 rounded-full flex items-center justify-center transition-transform duration-200 ${
                     isExpanded

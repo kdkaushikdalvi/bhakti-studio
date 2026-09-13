@@ -52,6 +52,8 @@ const DEFAULT_DEVOTIONAL_CATEGORIES = [
   'कथा',
 ];
 
+const DEFAULT_AUDIO_CATEGORIES = ['निखिलानंद महाराज', 'महाराज', 'प्रभुपाद', 'इतर'];
+
 export const AppleAddMediaBottomSheet: React.FC<AppleAddMediaBottomSheetProps> = ({
   isOpen,
   onClose,
@@ -66,12 +68,18 @@ export const AppleAddMediaBottomSheet: React.FC<AppleAddMediaBottomSheetProps> =
 
   // Available categories list in Marathi
   const availableCategories = React.useMemo(() => {
+    if (activeTab === 'audio') {
+      const configured = (categories || [])
+        .map((c) => translateCategoryToMarathi(c.name))
+        .filter((n) => n && normalizeCategory(n) !== 'all');
+      return Array.from(new Set([...DEFAULT_AUDIO_CATEGORIES, ...configured]));
+    }
     if (!categories || categories.length === 0) return DEFAULT_DEVOTIONAL_CATEGORIES;
     const names = categories
       .map((c) => translateCategoryToMarathi(c.name))
       .filter((n) => n && normalizeCategory(n) !== 'all');
     return names.length > 0 ? Array.from(new Set(names)) : DEFAULT_DEVOTIONAL_CATEGORIES;
-  }, [categories]);
+  }, [categories, activeTab]);
 
   // YouTube Video States
   const [videoUrl, setVideoUrl] = useState('');
@@ -142,6 +150,13 @@ export const AppleAddMediaBottomSheet: React.FC<AppleAddMediaBottomSheetProps> =
       setIsPlayingAudioPreview(false);
     }
   }, [isOpen, initialTab, initialCategory]);
+
+  useEffect(() => {
+    if (activeTab === 'audio') {
+      setLocalAudioCategory((current) => DEFAULT_AUDIO_CATEGORIES.includes(current) ? current : DEFAULT_AUDIO_CATEGORIES[0]);
+      setAudioCategory((current) => DEFAULT_AUDIO_CATEGORIES.includes(current) ? current : DEFAULT_AUDIO_CATEGORIES[0]);
+    }
+  }, [activeTab]);
 
   // Validate Google Drive link
   useEffect(() => {
@@ -523,62 +538,27 @@ export const AppleAddMediaBottomSheet: React.FC<AppleAddMediaBottomSheetProps> =
               <div className="w-10 h-1.5 rounded-full bg-stone-300/80" />
             </div>
 
-            {/* Header: Segmented tab switcher and close button */}
-            <div className="px-5 pt-2 pb-3 border-b border-stone-100 flex items-center justify-between gap-3">
-              {/* Clean Segmented Tab Switcher with 3 options: Videos, Photos, Audio */}
-              <div className="flex p-1 bg-stone-100/90 rounded-xl flex-1 max-w-[340px]">
+            {/* Header: current section is selected automatically by the app */}
+            <div className="px-5 pt-2 pb-3 border-b border-stone-100 flex items-center justify-end">
+              {activeTab === 'video' && (
                 <button
+                  id="btn-submit-video-header"
                   type="button"
-                  id="tab-btn-youtube"
-                  onClick={() => {
-                    setActiveTab('video');
-                    setErrorMessage('');
-                  }}
-                  className={`flex-1 flex items-center justify-center gap-1.5 py-1.5 rounded-lg text-xs transition-all cursor-pointer ${
-                    activeTab === 'video'
-                      ? 'bg-white text-stone-900 shadow-xs font-semibold'
-                      : 'text-stone-500 hover:text-stone-800 font-medium'
-                  }`}
+                  disabled={!isValidYoutubeUrl || isSuccess}
+                  onClick={() => document.getElementById('video-add-form')?.requestSubmit()}
+                  className="mr-2 px-5 py-2 bg-stone-900 hover:bg-stone-800 disabled:bg-stone-300 text-white rounded-xl text-xs font-semibold shadow-xs disabled:cursor-not-allowed transition-all flex items-center justify-center gap-1.5 cursor-pointer"
                 >
-                  <Youtube className={`w-3.5 h-3.5 ${activeTab === 'video' ? 'text-red-600' : 'text-stone-400'}`} />
-                  <span>Video</span>
+                  <Youtube className="w-3.5 h-3.5" />
+                  <span>Add</span>
                 </button>
-
-                <button
-                  type="button"
-                  id="tab-btn-audio"
-                  onClick={() => {
-                    setActiveTab('audio');
-                    setErrorMessage('');
-                  }}
-                  className={`flex-1 flex items-center justify-center gap-1.5 py-1.5 rounded-lg text-xs transition-all cursor-pointer ${
-                    activeTab === 'audio'
-                      ? 'bg-white text-stone-900 shadow-xs font-semibold'
-                      : 'text-stone-500 hover:text-stone-800 font-medium'
-                  }`}
-                >
-                  <Disc3 className={`w-3.5 h-3.5 ${activeTab === 'audio' ? 'text-amber-600' : 'text-stone-400'}`} />
-                  <span>Audio</span>
-                </button>
-
-                <button
-                  type="button"
-                  id="tab-btn-photos"
-                  onClick={() => {
-                    setActiveTab('photo');
-                    setErrorMessage('');
-                  }}
-                  className={`flex-1 flex items-center justify-center gap-1.5 py-1.5 rounded-lg text-xs transition-all cursor-pointer ${
-                    activeTab === 'photo'
-                      ? 'bg-white text-stone-900 shadow-xs font-semibold'
-                      : 'text-stone-500 hover:text-stone-800 font-medium'
-                  }`}
-                >
-                  <ImageIcon className={`w-3.5 h-3.5 ${activeTab === 'photo' ? 'text-purple-600' : 'text-stone-400'}`} />
-                  <span>Photo</span>
-                </button>
-              </div>
-
+              )}
+              {activeTab === 'photo' && (
+                photoDataUrl ? (
+                  <button type="button" disabled={isSuccess} onClick={() => document.getElementById('photo-add-form')?.requestSubmit()} className="mr-2 px-5 py-2 bg-stone-900 hover:bg-stone-800 disabled:bg-stone-300 text-white rounded-xl text-xs font-semibold shadow-xs disabled:cursor-not-allowed transition-all flex items-center justify-center gap-1.5 cursor-pointer"><ImageIcon className="w-3.5 h-3.5" /><span>Upload Photo</span></button>
+                ) : (
+                  <button type="button" onClick={() => fileInputRef.current?.click()} className="mr-2 px-5 py-2 bg-stone-900 hover:bg-stone-800 text-white rounded-xl text-xs font-semibold shadow-xs transition-all flex items-center justify-center gap-1.5 cursor-pointer"><ImageIcon className="w-3.5 h-3.5" /><span>Upload Photo</span></button>
+                )
+              )}
               {/* Close Button */}
               <button
                 id="btn-close-bottom-sheet"
@@ -610,7 +590,7 @@ export const AppleAddMediaBottomSheet: React.FC<AppleAddMediaBottomSheetProps> =
 
               {/* Option 1: YouTube Form */}
               {activeTab === 'video' ? (
-                <form onSubmit={handleAddVideoSubmit} className="space-y-4">
+                <form id="video-add-form" onSubmit={handleAddVideoSubmit} className="space-y-4">
                   {/* YouTube Link Input Area */}
                   <div>
                     <label
@@ -642,7 +622,6 @@ export const AppleAddMediaBottomSheet: React.FC<AppleAddMediaBottomSheetProps> =
                       </button>
                     </div>
                     <span className="text-[10px] text-stone-400 mt-1 block">
-                      Supports YouTube videos, live streams, shorts, and playlists
                     </span>
                   </div>
 
@@ -714,22 +693,10 @@ export const AppleAddMediaBottomSheet: React.FC<AppleAddMediaBottomSheetProps> =
                     </div>
                   </div>
 
-                  {/* Primary Action Button */}
-                  <div className="pt-2">
-                    <button
-                      id="btn-submit-video"
-                      type="submit"
-                      disabled={!isValidYoutubeUrl || isSuccess}
-                      className="w-full py-2.5 bg-stone-900 hover:bg-stone-800 disabled:bg-stone-300 text-white rounded-xl text-xs font-semibold shadow-xs disabled:cursor-not-allowed transition-all flex items-center justify-center gap-1.5 cursor-pointer"
-                    >
-                      <Youtube className="w-3.5 h-3.5" />
-                      <span>Add Video</span>
-                    </button>
-                  </div>
                 </form>
               ) : activeTab === 'photo' ? (
                 /* Option 2: Photo Upload Option */
-                <form onSubmit={handleAddPhotoSubmit} className="space-y-4">
+                <form id="photo-add-form" onSubmit={handleAddPhotoSubmit} className="space-y-4">
                   {/* Hidden File Input for Device Image Picker */}
                   <input
                     ref={fileInputRef}
@@ -857,29 +824,6 @@ export const AppleAddMediaBottomSheet: React.FC<AppleAddMediaBottomSheetProps> =
                     </div>
                   )}
 
-                  {/* Photo Primary Action Button */}
-                  <div className="pt-2">
-                    {photoDataUrl ? (
-                      <button
-                        id="btn-submit-photo"
-                        type="submit"
-                        disabled={isSuccess}
-                        className="w-full py-2.5 bg-stone-900 hover:bg-stone-800 text-white rounded-xl text-xs font-semibold shadow-xs transition-all flex items-center justify-center gap-1.5 cursor-pointer"
-                      >
-                        <ImageIcon className="w-3.5 h-3.5" />
-                        <span>Upload Photo</span>
-                      </button>
-                    ) : (
-                      <button
-                        type="button"
-                        onClick={() => fileInputRef.current?.click()}
-                        className="w-full py-2.5 bg-stone-900 hover:bg-stone-800 text-white rounded-xl text-xs font-semibold shadow-xs transition-all flex items-center justify-center gap-1.5 cursor-pointer"
-                      >
-                        <ImageIcon className="w-3.5 h-3.5" />
-                        <span>Choose Photo</span>
-                      </button>
-                    )}
-                  </div>
                 </form>
               ) : (
                 /* Option 3: Audio (Device Local Storage or Google Drive) */

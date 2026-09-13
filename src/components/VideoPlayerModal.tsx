@@ -56,7 +56,7 @@ export const VideoPlayerModal: React.FC<VideoPlayerModalProps> = ({
           <div className="flex items-center gap-1 shrink-0">
             <button
               onClick={() => onToggleWatchLater(video.id)}
-              className={`p-1.5 border transition-colors rounded-lg cursor-pointer ${
+              className={`hidden p-1.5 border transition-colors rounded-lg cursor-pointer ${
                 video.isWatchLater
                   ? 'bg-emerald-600 text-white border-emerald-600'
                   : 'border-orange-200 bg-white text-stone-600 hover:text-emerald-700'
@@ -67,7 +67,7 @@ export const VideoPlayerModal: React.FC<VideoPlayerModalProps> = ({
             </button>
             <button
               onClick={() => onToggleFavorite(video.id)}
-              className={`p-1.5 border transition-colors rounded-lg cursor-pointer ${
+              className={`hidden p-1.5 border transition-colors rounded-lg cursor-pointer ${
                 video.isFavorite
                   ? 'bg-orange-500 text-white border-orange-500'
                   : 'border-orange-200 bg-white text-stone-600 hover:text-orange-600'
@@ -78,7 +78,7 @@ export const VideoPlayerModal: React.FC<VideoPlayerModalProps> = ({
             </button>
             <button
               onClick={handleCopy}
-              className="p-1.5 border border-orange-200 bg-white text-stone-600 hover:text-stone-900 transition-colors rounded-lg cursor-pointer"
+              className="hidden p-1.5 border border-orange-200 bg-white text-stone-600 hover:text-stone-900 transition-colors rounded-lg cursor-pointer"
               title="Copy Link"
             >
               {copied ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Share2 className="w-3.5 h-3.5" />}
@@ -87,7 +87,7 @@ export const VideoPlayerModal: React.FC<VideoPlayerModalProps> = ({
               href={video.url}
               target="_blank"
               rel="noopener noreferrer"
-              className="p-1.5 border border-orange-200 bg-white text-stone-600 hover:text-stone-900 transition-colors rounded-lg cursor-pointer"
+              className="hidden p-1.5 border border-orange-200 bg-white text-stone-600 hover:text-stone-900 transition-colors rounded-lg cursor-pointer"
               title="Open on YouTube"
             >
               <ExternalLink className="w-3.5 h-3.5" />

@@ -51,7 +51,7 @@ export const VideoListItem: React.FC<VideoListItemProps> = ({
   return (
     <div
       id={`video-row-${video.id}`}
-      className="group bg-white hover:bg-orange-50/40 border border-orange-100 p-3 transition-colors flex items-center justify-between gap-3 rounded-xl shadow-2xs relative"
+      className="group bg-white border border-orange-100 p-3 transition-colors flex items-center justify-between gap-3 rounded-xl shadow-2xs relative"
     >
       {/* Thumbnail + Title + Channel */}
       <div className="flex items-center gap-3 min-w-0 flex-1">
@@ -74,7 +74,6 @@ export const VideoListItem: React.FC<VideoListItemProps> = ({
             <span className="text-[10px] font-medium text-stone-500 truncate max-w-[140px]">
               {video.channelTitle || 'Spiritual Guide'}
             </span>
-            <span className="text-[9px] text-stone-400">Added {formattedDate}</span>
           </div>
 
           <h4
@@ -87,12 +86,6 @@ export const VideoListItem: React.FC<VideoListItemProps> = ({
 
           {/* Category & Tags / Chapters */}
           <div className="flex items-center gap-1.5 mt-1 flex-wrap">
-            {video.category && (
-              <span className="text-[9.5px] font-semibold text-teal-800 bg-teal-50 border border-teal-200/80 px-1.5 py-0.2 rounded-md flex items-center gap-1 shrink-0">
-                <Tag className="w-2.5 h-2.5 text-teal-600" />
-                <span>{translateCategoryToMarathi(video.category)}</span>
-              </span>
-            )}
             {video.tags && video.tags.length > 0 && (
               <div className="flex items-center gap-1 flex-wrap">
                 {video.tags.slice(0, 2).map((tag, i) => (
@@ -115,7 +108,7 @@ export const VideoListItem: React.FC<VideoListItemProps> = ({
       <div className="flex items-center gap-1 shrink-0">
         <button
           onClick={() => onToggleWatchLater(video.id)}
-          className={`p-1.5 border transition-colors rounded-lg ${
+          className={`hidden p-1.5 border transition-colors rounded-lg ${
             video.isWatchLater
               ? 'bg-emerald-600 text-white border-emerald-600'
               : 'border-orange-100 bg-white text-stone-500 hover:text-emerald-700 hover:bg-orange-50'
@@ -127,14 +120,13 @@ export const VideoListItem: React.FC<VideoListItemProps> = ({
 
         <button
           onClick={() => onToggleFavorite(video.id)}
-          className={`p-1.5 border transition-colors rounded-lg ${
+          className={`hidden p-1.5 border transition-colors rounded-lg ${
             video.isFavorite
               ? 'bg-orange-500 text-white border-orange-500'
               : 'border-orange-100 bg-white text-stone-500 hover:text-orange-500 hover:bg-orange-50'
           }`}
           title={video.isFavorite ? 'Essential Gem' : 'Mark as Essential'}
         >
-          <Star className={`w-3 h-3 ${video.isFavorite ? 'fill-white' : ''}`} />
         </button>
 
         {/* More Menu */}
@@ -152,39 +144,7 @@ export const VideoListItem: React.FC<VideoListItemProps> = ({
                 className="fixed inset-0 z-10"
                 onClick={() => setShowMenu(false)}
               />
-              <div className="absolute right-0 top-full mt-1 w-44 bg-white border border-orange-200 rounded-xl shadow-lg z-20 py-1 text-xs text-stone-800 font-medium animate-fadeIn">
-                <button
-                  onClick={handleCopyLink}
-                  className="w-full px-3 py-2 text-left hover:bg-orange-50 flex items-center gap-2 cursor-pointer"
-                >
-                  {copied ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Share2 className="w-3.5 h-3.5 text-stone-500" />}
-                  <span>{copied ? 'Copied' : 'Copy Link'}</span>
-                </button>
-
-                <a
-                  href={video.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  onClick={() => setShowMenu(false)}
-                  className="w-full px-3 py-2 text-left hover:bg-orange-50 flex items-center gap-2 cursor-pointer"
-                >
-                  <ExternalLink className="w-3.5 h-3.5 text-stone-500" />
-                  <span>Open in YouTube</span>
-                </a>
-
-                <button
-                  onClick={() => {
-                    setShowMenu(false);
-                    onEdit(video);
-                  }}
-                  className="w-full px-3 py-2 text-left hover:bg-orange-50 flex items-center gap-2 cursor-pointer"
-                >
-                  <Edit2 className="w-3.5 h-3.5 text-stone-500" />
-                  <span>Edit Entry</span>
-                </button>
-
-                <div className="h-px bg-orange-100 my-1" />
-
+              <div className="absolute right-0 top-full mt-1 w-44 bg-white border border-orange-200 rounded-xl shadow-lg z-50 py-1 text-xs text-stone-800 font-medium animate-fadeIn">
                 <button
                   onClick={() => {
                     setShowMenu(false);

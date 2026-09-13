@@ -6,7 +6,6 @@ import {
   Image as ImageIcon,
 } from 'lucide-react';
 import { PhotoItem } from '../types';
-import { translateCategoryToMarathi } from './CategoryPillsRow';
 
 interface PhotoListItemProps {
   photo: PhotoItem;
@@ -29,7 +28,7 @@ export const PhotoListItem: React.FC<PhotoListItemProps> = ({
   return (
     <div
       id={`photo-row-${photo.id}`}
-      className="group bg-white hover:bg-orange-50/40 dark:bg-stone-900 dark:hover:bg-stone-850 border border-orange-100 dark:border-stone-800 p-2.5 transition-colors flex items-center justify-between gap-3 rounded-xl shadow-2xs relative"
+      className="group bg-white border border-orange-100 p-2.5 transition-colors flex items-center justify-between gap-3 rounded-xl shadow-2xs relative"
     >
       {/* Thumbnail + Details */}
       <div className="flex items-center gap-3 min-w-0 flex-1">
@@ -50,11 +49,6 @@ export const PhotoListItem: React.FC<PhotoListItemProps> = ({
 
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-1.5 mb-0.5 flex-wrap">
-            <span className="text-[10px] font-medium text-orange-600 dark:text-cyan-400 bg-orange-50 dark:bg-blue-950/60 px-1.5 py-0.2 rounded border border-orange-100 dark:border-blue-900/60 flex items-center gap-1">
-              <ImageIcon className="w-2.5 h-2.5" />
-              <span>{translateCategoryToMarathi(photo.category || 'दर्शन')}</span>
-            </span>
-            <span className="text-[9px] text-stone-400">Added {formattedDate}</span>
             {photo.fileSize && (
               <>
                 <span className="text-[9px] text-stone-300 dark:text-stone-600">•</span>
@@ -86,7 +80,6 @@ export const PhotoListItem: React.FC<PhotoListItemProps> = ({
           }`}
           title={photo.isFavorite ? 'Remove Favorite' : 'Mark as Favorite'}
         >
-          <Star className={`w-3.5 h-3.5 ${photo.isFavorite ? 'fill-white text-white' : ''}`} />
         </button>
 
         {/* View / Fullscreen Button */}

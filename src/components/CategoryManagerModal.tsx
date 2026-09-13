@@ -283,6 +283,7 @@ export const CategoryManagerModal: React.FC<CategoryManagerModalProps> = ({
                 {categories.map((cat) => {
                   const isEditing = editingId === cat.id;
                   const counts = getItemCount(cat.name);
+                  const isDefaultCategory = ['cat-all', 'cat-kirtan', 'cat-bhajan', 'cat-bhakti-marg', 'cat-jkp', 'cat-aarti', 'cat-other'].includes(cat.id);
 
                   if (isEditing) {
                     return (
@@ -411,8 +412,9 @@ export const CategoryManagerModal: React.FC<CategoryManagerModalProps> = ({
                         </button>
                         <button
                           onClick={() => setDeleteConfirmCat(cat)}
-                          className="p-1.5 text-stone-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors cursor-pointer"
-                          title="Delete Category"
+                          disabled={isDefaultCategory}
+                          className={`p-1.5 rounded-lg transition-colors ${isDefaultCategory ? 'text-stone-200 cursor-not-allowed' : 'text-stone-400 hover:text-rose-600 hover:bg-rose-50 cursor-pointer'}`}
+                          title={isDefaultCategory ? 'Default categories cannot be deleted' : 'Delete Category'}
                         >
                           <Trash2 className="w-3.5 h-3.5" />
                         </button>
@@ -431,7 +433,12 @@ export const CategoryManagerModal: React.FC<CategoryManagerModalProps> = ({
             <div className="flex items-center gap-2 text-xs text-rose-900">
               <AlertTriangle className="w-4 h-4 text-rose-600 shrink-0" />
               <span>
-                Delete category <strong>"{deleteConfirmCat.name}"</strong>? Media items will remain intact in your vault.
+                {(() => {
+                  const counts = getItemCount(deleteConfirmCat.name);
+                  return counts.total > 0
+                    ? <>{`Category "${deleteConfirmCat.name}" has ${counts.total} assigned media item${counts.total === 1 ? '' : 's'}. Move them to another category before deleting; media will not be deleted.`}</>
+                    : <>Delete category <strong>"{deleteConfirmCat.name}"</strong>? Media items will remain intact in your vault.</>;
+                })()}
               </span>
             </div>
             <div className="flex items-center gap-2 shrink-0 ml-auto">
@@ -442,11 +449,12 @@ export const CategoryManagerModal: React.FC<CategoryManagerModalProps> = ({
                 Cancel
               </button>
               <button
+                disabled={getItemCount(deleteConfirmCat.name).total > 0}
                 onClick={() => {
                   onDeleteCategory(deleteConfirmCat);
                   setDeleteConfirmCat(null);
                 }}
-                className="px-3 py-1 bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold rounded-xl shadow-xs cursor-pointer"
+                className="px-3 py-1 bg-rose-600 hover:bg-rose-700 disabled:bg-stone-300 disabled:cursor-not-allowed text-white text-xs font-bold rounded-xl shadow-xs cursor-pointer"
               >
                 Confirm Delete
               </button>

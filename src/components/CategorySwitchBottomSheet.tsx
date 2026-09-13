@@ -2,13 +2,22 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import {
   X,
-  Pin,
   Check,
   Settings2,
   Menu,
+  Edit2,
+  Trash2,
+  Plus,
 } from 'lucide-react';
 import { ThemeMode, CategoryInfo, VideoItem, PhotoItem, AudioItem, MediaTypeFilter } from '../types';
 import { normalizeCategory, translateCategoryToMarathi } from './CategoryPillsRow';
+
+const AUDIO_DEFAULT_CATEGORIES: CategoryInfo[] = [
+  { id: 'audio-nikhilanand', name: 'निखिलानंद महाराज', color: '#F59E0B' },
+  { id: 'audio-maharaj', name: 'महाराज', color: '#F59E0B' },
+  { id: 'audio-prabhupad', name: 'प्रभुपाद', color: '#F59E0B' },
+  { id: 'audio-other', name: 'इतर', color: '#F59E0B' },
+];
 
 interface CategorySwitchBottomSheetProps {
   isOpen: boolean;
@@ -16,8 +25,8 @@ interface CategorySwitchBottomSheetProps {
   categories: CategoryInfo[];
   selectedCategory: string;
   onSelectCategory: (category: string) => void;
-  defaultCategory: string;
-  onSetDefaultCategory: (category: string) => void;
+  defaultCategory?: string;
+  onSetDefaultCategory?: (category: string) => void;
   videos: VideoItem[];
   photos: PhotoItem[];
   audios?: AudioItem[];
@@ -25,6 +34,9 @@ interface CategorySwitchBottomSheetProps {
   mediaType?: MediaTypeFilter;
   onOpenCategoryManager?: () => void;
   onReorderCategories?: (reordered: CategoryInfo[]) => void;
+  onRenameCategory?: (category: CategoryInfo) => void;
+  onDeleteCategory?: (category: CategoryInfo) => void;
+  onAddCategory?: (category: CategoryInfo) => void;
 }
 
 export const CategorySwitchBottomSheet: React.FC<CategorySwitchBottomSheetProps> = ({
@@ -41,6 +53,9 @@ export const CategorySwitchBottomSheet: React.FC<CategorySwitchBottomSheetProps>
   mediaType = 'videos',
   onOpenCategoryManager,
   onReorderCategories,
+  onRenameCategory,
+  onDeleteCategory,
+  onAddCategory,
 }) => {
   const [draggedCatId, setDraggedCatId] = useState<string | null>(null);
   const [dragOverCatId, setDragOverCatId] = useState<string | null>(null);
@@ -52,7 +67,11 @@ export const CategorySwitchBottomSheet: React.FC<CategorySwitchBottomSheetProps>
   // Compute full list ensuring "सर्व" is included first
   const fullCategories: CategoryInfo[] = [
     { id: 'cat-all', name: 'सर्व', color: '#EA580C', iconName: 'Compass' },
-    ...categories.filter((c) => normalizeCategory(c.name) !== 'all'),
+    ...(isAudio
+      ? [...AUDIO_DEFAULT_CATEGORIES, ...categories.filter((c) =>
+          normalizeCategory(c.name) !== 'all' && !AUDIO_DEFAULT_CATEGORIES.some((a) => normalizeCategory(a.name) === normalizeCategory(c.name))
+        )]
+      : categories.filter((c) => normalizeCategory(c.name) !== 'all')),
   ];
 
   // Helper to count items per category
@@ -73,17 +92,6 @@ export const CategorySwitchBottomSheet: React.FC<CategorySwitchBottomSheetProps>
   const handleSelect = (catName: string) => {
     const target = normalizeCategory(catName) === 'all' ? 'all' : catName;
     onSelectCategory(target);
-    onClose();
-  };
-
-  const handleTogglePinDefault = (e: React.MouseEvent, catName: string) => {
-    e.stopPropagation();
-    const target = normalizeCategory(catName) === 'all' ? 'all' : catName;
-    if (normalizeCategory(defaultCategory) === normalizeCategory(target)) {
-      onSetDefaultCategory('');
-    } else {
-      onSetDefaultCategory(target);
-    }
   };
 
   // Reorder logic
@@ -187,7 +195,7 @@ export const CategorySwitchBottomSheet: React.FC<CategorySwitchBottomSheetProps>
                 type="button"
                 onClick={onClose}
                 aria-label="Close"
-                className={`p-1 rounded-lg transition-colors cursor-pointer ${
+                className={`w-8 h-8 rounded-full flex items-center justify-center transition-colors cursor-pointer ${
                   isPhotos
                     ? 'hover:bg-purple-900/60 text-purple-300'
                     : isAudio
@@ -196,6 +204,20 @@ export const CategorySwitchBottomSheet: React.FC<CategorySwitchBottomSheetProps>
                 }`}
               >
                 <X className="w-4 h-4" />
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  const name = window.prompt('New category name')?.trim();
+                  if (name && !categories.some((c) => normalizeCategory(c.name) === normalizeCategory(name))) {
+                    onAddCategory?.({ id: `cat-${Date.now()}`, name, color: isPhotos ? '#A855F7' : isAudio ? '#F59E0B' : '#14B8A6' });
+                  }
+                }}
+                className="w-8 h-8 rounded-full flex items-center justify-center text-current opacity-80 hover:opacity-100 hover:bg-white/10 cursor-pointer"
+                aria-label="Add category"
+                title="Add category"
+              >
+                <Plus className="w-5 h-5" />
               </button>
             </div>
 
@@ -207,9 +229,6 @@ export const CategorySwitchBottomSheet: React.FC<CategorySwitchBottomSheetProps>
                 const isCurrentActive =
                   normalizeCategory(selectedCategory) === normalizeCategory(cat.name) ||
                   (normalizeCategory(selectedCategory) === 'all' && normalizeCategory(cat.name) === 'all');
-                const isPinnedDefault =
-                  normalizeCategory(defaultCategory) === normalizeCategory(cat.name) ||
-                  (defaultCategory === '' && normalizeCategory(cat.name) === 'all');
                 const count = getItemCount(cat.name);
                 const isDragging = draggedCatId === catId;
                 const isDragOver = dragOverCatId === catId;
@@ -249,24 +268,15 @@ export const CategorySwitchBottomSheet: React.FC<CategorySwitchBottomSheetProps>
                         : 'bg-teal-950/30 hover:bg-teal-900/40 border-teal-900/40 text-teal-200/90'
                     }`}
                   >
-                    {/* Left 3-Line Reorder Handle */}
-                    {!isAll ? (
-                      <div
-                        className="p-1 mr-1.5 text-stone-400 hover:text-stone-200 cursor-grab active:cursor-grabbing shrink-0 opacity-60 hover:opacity-100 transition-opacity"
-                        title="Drag 3 lines to reorder"
-                      >
-                        <Menu className="w-3.5 h-3.5" />
-                      </div>
-                    ) : (
-                      <div className="w-3.5 mr-1.5 shrink-0" />
-                    )}
-
                     {/* Category Name & Item Count clickable area */}
                     <button
                       type="button"
                       onClick={() => handleSelect(cat.name)}
                       className="flex-1 flex items-center gap-2 py-0.5 text-left cursor-pointer min-w-0"
                     >
+                      <span className={`w-4 h-4 rounded-md border-2 shrink-0 flex items-center justify-center ${isCurrentActive ? 'border-teal-400 bg-teal-400/20' : 'border-stone-400'}`}>
+                        {isCurrentActive && <Check className="w-3 h-3 text-teal-300 stroke-[3]" />}
+                      </span>
                       <span className="text-sm font-medium tracking-tight truncate">
                         {translateCategoryToMarathi(cat.name)}
                       </span>
@@ -292,28 +302,12 @@ export const CategorySwitchBottomSheet: React.FC<CategorySwitchBottomSheetProps>
 
                     {/* Right Indicators: Default Mark & Active Check */}
                     <div className="flex items-center gap-1.5 shrink-0 ml-2">
-                      {/* Default Mark / Toggle */}
-                      <button
-                        type="button"
-                        onClick={(e) => handleTogglePinDefault(e, cat.name)}
-                        className={`p-1 rounded-md transition-colors cursor-pointer ${
-                          isPinnedDefault
-                            ? 'text-amber-400 bg-amber-400/15'
-                            : 'text-stone-500 hover:text-stone-300 opacity-40 hover:opacity-100'
-                        }`}
-                        title={
-                          isPinnedDefault
-                            ? `Pinned default for ${mediaLabel} (Click to unset)`
-                            : `Pin as default category for ${mediaLabel}`
-                        }
-                      >
-                        <Pin
-                          className={`w-3.5 h-3.5 ${
-                            isPinnedDefault ? 'fill-current' : ''
-                          }`}
-                        />
-                      </button>
-
+                      {!isAll && (
+                        <>
+                          <button type="button" aria-label={`Rename ${cat.name}`} title="Rename category" className="w-8 h-8 rounded-full flex items-center justify-center text-teal-300 hover:bg-teal-900/60" onClick={(e) => { e.stopPropagation(); onRenameCategory?.(cat); }}><Edit2 className="w-3.5 h-3.5" /></button>
+                          <button type="button" aria-label={`Delete ${cat.name}`} title="Delete category" className="w-8 h-8 rounded-full flex items-center justify-center text-rose-300 hover:bg-rose-900/60" onClick={(e) => { e.stopPropagation(); if (window.confirm(`Delete category "${translateCategoryToMarathi(cat.name)}"?`)) onDeleteCategory?.(cat); }}><Trash2 className="w-3.5 h-3.5" /></button>
+                        </>
+                      )}
                       {/* Active Select Checkmark */}
                       {isCurrentActive ? (
                         <Check
@@ -324,51 +318,23 @@ export const CategorySwitchBottomSheet: React.FC<CategorySwitchBottomSheetProps>
                       ) : (
                         <div className="w-4 h-4" />
                       )}
+                      {!isAll && (
+                        <div
+                          className="w-8 h-8 rounded-full flex items-center justify-center ml-1 text-stone-400 hover:text-stone-200 cursor-grab active:cursor-grabbing shrink-0 opacity-60 hover:opacity-100 transition-opacity"
+                          title="Drag to reorder"
+                        >
+                          <Menu className="w-3.5 h-3.5" />
+                        </div>
+                      )}
                     </div>
                   </div>
                 );
               })}
             </div>
 
-            {/* Minimal Footer */}
-            {onOpenCategoryManager && (
-              <div
-                className={`py-2 px-3 border-t flex items-center justify-between shrink-0 text-[11px] ${
-                  isPhotos
-                    ? 'border-purple-900/60 bg-purple-950/40 text-purple-300/80'
-                    : isAudio
-                    ? 'border-amber-900/60 bg-amber-950/40 text-amber-300/80'
-                    : 'border-teal-900/60 bg-teal-950/40 text-teal-300/80'
-                }`}
-              >
-                <span className="flex items-center gap-1">
-                  <Pin className="w-3 h-3 text-amber-400 fill-amber-400" />
-                  <span>Pin = Default on launch</span>
-                </span>
-
-                <button
-                  type="button"
-                  onClick={() => {
-                    onClose();
-                    onOpenCategoryManager();
-                  }}
-                  className={`flex items-center gap-1 font-semibold transition-colors cursor-pointer px-2 py-0.5 rounded-md ${
-                    isPhotos
-                      ? 'hover:text-purple-100 hover:bg-purple-900/60 text-purple-300'
-                      : isAudio
-                      ? 'hover:text-amber-100 hover:bg-amber-900/60 text-amber-300'
-                      : 'hover:text-teal-100 hover:bg-teal-900/60 text-teal-300'
-                  }`}
-                >
-                  <Settings2 className="w-3 h-3" />
-                  <span>Manage</span>
-                </button>
-              </div>
-            )}
           </motion.div>
         </div>
       )}
     </AnimatePresence>
   );
 };
-

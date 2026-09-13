@@ -82,7 +82,7 @@ export const PhotoLightboxModal: React.FC<PhotoLightboxModalProps> = ({
               <button
                 type="button"
                 onClick={() => onToggleFavorite(photo.id)}
-                className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
+                className={`hidden px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
                   photo.isFavorite
                     ? 'bg-orange-500 text-white shadow-xs'
                     : 'bg-orange-50 text-stone-700 hover:bg-orange-100'

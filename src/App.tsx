@@ -68,6 +68,7 @@ import {
   Image as ImageIcon,
   Disc3,
   Check,
+  ChevronDown,
 } from 'lucide-react';
 
 const DEFAULT_PROFILE: UserProfile = {
@@ -105,10 +106,33 @@ export function App() {
   const [categories, setCategories] = useState<CategoryInfo[]>(() => {
     const loaded = getInitialFromLocalStorage<CategoryInfo[]>(STORAGE_KEY_CATEGORIES, DEFAULT_PRESET_CATEGORIES);
     if (!loaded || loaded.length === 0) return DEFAULT_PRESET_CATEGORIES;
-    return loaded.map((cat) => ({
+    const legacySystemIds = new Set([
+      'cat-all', 'cat-bhajans', 'cat-abhang', 'cat-lectures', 'cat-haripath',
+      'cat-stotra', 'cat-meditation', 'cat-mantras', 'cat-darshan', 'cat-katha',
+    ]);
+    const legacySystemNames = new Set([
+      'abhang', 'lecture', 'haripath', 'stotra', 'meditation', 'mantra', 'darshan', 'katha',
+    ]);
+    const normalized = loaded.filter((cat) =>
+      !legacySystemIds.has(cat.id) && !legacySystemNames.has(normalizeCategory(cat.name))
+    ).map((cat) => ({
       ...cat,
       name: translateCategoryToMarathi(cat.name),
     }));
+    const preferredOrder = DEFAULT_PRESET_CATEGORIES.map((cat) => normalizeCategory(cat.name));
+    normalized.sort((a, b) => {
+      const aIndex = preferredOrder.indexOf(normalizeCategory(a.name));
+      const bIndex = preferredOrder.indexOf(normalizeCategory(b.name));
+      if (aIndex === -1 && bIndex === -1) return 0;
+      if (aIndex === -1) return 1;
+      if (bIndex === -1) return -1;
+      return aIndex - bIndex;
+    });
+    // Keep exactly the six shared system categories available across all media types.
+    const existing = new Set(normalized.map((cat) => normalizeCategory(cat.name)));
+    return [...normalized, ...DEFAULT_PRESET_CATEGORIES.filter((cat) =>
+      !existing.has(normalizeCategory(cat.name)) && cat.id !== 'cat-all'
+    )];
   });
 
   const [userProfile, setUserProfile] = useState<UserProfile>(() =>
@@ -185,9 +209,12 @@ export function App() {
 
   const handleToggleCategory = (categoryName: string) => {
     setExpandedCategory((prev) => {
-      const isAlreadyExpanded =
-        prev !== null && normalizeCategory(prev) === normalizeCategory(categoryName);
-      const next = isAlreadyExpanded ? null : categoryName;
+      const current = prev ? prev.split('|').filter(Boolean) : [];
+      const target = normalizeCategory(categoryName);
+      const nextItems = current.some((item) => normalizeCategory(item) === target)
+        ? current.filter((item) => normalizeCategory(item) !== target)
+        : [...current, categoryName];
+      const next = nextItems.length ? nextItems.join('|') : null;
       try {
         if (next) {
           sessionStorage.setItem('bhakti_expanded_category_video', next);
@@ -434,6 +461,18 @@ export function App() {
   };
 
   const handleDeleteCategory = (catToDelete: CategoryInfo) => {
+    if (DEFAULT_PRESET_CATEGORIES.some((cat) => cat.id === catToDelete.id)) {
+      showToast('Default categories cannot be deleted');
+      return;
+    }
+    const norm = normalizeCategory(catToDelete.name);
+    const assigned = videos.filter((v) => normalizeCategory(v.category || '') === norm).length
+      + photos.filter((p) => normalizeCategory(p.category || '') === norm).length
+      + audios.filter((a) => normalizeCategory(a.category || '') === norm).length;
+    if (assigned > 0) {
+      window.alert(`Cannot delete "${catToDelete.name}". Move ${assigned} assigned media item${assigned === 1 ? '' : 's'} to another category first.`);
+      return;
+    }
     setCategories((prev) => prev.filter((c) => c.id !== catToDelete.id));
 
     // Reset filter if deleting active category
@@ -880,9 +919,9 @@ export function App() {
                 {filterState.mediaType === 'videos' ? (
                   expandedCategory ? (
                     <>
-                      <span className="font-semibold text-teal-300">{expandedCategory}</span>
+                      <span className="font-semibold text-teal-300">{expandedCategory.split('|').join(' • ')}</span>
                       {' • '}
-                      {videos.filter((v) => normalizeCategory(v.category || '') === normalizeCategory(expandedCategory)).length} videos
+                      {videos.filter((v) => expandedCategory.split('|').some((category) => normalizeCategory(v.category || '') === normalizeCategory(category))).length} videos
                     </>
                   ) : (
                     <>
@@ -930,9 +969,13 @@ export function App() {
               />
             ) : (
               <CategoryAccordionFeed
-                categories={categories}
+                categories={normalizeCategory(filterState.selectedCategory) === 'all'
+                  ? categories
+                  : categories.filter((c) => normalizeCategory(c.name) === normalizeCategory(filterState.selectedCategory))}
                 videos={videos}
-                expandedCategory={expandedCategory}
+                expandedCategory={normalizeCategory(filterState.selectedCategory) === 'all'
+                  ? expandedCategory
+                  : filterState.selectedCategory}
                 onToggleCategory={handleToggleCategory}
                 viewMode={viewMode}
                 searchQuery={filterState.searchQuery}
@@ -947,6 +990,40 @@ export function App() {
                 onAddVideoToCategory={handleAddVideoToCategory}
               />
             )
+          ) : filterState.mediaType === 'photos' ? (
+            <div className="space-y-2.5">
+              {(normalizeCategory(filterState.selectedCategory) === 'all'
+                ? ['आरती', 'जेकेपी', 'भक्ती मार्ग', 'कीर्तन', 'भजन', 'इतर']
+                : [translateCategoryToMarathi(filterState.selectedCategory)]
+              ).map((categoryName) => {
+                const isExpanded = !!expandedCategory?.split('|').some((name) => normalizeCategory(name) === normalizeCategory(categoryName));
+                const items = photos.filter((p) => normalizeCategory(p.category || '') === normalizeCategory(categoryName));
+                return <div key={categoryName} className={`rounded-2xl border overflow-hidden transition-colors ${isExpanded ? 'border-purple-400/80 bg-purple-900/40' : 'border-purple-800/40 bg-[#16062b]/80'}`}>
+                  <button type="button" onClick={(e) => { e.stopPropagation(); handleToggleCategory(categoryName); }} aria-expanded={isExpanded} className="w-full flex items-center justify-between px-4 py-4 text-left cursor-pointer">
+                    <span className="font-sans font-semibold text-purple-50">{categoryName}</span>
+                    <span className="flex items-center gap-2"><span className="w-8 h-8 flex items-center justify-center rounded-full border border-purple-700/60 text-xs text-purple-300/80">{items.length}</span><ChevronDown className={`w-5 h-5 text-purple-400 transition-transform ${isExpanded ? 'rotate-180' : ''}`} /></span>
+                  </button>
+                  {isExpanded && items.length > 0 && <div className="px-3 pb-3 space-y-2">{items.map((item) => <PhotoListItem key={item.id} photo={item} onView={(p) => setActivePhoto(p)} onToggleFavorite={handleToggleFavoritePhoto} onDelete={handleDeletePhoto} />)}</div>}
+                </div>;
+              })}
+            </div>
+          ) : filterState.mediaType === 'audio' ? (
+            <div className="space-y-2.5">
+              {(normalizeCategory(filterState.selectedCategory) === 'all'
+                ? ['निखिलानंद महाराज', 'महाराज', 'प्रभुपाद', 'इतर']
+                : [translateCategoryToMarathi(filterState.selectedCategory)]
+              ).map((categoryName) => {
+                const isExpanded = !!expandedCategory?.split('|').some((name) => normalizeCategory(name) === normalizeCategory(categoryName));
+                const items = audios.filter((a) => normalizeCategory(a.category || '') === normalizeCategory(categoryName));
+                return <div key={categoryName} className={`rounded-2xl border overflow-hidden transition-colors ${isExpanded ? 'border-amber-400/80 bg-amber-900/40' : 'border-amber-800/40 bg-[#1a0b02]/80'}`}>
+                  <button type="button" onClick={(e) => { e.stopPropagation(); handleToggleCategory(categoryName); }} aria-expanded={isExpanded} className="w-full flex items-center justify-between px-4 py-4 text-left cursor-pointer">
+                    <span className="font-sans font-semibold text-amber-50">{categoryName}</span>
+                    <span className="flex items-center gap-2"><span className="w-8 h-8 flex items-center justify-center rounded-full border border-amber-700/60 text-xs text-amber-300/80">{items.length}</span><ChevronDown className={`w-5 h-5 text-amber-400 transition-transform ${isExpanded ? 'rotate-180' : ''}`} /></span>
+                  </button>
+                  {isExpanded && items.length > 0 && <div className="px-3 pb-3 space-y-2">{items.map((item) => <AudioListItem key={item.id} audio={item} isPlaying={activePlaybackAudio?.id === item.id} onPlay={handlePlayAudio} onToggleFavorite={handleToggleFavoriteAudio} onDelete={handleDeleteAudio} />)}</div>}
+                </div>;
+              })}
+            </div>
           ) : unifiedMediaItems.length === 0 ? (
             <div className="py-14 px-4 text-center flex flex-col items-center justify-center space-y-3">
               <div className={`w-12 h-12 rounded-2xl flex items-center justify-center shadow-2xs ${
@@ -1198,6 +1275,14 @@ export function App() {
           mediaType={filterState.mediaType}
           onOpenCategoryManager={() => setIsCategoryManagerOpen(true)}
           onReorderCategories={(reordered) => setCategories(reordered)}
+          onRenameCategory={(cat) => {
+            const name = window.prompt('Rename category', cat.name)?.trim();
+            if (name && normalizeCategory(name) !== normalizeCategory(cat.name) && !categories.some((c) => normalizeCategory(c.name) === normalizeCategory(name))) {
+              handleUpdateCategory(cat.id, { name }, cat.name);
+            }
+          }}
+          onDeleteCategory={handleDeleteCategory}
+          onAddCategory={handleAddCategory}
         />
 
         {/* Modern Floating Glassmorphism Footer: Media Cycle | Category Switch | + */}

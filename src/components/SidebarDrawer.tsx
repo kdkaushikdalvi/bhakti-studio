@@ -349,28 +349,6 @@ export const SidebarDrawer: React.FC<SidebarDrawerProps> = ({
                 </div>
 
                 <div className="space-y-1">
-                  {/* Manage Categories Button */}
-                  {onOpenCategoryManager && (
-                    <button
-                      onClick={() => {
-                        onOpenCategoryManager();
-                        onClose();
-                      }}
-                      className={`w-full py-1.5 px-2.5 rounded-xl border text-left flex items-center justify-between transition-all cursor-pointer shadow-2xs active:scale-[0.98] ${
-                        currentMediaType === 'photos'
-                          ? 'bg-purple-950/40 border-purple-900/50 hover:bg-purple-900/50 text-purple-100'
-                          : 'bg-teal-950/40 border-teal-900/50 hover:bg-teal-900/50 text-teal-100'
-                      }`}
-                    >
-                      <div className="flex items-center gap-2">
-                        <div className="p-1 rounded-md bg-orange-500/15 text-orange-400 shrink-0">
-                          <Tag className="w-3.5 h-3.5" />
-                        </div>
-                        <span className="text-xs font-semibold">Manage Categories</span>
-                      </div>
-                    </button>
-                  )}
-
                   {/* Refresh App */}
                   <button
                     onClick={() => {
@@ -499,4 +477,3 @@ export const SidebarDrawer: React.FC<SidebarDrawerProps> = ({
     </AnimatePresence>
   );
 };
-
