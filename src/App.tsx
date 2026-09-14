@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import {
   INITIAL_VIDEOS,
   INITIAL_PHOTOS,
@@ -111,9 +111,15 @@ export function App() {
     getInitialFromLocalStorage<PhotoItem[]>(STORAGE_KEY_PHOTOS, INITIAL_PHOTOS)
   );
 
-  const [audios, setAudios] = useState<AudioItem[]>(() =>
-    getInitialFromLocalStorage<AudioItem[]>(STORAGE_KEY_AUDIOS, INITIAL_AUDIOS)
-  );
+  const [audios, setAudios] = useState<AudioItem[]>(() => {
+    const loaded = getInitialFromLocalStorage<AudioItem[]>(STORAGE_KEY_AUDIOS, INITIAL_AUDIOS);
+    const titles: Record<string, string> = {
+      'audio-other-drive-1': 'Stability',
+      'audio-other-drive-2': 'Marriage – Depression',
+      'audio-other-drive-3': 'Maharajis on Marriage',
+    };
+    return loaded.map((audio) => titles[audio.id] ? { ...audio, title: titles[audio.id] } : audio);
+  });
 
   const [categories, setCategories] = useState<CategoryInfo[]>(() => {
     const loaded = getInitialFromLocalStorage<CategoryInfo[]>(STORAGE_KEY_CATEGORIES, DEFAULT_PRESET_CATEGORIES);
@@ -210,15 +216,32 @@ export function App() {
   // - Only the selected category should expand; others remain collapsed
   // - Preserves expanded/collapsed state across feed navigation
   const [expandedCategory, setExpandedCategory] = useState<string | null>(() => {
-    try {
-      const saved = sessionStorage.getItem('bhakti_expanded_category_video');
-      return saved !== null ? saved : 'आरती';
-    } catch {
-      return 'आरती';
-    }
+    return null;
   });
 
   const [addModalInitialCategory, setAddModalInitialCategory] = useState<string | undefined>(undefined);
+  const autoExpandedOnce = useRef(false);
+
+  useEffect(() => {
+    if (expandedCategory || autoExpandedOnce.current) return;
+    const mediaCategories = filterState.mediaType === 'audio'
+      ? ['निखिलानंद महाराज', 'महाराज', 'प्रभुपाद', 'इतर']
+      : filterState.mediaType === 'photos'
+      ? ['आरती', 'जेकेपी', 'भक्ती मार्ग', 'कीर्तन', 'भजन', 'इतर']
+      : categories.map((category) => category.name).filter((name) => normalizeCategory(name) !== 'all');
+    const firstWithItems = mediaCategories.find((category) => {
+      const normalized = normalizeCategory(category);
+      return filterState.mediaType === 'audio'
+        ? audios.some((item) => normalizeCategory(item.category || '') === normalized)
+        : filterState.mediaType === 'photos'
+        ? photos.some((item) => normalizeCategory(item.category || '') === normalized)
+        : videos.some((item) => normalizeCategory(item.category || '') === normalized);
+    });
+    if (firstWithItems) {
+      autoExpandedOnce.current = true;
+      setExpandedCategory(firstWithItems);
+    }
+  }, [audios, photos, videos, categories, filterState.mediaType, expandedCategory]);
 
   const handleToggleCategory = useCallback((categoryName: string) => {
     setExpandedCategory((prev) => {
@@ -281,7 +304,13 @@ export function App() {
           setPhotos((prev) => mergeItemsById(prev, idbPhotos));
         }
         if (idbAudios && Array.isArray(idbAudios) && idbAudios.length > 0) {
-          setAudios((prev) => mergeItemsById(prev, idbAudios));
+          setAudios((prev) => mergeItemsById(prev, idbAudios).map((audio) => ({
+            ...audio,
+            title: audio.id === 'audio-other-drive-1' ? 'Stability'
+              : audio.id === 'audio-other-drive-2' ? 'Marriage – Depression'
+              : audio.id === 'audio-other-drive-3' ? 'Maharajis on Marriage'
+              : audio.title,
+          })));
         }
         if (idbCats && Array.isArray(idbCats) && idbCats.length > 0) {
           const marathiIdbCats = idbCats.map((cat) => ({
@@ -776,17 +805,12 @@ export function App() {
 
   // Switch between Videos, Photos, and Audio (and load its corresponding pinned category)
   const handleSwitchMediaType = (type: MediaTypeFilter) => {
-    const pinnedCat =
-      type === 'photos'
-        ? (appSettings.defaultPhotoCategory || 'all')
-        : type === 'audio'
-        ? (appSettings.defaultAudioCategory || 'all')
-        : (appSettings.defaultVideoCategory || appSettings.defaultCategory || 'all');
-
+    autoExpandedOnce.current = false;
+    setExpandedCategory(null);
     setFilterState((prev) => ({
       ...prev,
       mediaType: type,
-      selectedCategory: pinnedCat,
+      selectedCategory: 'all',
     }));
   };
 
@@ -1022,11 +1046,11 @@ export function App() {
           ) : filterState.mediaType === 'photos' ? (
             <div className="space-y-2.5">
               {(normalizeCategory(filterState.selectedCategory) === 'all'
-                ? ['आरती', 'जेकेपी', 'भक्ती मार्ग', 'कीर्तन', 'भजन', 'इतर']
+                ? ['आरती', 'जेकेपी', 'भक्ती मार्ग', 'कीर्तन', 'भजन', 'इतर'].sort((a, b) => photos.filter((p) => normalizeCategory(p.category || '') === normalizeCategory(b)).length - photos.filter((p) => normalizeCategory(p.category || '') === normalizeCategory(a)).length)
                 : [translateCategoryToMarathi(filterState.selectedCategory)]
               ).map((categoryName) => {
-                const isExpanded = !!expandedCategory?.split('|').some((name) => normalizeCategory(name) === normalizeCategory(categoryName));
                 const items = photos.filter((p) => normalizeCategory(p.category || '') === normalizeCategory(categoryName));
+                const isExpanded = !!expandedCategory?.split('|').some((name) => normalizeCategory(name) === normalizeCategory(categoryName));
                 return <div key={categoryName} className={`rounded-2xl border overflow-hidden transition-colors ${isExpanded ? 'border-emerald-400 bg-emerald-100/90 shadow-2xs' : 'border-emerald-200/80 bg-emerald-50/70'}`}>
                   <button type="button" onClick={(e) => { e.stopPropagation(); handleToggleCategory(categoryName); }} aria-expanded={isExpanded} className="w-full flex items-center justify-between px-4 py-4 text-left cursor-pointer">
                     <span className="font-sans font-bold text-emerald-950">{categoryName}</span>
@@ -1039,11 +1063,11 @@ export function App() {
           ) : filterState.mediaType === 'audio' ? (
             <div className="space-y-2.5">
               {(normalizeCategory(filterState.selectedCategory) === 'all'
-                ? ['निखिलानंद महाराज', 'महाराज', 'प्रभुपाद', 'इतर']
+                ? ['निखिलानंद महाराज', 'महाराज', 'प्रभुपाद', 'इतर'].sort((a, b) => audios.filter((x) => normalizeCategory(x.category || '') === normalizeCategory(b)).length - audios.filter((x) => normalizeCategory(x.category || '') === normalizeCategory(a)).length)
                 : [translateCategoryToMarathi(filterState.selectedCategory)]
               ).map((categoryName) => {
-                const isExpanded = !!expandedCategory?.split('|').some((name) => normalizeCategory(name) === normalizeCategory(categoryName));
                 const items = audios.filter((a) => normalizeCategory(a.category || '') === normalizeCategory(categoryName));
+                const isExpanded = !!expandedCategory?.split('|').some((name) => normalizeCategory(name) === normalizeCategory(categoryName));
                 return <div key={categoryName} className={`rounded-2xl border overflow-hidden transition-colors ${isExpanded ? 'border-yellow-400 bg-yellow-100/90 shadow-2xs' : 'border-yellow-200/80 bg-yellow-50/70'}`}>
                   <button type="button" onClick={(e) => { e.stopPropagation(); handleToggleCategory(categoryName); }} aria-expanded={isExpanded} className="w-full flex items-center justify-between px-4 py-4 text-left cursor-pointer">
                     <span className="font-sans font-bold text-amber-950">{categoryName}</span>

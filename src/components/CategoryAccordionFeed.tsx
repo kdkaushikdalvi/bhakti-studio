@@ -67,7 +67,11 @@ export const CategoryAccordionFeed: React.FC<CategoryAccordionFeedProps> = ({
     return [...filtered, ...extraCategories].map((c) => ({
       ...c,
       name: translateCategoryToMarathi(c.name),
-    }));
+    })).sort((a, b) => {
+      const aCount = videos.filter((v) => normalizeCategory(v.category || '') === normalizeCategory(a.name)).length;
+      const bCount = videos.filter((v) => normalizeCategory(v.category || '') === normalizeCategory(b.name)).length;
+      return bCount - aCount;
+    });
   }, [categories, videos]);
 
   // Helper to filter videos for a specific category based on current filters

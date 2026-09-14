@@ -47,7 +47,8 @@ export const AudioPlayerModal: React.FC<AudioPlayerModalProps> = ({
   const [isLooping, setIsLooping] = useState(false);
   const [playbackRate, setPlaybackRate] = useState(1);
   const [notes, setNotes] = useState(audio.notes || '');
-  const [useIframeFallback, setUseIframeFallback] = useState(false);
+  // Google Drive usually blocks direct browser audio streaming; use its embed player first.
+  const [useIframeFallback, setUseIframeFallback] = useState(Boolean(audio.driveId));
   const [hasStreamError, setHasStreamError] = useState(false);
   const [resolvedAudioUrl, setResolvedAudioUrl] = useState<string>('');
 

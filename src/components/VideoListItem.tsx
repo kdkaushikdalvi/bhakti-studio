@@ -153,7 +153,7 @@ export const VideoListItem: React.FC<VideoListItemProps> = ({
                   className="w-full px-3 py-2 text-left hover:bg-rose-50 text-rose-600 flex items-center gap-2 cursor-pointer"
                 >
                   <Trash2 className="w-3.5 h-3.5" />
-                  <span>Remove Entry</span>
+                  <span>Remove</span>
                 </button>
               </div>
             </>

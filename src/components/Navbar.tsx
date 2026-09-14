@@ -86,9 +86,6 @@ export const Navbar: React.FC<NavbarProps> = ({
                 />
               </div>
               <div className="flex items-center gap-2 min-w-0">
-                <h1 className="text-sm font-serif font-bold tracking-tight truncate">
-                  Bhakti
-                </h1>
                 <span
                   className={`text-[10px] px-2 py-0.5 rounded-full font-bold uppercase tracking-wider border flex items-center gap-1 ${
                     isVideos
@@ -150,5 +147,4 @@ export const Navbar: React.FC<NavbarProps> = ({
     </header>
   );
 };
-
 

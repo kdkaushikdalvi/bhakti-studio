@@ -112,18 +112,6 @@ export const AudioListItem: React.FC<AudioListItemProps> = ({
 
       {/* Right Controls */}
       <div className="flex items-center gap-1 shrink-0">
-        <button
-          onClick={() => onToggleFavorite(audio.id)}
-          className={`p-1.5 border transition-colors rounded-lg cursor-pointer ${
-            audio.isFavorite
-              ? 'bg-yellow-400 text-amber-950 border-yellow-500 shadow-2xs'
-              : 'border-yellow-200 bg-white/90 text-amber-700 hover:text-amber-950 hover:bg-yellow-100'
-          }`}
-          title={audio.isFavorite ? 'Starred Favorite' : 'Mark as Favorite'}
-        >
-          <Star className={`w-3.5 h-3.5 ${audio.isFavorite ? 'fill-amber-950' : ''}`} />
-        </button>
-
         {/* More Menu */}
         <div className="relative">
           <button
@@ -140,55 +128,6 @@ export const AudioListItem: React.FC<AudioListItemProps> = ({
                 onClick={() => setShowMenu(false)}
               />
               <div className="absolute right-0 top-full mt-1 w-44 bg-[#fffdf0] border border-yellow-300 rounded-xl shadow-lg z-20 py-1 text-xs text-amber-950 font-medium animate-fadeIn">
-                {!isLocalAudio && (
-                  <>
-                    <button
-                      onClick={handleCopyLink}
-                      className="w-full px-3 py-2 text-left hover:bg-yellow-100 flex items-center gap-2 cursor-pointer"
-                    >
-                      {copied ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Share2 className="w-3.5 h-3.5 text-amber-700" />}
-                      <span>{copied ? 'Copied' : 'Copy Drive Link'}</span>
-                    </button>
-
-                    <a
-                      href={audio.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      onClick={() => setShowMenu(false)}
-                      className="w-full px-3 py-2 text-left hover:bg-yellow-100 flex items-center gap-2 cursor-pointer"
-                    >
-                      <ExternalLink className="w-3.5 h-3.5 text-amber-700" />
-                      <span>Open in Drive</span>
-                    </a>
-                  </>
-                )}
-
-                {isLocalAudio && (
-                  <button
-                    onClick={() => {
-                      setShowMenu(false);
-                      onPlay(audio);
-                    }}
-                    className="w-full px-3 py-2 text-left hover:bg-yellow-100 flex items-center gap-2 cursor-pointer"
-                  >
-                    <Play className="w-3.5 h-3.5 text-amber-700" />
-                    <span>Play Audio</span>
-                  </button>
-                )}
-
-                <button
-                  onClick={() => {
-                    setShowMenu(false);
-                    if (onEdit) onEdit(audio);
-                  }}
-                  className="w-full px-3 py-2 text-left hover:bg-yellow-100 flex items-center gap-2 cursor-pointer"
-                >
-                  <Edit2 className="w-3.5 h-3.5 text-amber-700" />
-                  <span>Edit Track</span>
-                </button>
-
-                <div className="h-px bg-yellow-200 my-1" />
-
                 <button
                   onClick={() => {
                     setShowMenu(false);
@@ -197,7 +136,7 @@ export const AudioListItem: React.FC<AudioListItemProps> = ({
                   className="w-full px-3 py-2 text-left hover:bg-rose-50 text-rose-600 flex items-center gap-2 cursor-pointer"
                 >
                   <Trash2 className="w-3.5 h-3.5" />
-                  <span>Remove Entry</span>
+                  <span>Remove</span>
                 </button>
               </div>
             </>

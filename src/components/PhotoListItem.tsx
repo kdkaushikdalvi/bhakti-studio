@@ -1,9 +1,10 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   Star,
   Trash2,
   Maximize2,
   Image as ImageIcon,
+  MoreVertical,
 } from 'lucide-react';
 import { PhotoItem } from '../types';
 
@@ -20,6 +21,7 @@ export const PhotoListItem: React.FC<PhotoListItemProps> = ({
   onToggleFavorite,
   onDelete,
 }) => {
+  const [showMenu, setShowMenu] = useState(false);
   const formattedDate = new Date(photo.createdAt).toLocaleDateString(undefined, {
     month: 'short',
     day: 'numeric',
@@ -92,15 +94,16 @@ export const PhotoListItem: React.FC<PhotoListItemProps> = ({
           <Maximize2 className="w-3.5 h-3.5" />
         </button>
 
-        {/* Delete Button */}
+        {/* More actions */}
         <button
           type="button"
-          onClick={() => onDelete(photo.id)}
+          onClick={() => setShowMenu((open) => !open)}
           className="p-1.5 border border-stone-100 dark:border-stone-800 bg-white dark:bg-stone-800 text-stone-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40 rounded-lg transition-colors cursor-pointer"
-          title="Delete Photo"
+          title="More actions"
         >
-          <Trash2 className="w-3.5 h-3.5" />
+          <MoreVertical className="w-3.5 h-3.5" />
         </button>
+        {showMenu && <button type="button" onClick={() => { setShowMenu(false); onDelete(photo.id); }} className="absolute right-2 bottom-10 z-50 px-3 py-2 bg-white border border-orange-200 rounded-lg shadow-lg text-xs text-rose-600">Remove</button>}
       </div>
     </div>
   );

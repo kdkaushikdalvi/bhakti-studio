@@ -96,23 +96,6 @@ export const AudioCard: React.FC<AudioCardProps> = ({
             )}
           </div>
 
-          {/* Star favorite quick button */}
-          <div className="absolute top-2 right-2 flex items-center gap-1">
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                onToggleFavorite(audio.id);
-              }}
-              className={`p-1.5 rounded-lg border transition-colors cursor-pointer ${
-                audio.isFavorite
-                  ? 'bg-yellow-400 text-amber-950 border-yellow-500 shadow-xs'
-                  : 'bg-white/80 text-amber-700 hover:text-amber-950 hover:bg-yellow-100 border-yellow-300/80 shadow-2xs'
-              }`}
-              title={audio.isFavorite ? 'Starred Favorite' : 'Mark Favorite'}
-            >
-              <Star className={`w-3.5 h-3.5 ${audio.isFavorite ? 'fill-amber-950' : ''}`} />
-            </button>
-          </div>
         </div>
 
         {/* Title */}
@@ -237,7 +220,7 @@ export const AudioCard: React.FC<AudioCardProps> = ({
                     className="w-full px-3 py-2 text-left hover:bg-rose-50 text-rose-600 flex items-center gap-2 cursor-pointer"
                   >
                     <Trash2 className="w-3.5 h-3.5" />
-                    <span>Delete Entry</span>
+                    <span>Remove</span>
                   </button>
                 </div>
               </>

@@ -201,7 +201,7 @@ export const VideoCard: React.FC<VideoCardProps> = ({
                     className="w-full px-3 py-2 text-left hover:bg-rose-50 text-rose-600 flex items-center gap-2 cursor-pointer"
                   >
                     <Trash2 className="w-3.5 h-3.5" />
-                    <span>Delete Entry</span>
+                    <span>Remove</span>
                   </button>
                 </div>
               </>
