@@ -51,13 +51,13 @@ export const VideoListItem: React.FC<VideoListItemProps> = ({
   return (
     <div
       id={`video-row-${video.id}`}
-      className="group bg-white border border-orange-100 p-3 transition-colors flex items-center justify-between gap-3 rounded-xl shadow-2xs relative"
+      className="group bg-white border border-rose-100 hover:border-rose-300 p-3 transition-colors flex items-center justify-between gap-3 rounded-xl shadow-2xs relative"
     >
       {/* Thumbnail + Title + Channel */}
       <div className="flex items-center gap-3 min-w-0 flex-1">
         <div
           onClick={() => onPlay(video)}
-          className="relative w-20 aspect-video bg-orange-50 overflow-hidden shrink-0 cursor-pointer rounded-lg border border-orange-100/80"
+          className="relative w-20 aspect-video bg-rose-50 overflow-hidden shrink-0 cursor-pointer rounded-lg border border-rose-100/80"
         >
           <img
             src={video.thumbnailUrl || getYouTubeThumbnail(video.youtubeId, 'hq')}
@@ -78,7 +78,7 @@ export const VideoListItem: React.FC<VideoListItemProps> = ({
 
           <h4
             onClick={() => onPlay(video)}
-            className="text-xs font-serif font-bold text-stone-900 hover:text-orange-600 transition-colors line-clamp-1 cursor-pointer"
+            className="text-xs font-serif font-bold text-stone-900 hover:text-rose-600 transition-colors line-clamp-1 cursor-pointer"
             title={video.title}
           >
             {video.title}
@@ -96,7 +96,7 @@ export const VideoListItem: React.FC<VideoListItemProps> = ({
               </div>
             )}
             {video.timestamps && video.timestamps.length > 0 && (
-              <span className="text-[9px] font-semibold text-orange-600 flex items-center gap-0.5">
+              <span className="text-[9px] font-semibold text-rose-600 flex items-center gap-0.5">
                 <Bookmark className="w-2.5 h-2.5" /> {video.timestamps.length} Ch
               </span>
             )}
@@ -110,8 +110,8 @@ export const VideoListItem: React.FC<VideoListItemProps> = ({
           onClick={() => onToggleWatchLater(video.id)}
           className={`hidden p-1.5 border transition-colors rounded-lg ${
             video.isWatchLater
-              ? 'bg-emerald-600 text-white border-emerald-600'
-              : 'border-orange-100 bg-white text-stone-500 hover:text-emerald-700 hover:bg-orange-50'
+              ? 'bg-rose-600 text-white border-rose-600'
+              : 'border-rose-100 bg-white text-stone-500 hover:text-rose-700 hover:bg-rose-50'
           }`}
           title={video.isWatchLater ? 'In Contemplation' : 'Queue for Study'}
         >
@@ -122,8 +122,8 @@ export const VideoListItem: React.FC<VideoListItemProps> = ({
           onClick={() => onToggleFavorite(video.id)}
           className={`hidden p-1.5 border transition-colors rounded-lg ${
             video.isFavorite
-              ? 'bg-orange-500 text-white border-orange-500'
-              : 'border-orange-100 bg-white text-stone-500 hover:text-orange-500 hover:bg-orange-50'
+              ? 'bg-rose-500 text-white border-rose-500'
+              : 'border-rose-100 bg-white text-stone-500 hover:text-rose-500 hover:bg-rose-50'
           }`}
           title={video.isFavorite ? 'Essential Gem' : 'Mark as Essential'}
         >
@@ -144,7 +144,7 @@ export const VideoListItem: React.FC<VideoListItemProps> = ({
                 className="fixed inset-0 z-10"
                 onClick={() => setShowMenu(false)}
               />
-              <div className="absolute right-0 top-full mt-1 w-44 bg-white border border-orange-200 rounded-xl shadow-lg z-50 py-1 text-xs text-stone-800 font-medium animate-fadeIn">
+              <div className="absolute right-0 top-full mt-1 w-44 bg-white border border-rose-200 rounded-xl shadow-lg z-50 py-1 text-xs text-stone-800 font-medium animate-fadeIn">
                 <button
                   onClick={() => {
                     setShowMenu(false);

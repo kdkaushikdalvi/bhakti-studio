@@ -91,7 +91,7 @@ export const SidebarDrawer: React.FC<SidebarDrawerProps> = ({
                 ? 'bg-gradient-to-b from-[#18082c] via-[#120421] to-[#0c0216] border-purple-800 text-purple-100 shadow-purple-950/80'
                 : isAudio
                 ? 'bg-gradient-to-b from-[#241303] via-[#1a0c02] to-[#120801] border-amber-800 text-amber-100 shadow-amber-950/80'
-                : 'bg-gradient-to-b from-[#032420] via-[#021815] to-[#011210] border-teal-800 text-teal-100 shadow-teal-950/80'
+                : 'bg-gradient-to-b from-[#fff1f2] via-[#ffe4e6] to-[#fff1f2] border-rose-200 text-stone-900 shadow-rose-900/20'
             }`}
           >
             {/* Drawer Header */}
@@ -101,7 +101,7 @@ export const SidebarDrawer: React.FC<SidebarDrawerProps> = ({
                   ? 'bg-purple-950/90 border-purple-800/80'
                   : isAudio
                   ? 'bg-amber-950/90 border-amber-800/80'
-                  : 'bg-teal-950/90 border-teal-800/80'
+                  : 'bg-rose-100/90 border-rose-200/80'
               }`}
             >
               <div className="flex items-center gap-2">
@@ -111,7 +111,7 @@ export const SidebarDrawer: React.FC<SidebarDrawerProps> = ({
                       ? 'ring-purple-400/60 shadow-purple-950/40 bg-purple-950'
                       : isAudio
                       ? 'ring-amber-400/60 shadow-amber-950/40 bg-amber-950'
-                      : 'ring-teal-400/60 shadow-teal-950/40 bg-teal-950'
+                      : 'ring-rose-400/60 shadow-rose-900/20 bg-white'
                   }`}
                 >
                   <img
@@ -126,7 +126,7 @@ export const SidebarDrawer: React.FC<SidebarDrawerProps> = ({
                     Bhakti
                   </span>
                   <span className={`text-[9px] font-serif italic leading-tight ${
-                    isPhotos ? 'text-purple-300' : isAudio ? 'text-amber-300' : 'text-teal-300'
+                    isPhotos ? 'text-purple-300' : isAudio ? 'text-amber-300' : 'text-rose-700'
                   }`}>
                     || भक्ती हीच माझी शक्ती ||
                   </span>
@@ -135,7 +135,7 @@ export const SidebarDrawer: React.FC<SidebarDrawerProps> = ({
 
               <button
                 onClick={onClose}
-                className="p-1 text-stone-400 hover:text-white hover:bg-white/10 rounded-lg transition-colors cursor-pointer"
+                className="p-1 text-stone-400 hover:text-stone-800 hover:bg-black/5 rounded-lg transition-colors cursor-pointer"
                 title="Close menu"
               >
                 <X className="w-4 h-4" />
@@ -160,27 +160,27 @@ export const SidebarDrawer: React.FC<SidebarDrawerProps> = ({
                     }}
                     className={`w-full py-1.5 px-2.5 rounded-xl border text-left flex items-center justify-between transition-all cursor-pointer shadow-2xs active:scale-[0.98] ${
                       isVideos
-                        ? 'bg-teal-900/60 border-teal-400 text-white shadow-teal-950/40 ring-1 ring-teal-400/40'
-                        : 'bg-teal-950/30 border-teal-900/40 hover:bg-teal-900/40 text-teal-200/70'
+                        ? 'bg-rose-500 border-rose-600 text-white shadow-rose-900/20 ring-1 ring-rose-400/40'
+                        : 'bg-rose-50/70 border-rose-200/80 hover:bg-rose-100/70 text-rose-900'
                     }`}
                   >
                     <div className="flex items-center gap-2 min-w-0">
                       <div className={`w-6 h-6 rounded-lg flex items-center justify-center shrink-0 ${
                         isVideos
-                          ? 'bg-teal-500 text-slate-950 shadow-xs'
-                          : 'bg-teal-500/20 text-teal-400'
+                          ? 'bg-white text-rose-600 shadow-xs'
+                          : 'bg-rose-100 text-rose-600'
                       }`}>
                         <Youtube className="w-3.5 h-3.5" />
                       </div>
                       <div className="flex items-center gap-1.5 min-w-0">
                         <span className="text-xs font-semibold truncate">Videos</span>
-                        <span className="text-[9px] px-1.5 py-0.2 rounded-md bg-white/10 opacity-75 font-semibold">
+                        <span className="text-[9px] px-1.5 py-0.2 rounded-md bg-white/20 opacity-90 font-semibold">
                           {videoCount}
                         </span>
                       </div>
                     </div>
                     {isVideos && (
-                      <Check className="w-3.5 h-3.5 text-teal-300 shrink-0 ml-1 stroke-[2.5]" />
+                      <Check className="w-3.5 h-3.5 text-white shrink-0 ml-1 stroke-[2.5]" />
                     )}
                   </button>
 
@@ -268,10 +268,10 @@ export const SidebarDrawer: React.FC<SidebarDrawerProps> = ({
                       viewMode === 'list'
                         ? currentMediaType === 'photos'
                           ? 'bg-purple-900/70 border-purple-400 text-white ring-1 ring-purple-400/30'
-                          : 'bg-teal-900/70 border-teal-400 text-white ring-1 ring-teal-400/30'
+                          : 'bg-rose-500 border-rose-600 text-white ring-1 ring-rose-400/30'
                         : currentMediaType === 'photos'
                         ? 'bg-purple-950/40 border-purple-900/50 hover:bg-purple-900/40 text-purple-200'
-                        : 'bg-teal-950/40 border-teal-900/50 hover:bg-teal-900/40 text-teal-200'
+                        : 'bg-rose-50/80 border-rose-200/80 hover:bg-rose-100/70 text-rose-900'
                     }`}
                   >
                     <div className="flex items-center gap-2 min-w-0">
@@ -281,7 +281,7 @@ export const SidebarDrawer: React.FC<SidebarDrawerProps> = ({
                       <span className="text-xs font-semibold">List Layout</span>
                     </div>
                     {viewMode === 'list' && (
-                      <Check className={`w-3.5 h-3.5 stroke-[2.5] ${currentMediaType === 'photos' ? 'text-purple-300' : 'text-teal-300'}`} />
+                      <Check className={`w-3.5 h-3.5 stroke-[2.5] ${currentMediaType === 'photos' ? 'text-purple-300' : 'text-white'}`} />
                     )}
                   </button>
 
@@ -295,10 +295,10 @@ export const SidebarDrawer: React.FC<SidebarDrawerProps> = ({
                       viewMode === 'grid'
                         ? currentMediaType === 'photos'
                           ? 'bg-purple-900/70 border-purple-400 text-white ring-1 ring-purple-400/30'
-                          : 'bg-teal-900/70 border-teal-400 text-white ring-1 ring-teal-400/30'
+                          : 'bg-rose-500 border-rose-600 text-white ring-1 ring-rose-400/30'
                         : currentMediaType === 'photos'
                         ? 'bg-purple-950/40 border-purple-900/50 hover:bg-purple-900/40 text-purple-200'
-                        : 'bg-teal-950/40 border-teal-900/50 hover:bg-teal-900/40 text-teal-200'
+                        : 'bg-rose-50/80 border-rose-200/80 hover:bg-rose-100/70 text-rose-900'
                     }`}
                   >
                     <div className="flex items-center gap-2 min-w-0">
@@ -308,7 +308,7 @@ export const SidebarDrawer: React.FC<SidebarDrawerProps> = ({
                       <span className="text-xs font-semibold">Grid Layout</span>
                     </div>
                     {viewMode === 'grid' && (
-                      <Check className={`w-3.5 h-3.5 stroke-[2.5] ${currentMediaType === 'photos' ? 'text-purple-300' : 'text-teal-300'}`} />
+                      <Check className={`w-3.5 h-3.5 stroke-[2.5] ${currentMediaType === 'photos' ? 'text-purple-300' : 'text-white'}`} />
                     )}
                   </button>
 
@@ -322,10 +322,10 @@ export const SidebarDrawer: React.FC<SidebarDrawerProps> = ({
                       viewMode === 'split'
                         ? currentMediaType === 'photos'
                           ? 'bg-purple-900/70 border-purple-400 text-white ring-1 ring-purple-400/30'
-                          : 'bg-teal-900/70 border-teal-400 text-white ring-1 ring-teal-400/30'
+                          : 'bg-rose-500 border-rose-600 text-white ring-1 ring-rose-400/30'
                         : currentMediaType === 'photos'
                         ? 'bg-purple-950/40 border-purple-900/50 hover:bg-purple-900/40 text-purple-200'
-                        : 'bg-teal-950/40 border-teal-900/50 hover:bg-teal-900/40 text-teal-200'
+                        : 'bg-rose-50/80 border-rose-200/80 hover:bg-rose-100/70 text-rose-900'
                     }`}
                   >
                     <div className="flex items-center gap-2 min-w-0">
@@ -335,7 +335,7 @@ export const SidebarDrawer: React.FC<SidebarDrawerProps> = ({
                       <span className="text-xs font-semibold">Split Workspace</span>
                     </div>
                     {viewMode === 'split' && (
-                      <Check className={`w-3.5 h-3.5 stroke-[2.5] ${currentMediaType === 'photos' ? 'text-purple-300' : 'text-teal-300'}`} />
+                      <Check className={`w-3.5 h-3.5 stroke-[2.5] ${currentMediaType === 'photos' ? 'text-purple-300' : 'text-white'}`} />
                     )}
                   </button>
                 </div>
@@ -358,7 +358,7 @@ export const SidebarDrawer: React.FC<SidebarDrawerProps> = ({
                     className={`w-full py-1.5 px-2.5 rounded-xl border text-left flex items-center justify-between transition-all cursor-pointer shadow-2xs active:scale-[0.98] ${
                       currentMediaType === 'photos'
                         ? 'bg-purple-950/40 border-purple-900/50 hover:bg-purple-900/50 text-purple-100'
-                        : 'bg-teal-950/40 border-teal-900/50 hover:bg-teal-900/50 text-teal-100'
+                        : 'bg-rose-50/80 border-rose-200/80 hover:bg-rose-100/70 text-rose-900'
                     }`}
                   >
                     <div className="flex items-center gap-2">
@@ -379,7 +379,7 @@ export const SidebarDrawer: React.FC<SidebarDrawerProps> = ({
                     className={`w-full py-2 px-2.5 rounded-xl border text-left flex items-center justify-between transition-all cursor-pointer shadow-2xs active:scale-[0.98] ${
                       currentMediaType === 'photos'
                         ? 'bg-purple-950/40 border-purple-900/50 hover:bg-purple-900/50 text-purple-100'
-                        : 'bg-teal-950/40 border-teal-900/50 hover:bg-teal-900/50 text-teal-100'
+                        : 'bg-rose-50/80 border-rose-200/80 hover:bg-rose-100/70 text-rose-900'
                     }`}
                   >
                     <div className="flex items-center gap-2">
@@ -403,7 +403,7 @@ export const SidebarDrawer: React.FC<SidebarDrawerProps> = ({
                     className={`w-full py-2 px-2.5 rounded-xl border text-left flex items-center justify-between transition-all cursor-pointer shadow-2xs active:scale-[0.98] ${
                       currentMediaType === 'photos'
                         ? 'bg-purple-950/40 border-purple-900/50 hover:bg-purple-900/50 text-purple-100'
-                        : 'bg-teal-950/40 border-teal-900/50 hover:bg-teal-900/50 text-teal-100'
+                        : 'bg-rose-50/80 border-rose-200/80 hover:bg-rose-100/70 text-rose-900'
                     }`}
                   >
                     <div className="flex items-center gap-2">
@@ -445,7 +445,7 @@ export const SidebarDrawer: React.FC<SidebarDrawerProps> = ({
               className={`py-2 px-3 border-t flex items-center justify-between text-[11px] transition-colors ${
                 currentMediaType === 'photos'
                   ? 'bg-purple-950/80 border-purple-800/60 text-purple-300'
-                  : 'bg-teal-950/80 border-teal-800/60 text-teal-300'
+                  : 'bg-rose-100/90 border-rose-200 text-rose-800'
               }`}
             >
               <div className="flex items-center gap-1.5">

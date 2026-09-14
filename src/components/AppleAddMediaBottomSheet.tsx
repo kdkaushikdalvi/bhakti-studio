@@ -545,7 +545,7 @@ export const AppleAddMediaBottomSheet: React.FC<AppleAddMediaBottomSheetProps> =
                   id="btn-submit-video-header"
                   type="button"
                   disabled={!isValidYoutubeUrl || isSuccess}
-                  onClick={() => document.getElementById('video-add-form')?.requestSubmit()}
+                  onClick={() => (document.getElementById('video-add-form') as HTMLFormElement | null)?.requestSubmit()}
                   className="mr-2 px-5 py-2 bg-stone-900 hover:bg-stone-800 disabled:bg-stone-300 text-white rounded-xl text-xs font-semibold shadow-xs disabled:cursor-not-allowed transition-all flex items-center justify-center gap-1.5 cursor-pointer"
                 >
                   <Youtube className="w-3.5 h-3.5" />
@@ -554,7 +554,7 @@ export const AppleAddMediaBottomSheet: React.FC<AppleAddMediaBottomSheetProps> =
               )}
               {activeTab === 'photo' && (
                 photoDataUrl ? (
-                  <button type="button" disabled={isSuccess} onClick={() => document.getElementById('photo-add-form')?.requestSubmit()} className="mr-2 px-5 py-2 bg-stone-900 hover:bg-stone-800 disabled:bg-stone-300 text-white rounded-xl text-xs font-semibold shadow-xs disabled:cursor-not-allowed transition-all flex items-center justify-center gap-1.5 cursor-pointer"><ImageIcon className="w-3.5 h-3.5" /><span>Upload Photo</span></button>
+                  <button type="button" disabled={isSuccess} onClick={() => (document.getElementById('photo-add-form') as HTMLFormElement | null)?.requestSubmit()} className="mr-2 px-5 py-2 bg-stone-900 hover:bg-stone-800 disabled:bg-stone-300 text-white rounded-xl text-xs font-semibold shadow-xs disabled:cursor-not-allowed transition-all flex items-center justify-center gap-1.5 cursor-pointer"><ImageIcon className="w-3.5 h-3.5" /><span>Upload Photo</span></button>
                 ) : (
                   <button type="button" onClick={() => fileInputRef.current?.click()} className="mr-2 px-5 py-2 bg-stone-900 hover:bg-stone-800 text-white rounded-xl text-xs font-semibold shadow-xs transition-all flex items-center justify-center gap-1.5 cursor-pointer"><ImageIcon className="w-3.5 h-3.5" /><span>Upload Photo</span></button>
                 )

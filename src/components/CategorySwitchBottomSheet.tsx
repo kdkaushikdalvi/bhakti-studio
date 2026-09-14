@@ -160,14 +160,14 @@ export const CategorySwitchBottomSheet: React.FC<CategorySwitchBottomSheetProps>
                 ? 'bg-[#140624] text-purple-100 border-purple-800/80'
                 : isAudio
                 ? 'bg-[#1a0c02] text-amber-100 border-amber-800/80'
-                : 'bg-[#021815] text-teal-100 border-teal-800/80'
+                : 'bg-[#fff1f2] text-rose-950 border-rose-200/80'
             }`}
           >
             {/* Minimal Drag Handle */}
             <div className="pt-2.5 pb-1 flex justify-center shrink-0">
               <div
                 className={`w-10 h-1 rounded-full opacity-50 ${
-                  isPhotos ? 'bg-purple-400' : isAudio ? 'bg-amber-400' : 'bg-teal-400'
+                  isPhotos ? 'bg-purple-400' : isAudio ? 'bg-amber-400' : 'bg-rose-400'
                 }`}
               />
             </div>
@@ -179,7 +179,7 @@ export const CategorySwitchBottomSheet: React.FC<CategorySwitchBottomSheetProps>
                   ? 'border-purple-900/60'
                   : isAudio
                   ? 'border-amber-900/60'
-                  : 'border-teal-900/60'
+                  : 'border-rose-200'
               }`}
             >
               <div className="flex items-center gap-2">
@@ -191,34 +191,42 @@ export const CategorySwitchBottomSheet: React.FC<CategorySwitchBottomSheetProps>
                 </span>
               </div>
 
-              <button
-                type="button"
-                onClick={onClose}
-                aria-label="Close"
-                className={`w-8 h-8 rounded-full flex items-center justify-center transition-colors cursor-pointer ${
-                  isPhotos
-                    ? 'hover:bg-purple-900/60 text-purple-300'
-                    : isAudio
-                    ? 'hover:bg-amber-900/60 text-amber-300'
-                    : 'hover:bg-teal-900/60 text-teal-300'
-                }`}
-              >
-                <X className="w-4 h-4" />
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  const name = window.prompt('New category name')?.trim();
-                  if (name && !categories.some((c) => normalizeCategory(c.name) === normalizeCategory(name))) {
-                    onAddCategory?.({ id: `cat-${Date.now()}`, name, color: isPhotos ? '#A855F7' : isAudio ? '#F59E0B' : '#14B8A6' });
-                  }
-                }}
-                className="w-8 h-8 rounded-full flex items-center justify-center text-current opacity-80 hover:opacity-100 hover:bg-white/10 cursor-pointer"
-                aria-label="Add category"
-                title="Add category"
-              >
-                <Plus className="w-5 h-5" />
-              </button>
+              <div className="flex items-center gap-1">
+                <button
+                  type="button"
+                  onClick={() => {
+                    const name = window.prompt('New category name')?.trim();
+                    if (name && !categories.some((c) => normalizeCategory(c.name) === normalizeCategory(name))) {
+                      onAddCategory?.({ id: `cat-${Date.now()}`, name, color: isPhotos ? '#A855F7' : isAudio ? '#F59E0B' : '#E11D48' });
+                    }
+                  }}
+                  className={`w-8 h-8 rounded-full flex items-center justify-center transition-colors cursor-pointer ${
+                    isPhotos
+                      ? 'hover:bg-purple-900/60 text-purple-300'
+                      : isAudio
+                      ? 'hover:bg-amber-900/60 text-amber-300'
+                      : 'hover:bg-rose-100 text-rose-800'
+                  }`}
+                  aria-label="Add category"
+                  title="Add category"
+                >
+                  <Plus className="w-4 h-4" />
+                </button>
+                <button
+                  type="button"
+                  onClick={onClose}
+                  aria-label="Close"
+                  className={`w-8 h-8 rounded-full flex items-center justify-center transition-colors cursor-pointer ${
+                    isPhotos
+                      ? 'hover:bg-purple-900/60 text-purple-300'
+                      : isAudio
+                      ? 'hover:bg-amber-900/60 text-amber-300'
+                      : 'hover:bg-rose-100 text-rose-800'
+                  }`}
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
             </div>
 
             {/* Category Names List with Counts and 3-Line Reorder Handle */}
@@ -252,7 +260,7 @@ export const CategorySwitchBottomSheet: React.FC<CategorySwitchBottomSheetProps>
                           ? 'border-purple-400 ring-2 ring-purple-400/40'
                           : isAudio
                           ? 'border-amber-400 ring-2 ring-amber-400/40'
-                          : 'border-teal-400 ring-2 ring-teal-400/40'
+                          : 'border-rose-400 ring-2 ring-rose-400/40'
                         : ''
                     } ${
                       isCurrentActive
@@ -260,12 +268,12 @@ export const CategorySwitchBottomSheet: React.FC<CategorySwitchBottomSheetProps>
                           ? 'bg-purple-900/70 border-purple-400/80 text-white font-semibold shadow-xs'
                           : isAudio
                           ? 'bg-amber-900/70 border-amber-400/80 text-white font-semibold shadow-xs'
-                          : 'bg-teal-900/70 border-teal-400/80 text-white font-semibold shadow-xs'
+                          : 'bg-rose-500 border-rose-600 text-white font-semibold shadow-xs'
                         : isPhotos
                         ? 'bg-purple-950/30 hover:bg-purple-900/40 border-purple-900/40 text-purple-200/90'
                         : isAudio
                         ? 'bg-amber-950/30 hover:bg-amber-900/40 border-amber-900/40 text-amber-200/90'
-                        : 'bg-teal-950/30 hover:bg-teal-900/40 border-teal-900/40 text-teal-200/90'
+                        : 'bg-white/80 hover:bg-rose-50/80 border-rose-200 text-rose-950'
                     }`}
                   >
                     {/* Category Name & Item Count clickable area */}
@@ -274,8 +282,20 @@ export const CategorySwitchBottomSheet: React.FC<CategorySwitchBottomSheetProps>
                       onClick={() => handleSelect(cat.name)}
                       className="flex-1 flex items-center gap-2 py-0.5 text-left cursor-pointer min-w-0"
                     >
-                      <span className={`w-4 h-4 rounded-md border-2 shrink-0 flex items-center justify-center ${isCurrentActive ? 'border-teal-400 bg-teal-400/20' : 'border-stone-400'}`}>
-                        {isCurrentActive && <Check className="w-3 h-3 text-teal-300 stroke-[3]" />}
+                      <span className={`w-4 h-4 rounded-md border-2 shrink-0 flex items-center justify-center ${
+                        isCurrentActive
+                          ? isPhotos
+                            ? 'border-purple-400 bg-purple-400/20'
+                            : isAudio
+                            ? 'border-amber-400 bg-amber-400/20'
+                            : 'border-white bg-white/20'
+                          : 'border-stone-400'
+                      }`}>
+                        {isCurrentActive && (
+                          <Check className={`w-3 h-3 stroke-[3] ${
+                            isPhotos ? 'text-purple-300' : isAudio ? 'text-amber-300' : 'text-white'
+                          }`} />
+                        )}
                       </span>
                       <span className="text-sm font-medium tracking-tight truncate">
                         {translateCategoryToMarathi(cat.name)}
@@ -288,12 +308,12 @@ export const CategorySwitchBottomSheet: React.FC<CategorySwitchBottomSheetProps>
                               ? 'bg-purple-950/90 text-purple-200 border border-purple-400/50'
                               : isAudio
                               ? 'bg-amber-950/90 text-amber-200 border border-amber-400/50'
-                              : 'bg-teal-950/90 text-teal-200 border border-teal-400/50'
+                              : 'bg-white/20 text-white border border-white/40'
                             : isPhotos
                             ? 'bg-purple-900/40 text-purple-300/80 border border-purple-800/40'
                             : isAudio
                             ? 'bg-amber-900/40 text-amber-300/80 border border-amber-800/40'
-                            : 'bg-teal-900/40 text-teal-300/80 border border-teal-800/40'
+                            : 'bg-rose-100 text-rose-800 border border-rose-200'
                         }`}
                       >
                         {count}
@@ -304,15 +324,54 @@ export const CategorySwitchBottomSheet: React.FC<CategorySwitchBottomSheetProps>
                     <div className="flex items-center gap-1.5 shrink-0 ml-2">
                       {!isAll && (
                         <>
-                          <button type="button" aria-label={`Rename ${cat.name}`} title="Rename category" className="w-8 h-8 rounded-full flex items-center justify-center text-teal-300 hover:bg-teal-900/60" onClick={(e) => { e.stopPropagation(); onRenameCategory?.(cat); }}><Edit2 className="w-3.5 h-3.5" /></button>
-                          <button type="button" aria-label={`Delete ${cat.name}`} title="Delete category" className="w-8 h-8 rounded-full flex items-center justify-center text-rose-300 hover:bg-rose-900/60" onClick={(e) => { e.stopPropagation(); if (window.confirm(`Delete category "${translateCategoryToMarathi(cat.name)}"?`)) onDeleteCategory?.(cat); }}><Trash2 className="w-3.5 h-3.5" /></button>
+                          <button
+                            type="button"
+                            aria-label={`Rename ${cat.name}`}
+                            title="Rename category"
+                            className={`w-8 h-8 rounded-full flex items-center justify-center transition-colors ${
+                              isPhotos
+                                ? 'text-purple-300 hover:bg-purple-900/60'
+                                : isAudio
+                                ? 'text-amber-300 hover:bg-amber-900/60'
+                                : isCurrentActive
+                                ? 'text-white hover:bg-white/20'
+                                : 'text-rose-700 hover:bg-rose-100'
+                            }`}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              onRenameCategory?.(cat);
+                            }}
+                          >
+                            <Edit2 className="w-3.5 h-3.5" />
+                          </button>
+                          <button
+                            type="button"
+                            aria-label={`Delete ${cat.name}`}
+                            title="Delete category"
+                            className={`w-8 h-8 rounded-full flex items-center justify-center transition-colors ${
+                              isPhotos
+                                ? 'text-rose-300 hover:bg-rose-900/60'
+                                : isAudio
+                                ? 'text-rose-300 hover:bg-rose-900/60'
+                                : isCurrentActive
+                                ? 'text-rose-100 hover:bg-white/20'
+                                : 'text-red-700 hover:bg-red-100'
+                            }`}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              if (window.confirm(`Delete category "${translateCategoryToMarathi(cat.name)}"?`))
+                                onDeleteCategory?.(cat);
+                            }}
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
                         </>
                       )}
                       {/* Active Select Checkmark */}
                       {isCurrentActive ? (
                         <Check
                           className={`w-4 h-4 stroke-[2.5] ${
-                            isPhotos ? 'text-purple-300' : isAudio ? 'text-amber-300' : 'text-teal-300'
+                            isPhotos ? 'text-purple-300' : isAudio ? 'text-amber-300' : 'text-white'
                           }`}
                         />
                       ) : (

@@ -203,12 +203,12 @@ export const CategoryPillsRow: React.FC<CategoryPillsRowProps> = ({
                     ? 'bg-gradient-to-r from-amber-500 to-yellow-600 text-white shadow-md shadow-amber-950/50 font-bold ring-1 ring-amber-400/40'
                     : mediaType === 'photos'
                     ? 'bg-gradient-to-r from-purple-500 to-violet-600 text-white shadow-md shadow-purple-950/50 font-bold ring-1 ring-purple-400/40'
-                    : 'bg-gradient-to-r from-teal-500 to-emerald-600 text-white shadow-md shadow-teal-950/50 font-bold ring-1 ring-teal-400/40'
+                    : 'bg-gradient-to-r from-rose-500 to-red-600 text-white shadow-md shadow-rose-900/30 font-bold ring-1 ring-rose-400/40'
                   : mediaType === 'audio'
                   ? 'bg-amber-950/40 text-amber-200 border border-amber-800/70 hover:bg-amber-800/50 hover:border-amber-400/50 hover:text-white'
                   : mediaType === 'photos'
                   ? 'bg-purple-950/40 text-purple-200 border border-purple-800/70 hover:bg-purple-800/50 hover:border-purple-400/50 hover:text-white'
-                  : 'bg-teal-950/40 text-teal-200 border border-teal-800/70 hover:bg-teal-800/50 hover:border-teal-400/50 hover:text-white'
+                  : 'bg-rose-50/90 text-rose-900 border border-rose-200 hover:bg-rose-100 hover:border-rose-400 hover:text-rose-950'
               }`}
             >
               <IconComponent
@@ -219,7 +219,7 @@ export const CategoryPillsRow: React.FC<CategoryPillsRowProps> = ({
                     ? 'text-amber-400 group-hover:scale-110'
                     : mediaType === 'photos'
                     ? 'text-purple-400 group-hover:scale-110'
-                    : 'text-teal-400 group-hover:scale-110'
+                    : 'text-rose-600 group-hover:scale-110'
                 }`}
               />
               <span>{name}</span>
@@ -239,6 +239,8 @@ export const CategoryPillsRow: React.FC<CategoryPillsRowProps> = ({
                   className={`text-[10px] px-1.5 py-0.2 rounded-full font-bold transition-colors ${
                     active
                       ? 'bg-white/25 text-white'
+                      : mediaType === 'videos'
+                      ? 'bg-rose-100 text-rose-800'
                       : theme === 'blue'
                       ? 'bg-blue-950/60 text-cyan-300'
                       : theme === 'dark'

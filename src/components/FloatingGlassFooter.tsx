@@ -63,7 +63,7 @@ export const FloatingGlassFooter: React.FC<FloatingGlassFooterProps> = ({
         aria-label={`Current: ${isVideos ? 'Videos' : isPhotos ? 'Photos' : 'Audio'}. Click to switch to ${nextLabel}`}
         className={`pointer-events-auto flex-1 flex items-center justify-between gap-2 px-3 py-2 sm:px-4 sm:py-2.5 rounded-full cursor-pointer transition-all duration-300 shadow-xl border-2 ring-2 ring-offset-1 select-none overflow-hidden relative ${
           isVideos
-            ? 'bg-gradient-to-r from-teal-600 via-emerald-500 to-teal-500 text-white border-teal-300 ring-teal-400/80 ring-offset-teal-950/40 shadow-[0_8px_24px_rgba(13,148,136,0.45)]'
+            ? 'bg-gradient-to-r from-rose-500 via-red-500 to-rose-600 text-white border-rose-300 ring-rose-400/80 ring-offset-rose-950/20 shadow-[0_8px_24px_rgba(244,63,94,0.4)]'
             : isPhotos
             ? 'bg-gradient-to-r from-purple-600 via-violet-600 to-indigo-600 text-white border-purple-300 ring-purple-400/80 ring-offset-purple-950/40 shadow-[0_8px_24px_rgba(147,51,234,0.45)]'
             : 'bg-gradient-to-r from-amber-600 via-yellow-600 to-amber-500 text-white border-amber-300 ring-amber-400/80 ring-offset-amber-950/40 shadow-[0_8px_24px_rgba(217,119,6,0.45)]'
@@ -139,7 +139,7 @@ export const FloatingGlassFooter: React.FC<FloatingGlassFooterProps> = ({
         aria-label="Switch Category"
         className={`pointer-events-auto flex items-center justify-center w-11 h-11 sm:w-12 sm:h-12 rounded-full cursor-pointer focus:outline-none focus:ring-4 shrink-0 shadow-xl border select-none relative ${
           isVideos
-            ? 'bg-gradient-to-tr from-[#032a24] via-[#083b33] to-[#032a24] text-teal-300 border-teal-500/50 shadow-[0_8px_24px_rgba(4,47,46,0.6)] ring-2 ring-teal-400/40 focus:ring-teal-300/60'
+            ? 'bg-gradient-to-tr from-rose-600 via-red-500 to-rose-600 text-white border-rose-300 shadow-[0_8px_24px_rgba(244,63,94,0.4)] ring-2 ring-rose-300/60 focus:ring-rose-300/60'
             : isPhotos
             ? 'bg-gradient-to-tr from-[#250942] via-[#3a0d66] to-[#250942] text-purple-300 border-purple-500/50 shadow-[0_8px_24px_rgba(59,7,100,0.6)] ring-2 ring-purple-400/40 focus:ring-purple-300/60'
             : 'bg-gradient-to-tr from-[#2d1603] via-[#422006] to-[#2d1603] text-amber-300 border-amber-500/50 shadow-[0_8px_24px_rgba(69,26,3,0.6)] ring-2 ring-amber-400/40 focus:ring-amber-300/60'
@@ -171,7 +171,7 @@ export const FloatingGlassFooter: React.FC<FloatingGlassFooterProps> = ({
         aria-label="Add Media"
         className={`pointer-events-auto flex items-center justify-center w-11 h-11 sm:w-12 sm:h-12 rounded-full text-white cursor-pointer focus:outline-none focus:ring-4 shrink-0 shadow-xl border border-white/30 ${
           isVideos
-            ? 'bg-gradient-to-tr from-teal-600 via-emerald-500 to-teal-500 shadow-[0_8px_24px_rgba(13,148,136,0.45)] ring-2 ring-teal-300/60 focus:ring-teal-300/60'
+            ? 'bg-gradient-to-tr from-rose-500 via-red-500 to-rose-600 shadow-[0_8px_24px_rgba(244,63,94,0.45)] ring-2 ring-rose-300/60 focus:ring-rose-300/60'
             : isPhotos
             ? 'bg-gradient-to-tr from-purple-600 via-violet-600 to-indigo-600 shadow-[0_8px_24px_rgba(147,51,234,0.45)] ring-2 ring-purple-300/60 focus:ring-purple-300/60'
             : 'bg-gradient-to-tr from-amber-600 via-yellow-500 to-amber-600 shadow-[0_8px_24px_rgba(217,119,6,0.45)] ring-2 ring-amber-300/60 focus:ring-amber-300/60'

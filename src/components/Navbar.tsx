@@ -37,7 +37,7 @@ export const Navbar: React.FC<NavbarProps> = ({
     <header
       className={`sticky top-0 z-30 backdrop-blur-md border-b transition-colors shadow-xs ${
         isVideos
-          ? 'bg-gradient-to-r from-[#021815]/95 via-[#06332e]/95 to-[#021815]/95 border-teal-700/40 text-teal-100'
+          ? 'bg-gradient-to-r from-[#fff1f2]/95 via-[#ffe4e6]/95 to-[#fff1f2]/95 border-rose-200/80 text-rose-950'
           : isPhotos
           ? 'bg-gradient-to-r from-[#110320]/95 via-[#290c4c]/95 to-[#110320]/95 border-purple-700/40 text-purple-100'
           : 'bg-gradient-to-r from-[#1b0c02]/95 via-[#351604]/95 to-[#1b0c02]/95 border-amber-700/40 text-amber-100'
@@ -53,7 +53,7 @@ export const Navbar: React.FC<NavbarProps> = ({
               id="btn-sidebar-toggle"
               className={`p-2 rounded-xl border transition-all shrink-0 cursor-pointer active:scale-95 flex items-center justify-center ${
                 isVideos
-                  ? 'bg-teal-900/50 border-teal-700/50 text-teal-200 hover:bg-teal-800/60 hover:text-white'
+                  ? 'bg-white/80 border-rose-200 text-rose-800 hover:bg-rose-50 hover:text-rose-950 shadow-2xs'
                   : isPhotos
                   ? 'bg-purple-900/50 border-purple-700/50 text-purple-200 hover:bg-purple-800/60 hover:text-white'
                   : 'bg-amber-900/50 border-amber-700/50 text-amber-200 hover:bg-amber-800/60 hover:text-white'
@@ -72,7 +72,7 @@ export const Navbar: React.FC<NavbarProps> = ({
               <div
                 className={`w-8 h-8 rounded-full overflow-hidden flex items-center justify-center shadow-xs select-none shrink-0 group-hover:scale-105 transition-transform ring-2 ${
                   isVideos
-                    ? 'ring-teal-400/70 shadow-teal-950/40 bg-teal-950'
+                    ? 'ring-rose-400/70 shadow-rose-900/10 bg-white'
                     : isPhotos
                     ? 'ring-purple-400/70 shadow-purple-950/40 bg-purple-950'
                     : 'ring-amber-400/70 shadow-amber-950/40 bg-amber-950'
@@ -92,7 +92,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                 <span
                   className={`text-[10px] px-2 py-0.5 rounded-full font-bold uppercase tracking-wider border flex items-center gap-1 ${
                     isVideos
-                      ? 'bg-teal-950/80 text-teal-300 border-teal-500/40'
+                      ? 'bg-rose-100 text-rose-800 border-rose-300/80'
                       : isPhotos
                       ? 'bg-purple-950/80 text-purple-300 border-purple-500/40'
                       : 'bg-amber-950/80 text-amber-300 border-amber-500/40'
@@ -126,7 +126,7 @@ export const Navbar: React.FC<NavbarProps> = ({
               id="btn-header-refresh"
               className={`p-2 rounded-xl border transition-all shrink-0 cursor-pointer active:scale-95 flex items-center justify-center ${
                 isVideos
-                  ? 'bg-teal-900/40 border-teal-700/40 text-teal-200 hover:bg-teal-800/60 hover:text-white'
+                  ? 'bg-white/80 border-rose-200 text-rose-800 hover:bg-rose-50 hover:text-rose-950 shadow-2xs'
                   : isPhotos
                   ? 'bg-purple-900/40 border-purple-700/40 text-purple-200 hover:bg-purple-800/60 hover:text-white'
                   : 'bg-amber-900/40 border-amber-700/40 text-amber-200 hover:bg-amber-800/60 hover:text-white'

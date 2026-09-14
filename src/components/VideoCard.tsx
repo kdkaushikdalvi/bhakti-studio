@@ -51,12 +51,12 @@ export const VideoCard: React.FC<VideoCardProps> = ({
   return (
     <article
       id={`video-card-${video.id}`}
-      className="group bg-white border border-orange-100/90 hover:border-orange-300 rounded-2xl shadow-xs hover:shadow-md p-3.5 transition-all flex flex-col justify-between relative"
+      className="group bg-white border border-rose-100 hover:border-rose-300 rounded-2xl shadow-xs hover:shadow-md p-3.5 transition-all flex flex-col justify-between relative"
     >
       <div>
         {/* Video Thumbnail */}
         <div
-          className="aspect-video bg-orange-50 mb-3 relative overflow-hidden cursor-pointer rounded-xl border border-orange-100/80 mt-1"
+          className="aspect-video bg-rose-50 mb-3 relative overflow-hidden cursor-pointer rounded-xl border border-rose-100/80 mt-1"
           onClick={() => onPlay(video)}
         >
           <img
@@ -78,8 +78,8 @@ export const VideoCard: React.FC<VideoCardProps> = ({
               }}
               className={`p-1.5 rounded-lg backdrop-blur-md transition-colors ${
                 video.isWatchLater
-                  ? 'bg-emerald-600 text-white shadow-xs'
-                  : 'bg-white/90 text-stone-600 hover:bg-white hover:text-emerald-700'
+                  ? 'bg-rose-600 text-white shadow-xs'
+                  : 'bg-white/90 text-stone-600 hover:bg-white hover:text-rose-700'
               }`}
               title={video.isWatchLater ? 'Queued in Study' : 'Add to Queue'}
             >
@@ -92,8 +92,8 @@ export const VideoCard: React.FC<VideoCardProps> = ({
               }}
               className={`p-1.5 rounded-lg backdrop-blur-md transition-colors ${
                 video.isFavorite
-                  ? 'bg-orange-500 text-white shadow-xs'
-                  : 'bg-white/90 text-stone-600 hover:bg-white hover:text-orange-500'
+                  ? 'bg-rose-500 text-white shadow-xs'
+                  : 'bg-white/90 text-stone-600 hover:bg-white hover:text-rose-500'
               }`}
               title={video.isFavorite ? 'Starred Favorite' : 'Mark Favorite'}
             >
@@ -103,7 +103,7 @@ export const VideoCard: React.FC<VideoCardProps> = ({
           {/* Chapters indicator */}
           {video.timestamps && video.timestamps.length > 0 && (
             <div className="absolute bottom-2 right-2 bg-stone-950/80 backdrop-blur px-1.5 py-0.5 text-[8px] uppercase tracking-wider text-white font-mono rounded-md flex items-center gap-1">
-              <Bookmark className="w-2.5 h-2.5 text-amber-400" />
+              <Bookmark className="w-2.5 h-2.5 text-rose-400" />
               <span>{video.timestamps.length} Ch</span>
             </div>
           )}
@@ -112,7 +112,7 @@ export const VideoCard: React.FC<VideoCardProps> = ({
         {/* Title */}
         <h4
           onClick={() => onPlay(video)}
-          className="text-base font-serif font-bold leading-snug mb-1 text-stone-900 group-hover:text-orange-600 transition-colors cursor-pointer line-clamp-2"
+          className="text-base font-serif font-bold leading-snug mb-1 text-stone-900 group-hover:text-rose-600 transition-colors cursor-pointer line-clamp-2"
           title={video.title}
         >
           {video.title}
@@ -124,8 +124,8 @@ export const VideoCard: React.FC<VideoCardProps> = ({
             {video.channelTitle || 'Spiritual Archive'}
           </p>
           {video.category && (
-            <span className="text-[9.5px] font-semibold text-teal-800 bg-teal-50 border border-teal-200/80 px-1.5 py-0.2 rounded-md flex items-center gap-1 shrink-0">
-              <Tag className="w-2.5 h-2.5 text-teal-600" />
+            <span className="text-[9.5px] font-semibold text-rose-800 bg-rose-50 border border-rose-200/80 px-1.5 py-0.2 rounded-md flex items-center gap-1 shrink-0">
+              <Tag className="w-2.5 h-2.5 text-rose-600" />
               <span>{translateCategoryToMarathi(video.category)}</span>
             </span>
           )}
@@ -133,14 +133,14 @@ export const VideoCard: React.FC<VideoCardProps> = ({
 
         {/* Notes Preview */}
         {video.notes && (
-          <p className="text-xs leading-relaxed text-stone-600 line-clamp-2 font-serif italic mb-2 bg-orange-50/40 p-2 rounded-lg border border-orange-100/60">
+          <p className="text-xs leading-relaxed text-stone-600 line-clamp-2 font-serif italic mb-2 bg-rose-50/40 p-2 rounded-lg border border-rose-100/60">
             "{video.notes}"
           </p>
         )}
       </div>
 
       {/* Footer Controls */}
-      <div className="mt-2 pt-2.5 border-t border-orange-100 flex items-center justify-between text-[10px] text-stone-400">
+      <div className="mt-2 pt-2.5 border-t border-rose-100 flex items-center justify-between text-[10px] text-stone-400">
         <span className="font-medium text-stone-400">Added {formattedDate}</span>
 
         <div className="flex items-center gap-2">
@@ -148,7 +148,7 @@ export const VideoCard: React.FC<VideoCardProps> = ({
           <div className="relative">
             <button
               onClick={() => setShowMenu(!showMenu)}
-              className="p-1 text-stone-400 hover:text-stone-800 transition-colors rounded-md hover:bg-orange-50 cursor-pointer"
+              className="p-1 text-stone-400 hover:text-stone-800 transition-colors rounded-md hover:bg-rose-50 cursor-pointer"
               title="More"
             >
               <MoreVertical className="w-3.5 h-3.5" />
@@ -160,12 +160,12 @@ export const VideoCard: React.FC<VideoCardProps> = ({
                   className="fixed inset-0 z-10"
                   onClick={() => setShowMenu(false)}
                 />
-                <div className="absolute right-0 bottom-full mb-1 w-44 bg-white border border-orange-200 rounded-xl shadow-lg z-20 py-1 text-xs text-stone-800 font-medium">
+                <div className="absolute right-0 bottom-full mb-1 w-44 bg-white border border-rose-200 rounded-xl shadow-lg z-20 py-1 text-xs text-stone-800 font-medium">
                   <button
                     onClick={handleCopyLink}
-                    className="w-full px-3 py-2 text-left hover:bg-orange-50 flex items-center gap-2 cursor-pointer"
+                    className="w-full px-3 py-2 text-left hover:bg-rose-50 flex items-center gap-2 cursor-pointer"
                   >
-                    {copied ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Share2 className="w-3.5 h-3.5 text-stone-500" />}
+                    {copied ? <Check className="w-3.5 h-3.5 text-rose-600" /> : <Share2 className="w-3.5 h-3.5 text-stone-500" />}
                     <span>{copied ? 'Copied Link' : 'Copy Link'}</span>
                   </button>
 
@@ -174,7 +174,7 @@ export const VideoCard: React.FC<VideoCardProps> = ({
                     target="_blank"
                     rel="noopener noreferrer"
                     onClick={() => setShowMenu(false)}
-                    className="w-full px-3 py-2 text-left hover:bg-orange-50 flex items-center gap-2 cursor-pointer"
+                    className="w-full px-3 py-2 text-left hover:bg-rose-50 flex items-center gap-2 cursor-pointer"
                   >
                     <ExternalLink className="w-3.5 h-3.5 text-stone-500" />
                     <span>Open in YouTube</span>
@@ -185,13 +185,13 @@ export const VideoCard: React.FC<VideoCardProps> = ({
                       setShowMenu(false);
                       onEdit(video);
                     }}
-                    className="w-full px-3 py-2 text-left hover:bg-orange-50 flex items-center gap-2 cursor-pointer"
+                    className="w-full px-3 py-2 text-left hover:bg-rose-50 flex items-center gap-2 cursor-pointer"
                   >
                     <Edit2 className="w-3.5 h-3.5 text-stone-500" />
                     <span>Edit Video</span>
                   </button>
 
-                  <div className="h-px bg-orange-100 my-1" />
+                  <div className="h-px bg-rose-100 my-1" />
 
                   <button
                     onClick={() => {

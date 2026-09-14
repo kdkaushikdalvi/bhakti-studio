@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import {
   INITIAL_VIDEOS,
   INITIAL_PHOTOS,
@@ -91,9 +91,23 @@ const DEFAULT_SETTINGS: AppSettings = {
 
 export function App() {
   // Dual-layer state - initial load from fast LocalStorage
-  const [videos, setVideos] = useState<VideoItem[]>(() =>
-    getInitialFromLocalStorage<VideoItem[]>(STORAGE_KEY_VIDEOS, INITIAL_VIDEOS)
-  );
+  const [videos, setVideos] = useState<VideoItem[]>(() => {
+    const loaded = getInitialFromLocalStorage<VideoItem[]>(STORAGE_KEY_VIDEOS, INITIAL_VIDEOS);
+    if (!loaded || loaded.length === 0) return INITIAL_VIDEOS;
+    let updated = loaded.map((v) => {
+      if (v.id === 'vid-aarti-preetam-pyari-ki' || v.youtubeId === 'Ywd9xNcvAFM') {
+        return INITIAL_VIDEOS[0];
+      }
+      return v;
+    });
+    const hasAartiDefault = updated.some(
+      (v) => v.youtubeId === 'Fql0RCRyFO0' || v.id === 'vid-aarti-preetam-pyari-ki'
+    );
+    if (!hasAartiDefault && INITIAL_VIDEOS.length > 0) {
+      updated = [...INITIAL_VIDEOS, ...updated];
+    }
+    return updated;
+  });
 
   const [photos, setPhotos] = useState<PhotoItem[]>(() =>
     getInitialFromLocalStorage<PhotoItem[]>(STORAGE_KEY_PHOTOS, INITIAL_PHOTOS)
@@ -199,15 +213,16 @@ export function App() {
   // - Preserves expanded/collapsed state across feed navigation
   const [expandedCategory, setExpandedCategory] = useState<string | null>(() => {
     try {
-      return sessionStorage.getItem('bhakti_expanded_category_video');
+      const saved = sessionStorage.getItem('bhakti_expanded_category_video');
+      return saved !== null ? saved : 'आरती';
     } catch {
-      return null;
+      return 'आरती';
     }
   });
 
   const [addModalInitialCategory, setAddModalInitialCategory] = useState<string | undefined>(undefined);
 
-  const handleToggleCategory = (categoryName: string) => {
+  const handleToggleCategory = useCallback((categoryName: string) => {
     setExpandedCategory((prev) => {
       const current = prev ? prev.split('|').filter(Boolean) : [];
       const target = normalizeCategory(categoryName);
@@ -226,7 +241,7 @@ export function App() {
       }
       return next;
     });
-  };
+  }, []);
 
   const handleAddVideoToCategory = (catName: string) => {
     setAddModalTab('video');
@@ -255,7 +270,22 @@ export function App() {
 
         // Safely merge records so existing user data is never overwritten or dropped
         if (idbVideos && Array.isArray(idbVideos) && idbVideos.length > 0) {
-          setVideos((prev) => mergeItemsById(prev, idbVideos));
+          setVideos((prev) => {
+            const merged = mergeItemsById(prev, idbVideos);
+            let updated = merged.map((v) => {
+              if (v.id === 'vid-aarti-preetam-pyari-ki' || v.youtubeId === 'Ywd9xNcvAFM') {
+                return INITIAL_VIDEOS[0];
+              }
+              return v;
+            });
+            const hasAartiDefault = updated.some(
+              (v) => v.youtubeId === 'Fql0RCRyFO0' || v.id === 'vid-aarti-preetam-pyari-ki'
+            );
+            if (!hasAartiDefault && INITIAL_VIDEOS.length > 0) {
+              updated = [...INITIAL_VIDEOS, ...updated];
+            }
+            return updated;
+          });
         }
         if (idbPhotos && Array.isArray(idbPhotos) && idbPhotos.length > 0) {
           setPhotos((prev) => mergeItemsById(prev, idbPhotos));
@@ -407,6 +437,13 @@ export function App() {
   const watchLaterCount = useMemo(() => {
     return videos.filter((v) => v.isWatchLater).length;
   }, [videos]);
+
+  const activeCategoriesForFeed = useMemo(() => {
+    if (normalizeCategory(filterState.selectedCategory) === 'all') {
+      return categories;
+    }
+    return categories.filter((c) => normalizeCategory(c.name) === normalizeCategory(filterState.selectedCategory));
+  }, [categories, filterState.selectedCategory]);
 
   // Category Actions
   const handleAddCategory = (newCat: CategoryInfo) => {
@@ -880,12 +917,12 @@ export function App() {
   };
 
   return (
-    <div className={`min-h-screen flex justify-center selection:bg-orange-200 selection:text-orange-950 font-sans transition-colors duration-300 ${
+    <div className={`min-h-screen flex justify-center selection:bg-rose-200 selection:text-rose-950 font-sans transition-colors duration-300 ${
       filterState.mediaType === 'photos'
         ? 'bg-gradient-to-br from-[#120421] via-[#21093d] to-[#0e031a] text-purple-50'
         : filterState.mediaType === 'audio'
         ? 'bg-gradient-to-br from-[#1b0c02] via-[#2d1403] to-[#120701] text-amber-50'
-        : 'bg-gradient-to-br from-[#021815] via-[#052b26] to-[#011412] text-teal-50'
+        : 'bg-gradient-to-br from-[#fff1f2] via-[#ffe4e6] to-[#fff5f5] text-stone-900'
     }`}>
       {/* Mobile-first Constrained Container max-w-[600px] */}
       <div className={`w-full max-w-[600px] min-h-screen flex flex-col shadow-2xl border-x relative transition-colors duration-300 ${
@@ -893,7 +930,7 @@ export function App() {
           ? 'bg-[#16062b]/95 border-purple-800/40 text-purple-50'
           : filterState.mediaType === 'audio'
           ? 'bg-[#1a0b02]/95 border-amber-800/40 text-amber-50'
-          : 'bg-[#031f1c]/95 border-teal-800/40 text-teal-50'
+          : 'bg-[#fff5f5]/95 border-rose-200 text-stone-900'
       }`}>
         {/* Small Top Header with 3-lines menu, brand & refresh */}
         <Navbar
@@ -913,13 +950,13 @@ export function App() {
                   ? 'bg-purple-400 shadow-purple-500/50'
                   : filterState.mediaType === 'audio'
                   ? 'bg-amber-400 shadow-amber-500/50'
-                  : 'bg-teal-400 shadow-teal-500/50'
+                  : 'bg-rose-500 shadow-rose-500/50'
               } shadow-xs`} />
               <span>
                 {filterState.mediaType === 'videos' ? (
                   expandedCategory ? (
                     <>
-                      <span className="font-semibold text-teal-300">{expandedCategory.split('|').join(' • ')}</span>
+                      <span className="font-semibold text-rose-700">{expandedCategory.split('|').join(' • ')}</span>
                       {' • '}
                       {videos.filter((v) => expandedCategory.split('|').some((category) => normalizeCategory(v.category || '') === normalizeCategory(category))).length} videos
                     </>
@@ -969,9 +1006,7 @@ export function App() {
               />
             ) : (
               <CategoryAccordionFeed
-                categories={normalizeCategory(filterState.selectedCategory) === 'all'
-                  ? categories
-                  : categories.filter((c) => normalizeCategory(c.name) === normalizeCategory(filterState.selectedCategory))}
+                categories={activeCategoriesForFeed}
                 videos={videos}
                 expandedCategory={normalizeCategory(filterState.selectedCategory) === 'all'
                   ? expandedCategory
