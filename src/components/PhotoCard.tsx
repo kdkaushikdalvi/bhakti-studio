@@ -20,11 +20,11 @@ export const PhotoCard: React.FC<PhotoCardProps> = ({
   onDelete,
 }) => {
   return (
-    <div className="bg-white border border-orange-200/80 hover:border-orange-300 rounded-2xl overflow-hidden shadow-2xs hover:shadow-md transition-all flex flex-col group relative">
+    <div className="bg-white border border-emerald-200 hover:border-emerald-300 rounded-2xl overflow-hidden shadow-2xs hover:shadow-md transition-all flex flex-col group relative">
       {/* Image Container with aspect ratio */}
       <div
         onClick={() => onView(photo)}
-        className="relative w-full aspect-[4/3] bg-orange-50/50 overflow-hidden cursor-pointer group"
+        className="relative w-full aspect-[4/3] bg-emerald-50/50 overflow-hidden cursor-pointer group"
       >
         <img
           src={photo.photoUrl}
@@ -46,11 +46,11 @@ export const PhotoCard: React.FC<PhotoCardProps> = ({
         <div>
           <h4
             onClick={() => onView(photo)}
-            className="text-xs font-serif font-bold text-stone-900 line-clamp-2 hover:text-orange-600 transition-colors cursor-pointer leading-snug"
+            className="text-xs font-serif font-bold text-emerald-950 line-clamp-2 hover:text-emerald-700 transition-colors cursor-pointer leading-snug"
           >
             {photo.title}
           </h4>
-          <div className="flex items-center gap-2 text-[10px] text-stone-400 mt-1">
+          <div className="flex items-center gap-2 text-[10px] text-emerald-800/60 mt-1">
             <span>{new Date(photo.createdAt).toLocaleDateString()}</span>
             {photo.fileSize && (
               <>
@@ -62,7 +62,7 @@ export const PhotoCard: React.FC<PhotoCardProps> = ({
         </div>
 
         {/* Quick Card Controls */}
-        <div className="mt-2.5 pt-2 border-t border-orange-100/70 flex items-center justify-between text-stone-500">
+        <div className="mt-2.5 pt-2 border-t border-emerald-100 flex items-center justify-between text-stone-500">
           <div className="flex items-center gap-1">
             {/* Favorite Button */}
             <button
@@ -70,8 +70,8 @@ export const PhotoCard: React.FC<PhotoCardProps> = ({
               onClick={() => onToggleFavorite(photo.id)}
               className={`hidden p-1.5 rounded-lg transition-colors cursor-pointer ${
                 photo.isFavorite
-                  ? 'bg-orange-100 text-orange-600'
-                  : 'hover:bg-orange-50 text-stone-400 hover:text-orange-500'
+                  ? 'bg-emerald-100 text-emerald-700'
+                  : 'hover:bg-emerald-50 text-stone-400 hover:text-emerald-600'
               }`}
               title={photo.isFavorite ? 'Remove Favorite' : 'Add to Favorites'}
             >

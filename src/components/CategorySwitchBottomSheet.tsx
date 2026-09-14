@@ -157,9 +157,9 @@ export const CategorySwitchBottomSheet: React.FC<CategorySwitchBottomSheetProps>
             transition={{ type: 'spring', damping: 30, stiffness: 350 }}
             className={`relative z-10 w-full max-w-md rounded-t-2xl max-h-[75vh] flex flex-col shadow-2xl border-t overflow-hidden ${
               isPhotos
-                ? 'bg-[#140624] text-purple-100 border-purple-800/80'
+                ? 'bg-[#f4fdf6] text-emerald-950 border-emerald-300'
                 : isAudio
-                ? 'bg-[#1a0c02] text-amber-100 border-amber-800/80'
+                ? 'bg-[#fffdf0] text-amber-950 border-yellow-300'
                 : 'bg-[#fff1f2] text-rose-950 border-rose-200/80'
             }`}
           >
@@ -167,7 +167,7 @@ export const CategorySwitchBottomSheet: React.FC<CategorySwitchBottomSheetProps>
             <div className="pt-2.5 pb-1 flex justify-center shrink-0">
               <div
                 className={`w-10 h-1 rounded-full opacity-50 ${
-                  isPhotos ? 'bg-purple-400' : isAudio ? 'bg-amber-400' : 'bg-rose-400'
+                  isPhotos ? 'bg-emerald-400' : isAudio ? 'bg-yellow-400' : 'bg-rose-400'
                 }`}
               />
             </div>
@@ -176,9 +176,9 @@ export const CategorySwitchBottomSheet: React.FC<CategorySwitchBottomSheetProps>
             <div
               className={`px-4 py-2 flex items-center justify-between border-b shrink-0 ${
                 isPhotos
-                  ? 'border-purple-900/60'
+                  ? 'border-emerald-200'
                   : isAudio
-                  ? 'border-amber-900/60'
+                  ? 'border-yellow-200'
                   : 'border-rose-200'
               }`}
             >
@@ -197,14 +197,14 @@ export const CategorySwitchBottomSheet: React.FC<CategorySwitchBottomSheetProps>
                   onClick={() => {
                     const name = window.prompt('New category name')?.trim();
                     if (name && !categories.some((c) => normalizeCategory(c.name) === normalizeCategory(name))) {
-                      onAddCategory?.({ id: `cat-${Date.now()}`, name, color: isPhotos ? '#A855F7' : isAudio ? '#F59E0B' : '#E11D48' });
+                      onAddCategory?.({ id: `cat-${Date.now()}`, name, color: isPhotos ? '#10B981' : isAudio ? '#F59E0B' : '#E11D48' });
                     }
                   }}
                   className={`w-8 h-8 rounded-full flex items-center justify-center transition-colors cursor-pointer ${
                     isPhotos
-                      ? 'hover:bg-purple-900/60 text-purple-300'
+                      ? 'hover:bg-emerald-100 text-emerald-900'
                       : isAudio
-                      ? 'hover:bg-amber-900/60 text-amber-300'
+                      ? 'hover:bg-yellow-100 text-amber-900'
                       : 'hover:bg-rose-100 text-rose-800'
                   }`}
                   aria-label="Add category"
@@ -218,9 +218,9 @@ export const CategorySwitchBottomSheet: React.FC<CategorySwitchBottomSheetProps>
                   aria-label="Close"
                   className={`w-8 h-8 rounded-full flex items-center justify-center transition-colors cursor-pointer ${
                     isPhotos
-                      ? 'hover:bg-purple-900/60 text-purple-300'
+                      ? 'hover:bg-emerald-100 text-emerald-900'
                       : isAudio
-                      ? 'hover:bg-amber-900/60 text-amber-300'
+                      ? 'hover:bg-yellow-100 text-amber-900'
                       : 'hover:bg-rose-100 text-rose-800'
                   }`}
                 >
@@ -239,7 +239,7 @@ export const CategorySwitchBottomSheet: React.FC<CategorySwitchBottomSheetProps>
                   (normalizeCategory(selectedCategory) === 'all' && normalizeCategory(cat.name) === 'all');
                 const count = getItemCount(cat.name);
                 const isDragging = draggedCatId === catId;
-                const isDragOver = dragOverCatId === catId;
+                const dragOverCurrent = dragOverCatId === catId;
 
                 return (
                   <div
@@ -255,24 +255,24 @@ export const CategorySwitchBottomSheet: React.FC<CategorySwitchBottomSheetProps>
                     className={`w-full py-2 px-2.5 rounded-xl border flex items-center justify-between transition-all select-none ${
                       isDragging ? 'opacity-40 scale-[0.98]' : 'opacity-100'
                     } ${
-                      isDragOver
+                      dragOverCurrent
                         ? isPhotos
-                          ? 'border-purple-400 ring-2 ring-purple-400/40'
+                          ? 'border-emerald-400 ring-2 ring-emerald-400/40'
                           : isAudio
-                          ? 'border-amber-400 ring-2 ring-amber-400/40'
+                          ? 'border-yellow-400 ring-2 ring-yellow-400/40'
                           : 'border-rose-400 ring-2 ring-rose-400/40'
                         : ''
                     } ${
                       isCurrentActive
                         ? isPhotos
-                          ? 'bg-purple-900/70 border-purple-400/80 text-white font-semibold shadow-xs'
+                          ? 'bg-emerald-400 border-emerald-500 text-emerald-950 font-bold shadow-xs'
                           : isAudio
-                          ? 'bg-amber-900/70 border-amber-400/80 text-white font-semibold shadow-xs'
+                          ? 'bg-yellow-400 border-yellow-500 text-amber-950 font-bold shadow-xs'
                           : 'bg-rose-500 border-rose-600 text-white font-semibold shadow-xs'
                         : isPhotos
-                        ? 'bg-purple-950/30 hover:bg-purple-900/40 border-purple-900/40 text-purple-200/90'
+                        ? 'bg-emerald-50/80 hover:bg-emerald-100/90 border-emerald-200 text-emerald-950'
                         : isAudio
-                        ? 'bg-amber-950/30 hover:bg-amber-900/40 border-amber-900/40 text-amber-200/90'
+                        ? 'bg-yellow-50/80 hover:bg-yellow-100/90 border-yellow-200 text-amber-950'
                         : 'bg-white/80 hover:bg-rose-50/80 border-rose-200 text-rose-950'
                     }`}
                   >
@@ -285,15 +285,19 @@ export const CategorySwitchBottomSheet: React.FC<CategorySwitchBottomSheetProps>
                       <span className={`w-4 h-4 rounded-md border-2 shrink-0 flex items-center justify-center ${
                         isCurrentActive
                           ? isPhotos
-                            ? 'border-purple-400 bg-purple-400/20'
+                            ? 'border-emerald-900 bg-emerald-400/40'
                             : isAudio
-                            ? 'border-amber-400 bg-amber-400/20'
+                            ? 'border-amber-900 bg-amber-400/40'
                             : 'border-white bg-white/20'
+                          : isPhotos
+                          ? 'border-emerald-400'
+                          : isAudio
+                          ? 'border-yellow-400'
                           : 'border-stone-400'
                       }`}>
                         {isCurrentActive && (
                           <Check className={`w-3 h-3 stroke-[3] ${
-                            isPhotos ? 'text-purple-300' : isAudio ? 'text-amber-300' : 'text-white'
+                            isPhotos ? 'text-emerald-950' : isAudio ? 'text-amber-950' : 'text-white'
                           }`} />
                         )}
                       </span>
@@ -305,14 +309,14 @@ export const CategorySwitchBottomSheet: React.FC<CategorySwitchBottomSheetProps>
                         className={`text-[10px] font-semibold px-1.5 py-0.2 rounded-full shrink-0 ${
                           isCurrentActive
                             ? isPhotos
-                              ? 'bg-purple-950/90 text-purple-200 border border-purple-400/50'
+                              ? 'bg-emerald-950/20 text-emerald-950 border border-emerald-950/20'
                               : isAudio
-                              ? 'bg-amber-950/90 text-amber-200 border border-amber-400/50'
+                              ? 'bg-amber-950/20 text-amber-950 border border-amber-950/20'
                               : 'bg-white/20 text-white border border-white/40'
                             : isPhotos
-                            ? 'bg-purple-900/40 text-purple-300/80 border border-purple-800/40'
+                            ? 'bg-emerald-200 text-emerald-900 border border-emerald-300'
                             : isAudio
-                            ? 'bg-amber-900/40 text-amber-300/80 border border-amber-800/40'
+                            ? 'bg-yellow-200 text-amber-900 border border-yellow-300'
                             : 'bg-rose-100 text-rose-800 border border-rose-200'
                         }`}
                       >
@@ -330,9 +334,9 @@ export const CategorySwitchBottomSheet: React.FC<CategorySwitchBottomSheetProps>
                             title="Rename category"
                             className={`w-8 h-8 rounded-full flex items-center justify-center transition-colors ${
                               isPhotos
-                                ? 'text-purple-300 hover:bg-purple-900/60'
+                                ? 'text-emerald-900 hover:bg-emerald-200/80'
                                 : isAudio
-                                ? 'text-amber-300 hover:bg-amber-900/60'
+                                ? 'text-amber-900 hover:bg-yellow-200/80'
                                 : isCurrentActive
                                 ? 'text-white hover:bg-white/20'
                                 : 'text-rose-700 hover:bg-rose-100'
@@ -350,9 +354,9 @@ export const CategorySwitchBottomSheet: React.FC<CategorySwitchBottomSheetProps>
                             title="Delete category"
                             className={`w-8 h-8 rounded-full flex items-center justify-center transition-colors ${
                               isPhotos
-                                ? 'text-rose-300 hover:bg-rose-900/60'
+                                ? 'text-rose-700 hover:bg-rose-100'
                                 : isAudio
-                                ? 'text-rose-300 hover:bg-rose-900/60'
+                                ? 'text-red-700 hover:bg-red-100'
                                 : isCurrentActive
                                 ? 'text-rose-100 hover:bg-white/20'
                                 : 'text-red-700 hover:bg-red-100'
@@ -371,7 +375,7 @@ export const CategorySwitchBottomSheet: React.FC<CategorySwitchBottomSheetProps>
                       {isCurrentActive ? (
                         <Check
                           className={`w-4 h-4 stroke-[2.5] ${
-                            isPhotos ? 'text-purple-300' : isAudio ? 'text-amber-300' : 'text-white'
+                            isPhotos ? 'text-emerald-950' : isAudio ? 'text-amber-950' : 'text-white'
                           }`}
                         />
                       ) : (
@@ -379,7 +383,13 @@ export const CategorySwitchBottomSheet: React.FC<CategorySwitchBottomSheetProps>
                       )}
                       {!isAll && (
                         <div
-                          className="w-8 h-8 rounded-full flex items-center justify-center ml-1 text-stone-400 hover:text-stone-200 cursor-grab active:cursor-grabbing shrink-0 opacity-60 hover:opacity-100 transition-opacity"
+                          className={`w-8 h-8 rounded-full flex items-center justify-center ml-1 cursor-grab active:cursor-grabbing shrink-0 opacity-60 hover:opacity-100 transition-opacity ${
+                            isAudio
+                              ? 'text-amber-700 hover:text-amber-950'
+                              : isPhotos
+                              ? 'text-emerald-700 hover:text-emerald-950'
+                              : 'text-stone-400 hover:text-stone-200'
+                          }`}
                           title="Drag to reorder"
                         >
                           <Menu className="w-3.5 h-3.5" />

@@ -200,25 +200,25 @@ export const CategoryPillsRow: React.FC<CategoryPillsRowProps> = ({
               className={`group flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold shrink-0 cursor-pointer transition-all duration-200 active:scale-95 select-none ${
                 active
                   ? mediaType === 'audio'
-                    ? 'bg-gradient-to-r from-amber-500 to-yellow-600 text-white shadow-md shadow-amber-950/50 font-bold ring-1 ring-amber-400/40'
+                    ? 'bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-500 text-amber-950 shadow-md shadow-yellow-500/25 font-bold ring-2 ring-yellow-400/80'
                     : mediaType === 'photos'
-                    ? 'bg-gradient-to-r from-purple-500 to-violet-600 text-white shadow-md shadow-purple-950/50 font-bold ring-1 ring-purple-400/40'
+                    ? 'bg-gradient-to-r from-emerald-500 via-green-500 to-emerald-600 text-white shadow-md shadow-emerald-600/30 font-bold ring-2 ring-emerald-400/80'
                     : 'bg-gradient-to-r from-rose-500 to-red-600 text-white shadow-md shadow-rose-900/30 font-bold ring-1 ring-rose-400/40'
                   : mediaType === 'audio'
-                  ? 'bg-amber-950/40 text-amber-200 border border-amber-800/70 hover:bg-amber-800/50 hover:border-amber-400/50 hover:text-white'
+                  ? 'bg-white/90 text-amber-950 border border-yellow-300 hover:bg-yellow-100 hover:border-yellow-400 hover:text-amber-950 shadow-2xs'
                   : mediaType === 'photos'
-                  ? 'bg-purple-950/40 text-purple-200 border border-purple-800/70 hover:bg-purple-800/50 hover:border-purple-400/50 hover:text-white'
+                  ? 'bg-white/90 text-emerald-950 border border-emerald-300 hover:bg-emerald-100 hover:border-emerald-400 hover:text-emerald-950 shadow-2xs'
                   : 'bg-rose-50/90 text-rose-900 border border-rose-200 hover:bg-rose-100 hover:border-rose-400 hover:text-rose-950'
               }`}
             >
               <IconComponent
                 className={`w-3.5 h-3.5 transition-transform duration-200 ${
                   active
-                    ? 'text-white scale-105'
+                    ? mediaType === 'audio' ? 'text-amber-950 scale-105' : 'text-white scale-105'
                     : mediaType === 'audio'
-                    ? 'text-amber-400 group-hover:scale-110'
+                    ? 'text-amber-700 group-hover:scale-110'
                     : mediaType === 'photos'
-                    ? 'text-purple-400 group-hover:scale-110'
+                    ? 'text-emerald-700 group-hover:scale-110'
                     : 'text-rose-600 group-hover:scale-110'
                 }`}
               />
@@ -229,7 +229,7 @@ export const CategoryPillsRow: React.FC<CategoryPillsRowProps> = ({
                 (normalizeCategory(defaultCategory) === normalizeCategory(name) ||
                   (defaultCategory === 'all' && normalizeCategory(name) === 'all')) && (
                   <span title="Pinned as default category on launch">
-                    <Pin className={`w-2.5 h-2.5 ${active ? 'fill-white text-white' : 'fill-amber-400 text-amber-500'} rotate-45 shrink-0`} />
+                    <Pin className={`w-2.5 h-2.5 ${active ? (mediaType === 'audio' ? 'fill-amber-950 text-amber-950' : 'fill-white text-white') : 'fill-amber-500 text-amber-600'} rotate-45 shrink-0`} />
                   </span>
                 )}
 
@@ -238,7 +238,13 @@ export const CategoryPillsRow: React.FC<CategoryPillsRowProps> = ({
                 <span
                   className={`text-[10px] px-1.5 py-0.2 rounded-full font-bold transition-colors ${
                     active
-                      ? 'bg-white/25 text-white'
+                      ? mediaType === 'audio'
+                        ? 'bg-amber-950/20 text-amber-950'
+                        : 'bg-white/25 text-white'
+                      : mediaType === 'audio'
+                      ? 'bg-yellow-100 text-amber-900 border border-yellow-200'
+                      : mediaType === 'photos'
+                      ? 'bg-emerald-100 text-emerald-900 border border-emerald-200'
                       : mediaType === 'videos'
                       ? 'bg-rose-100 text-rose-800'
                       : theme === 'blue'

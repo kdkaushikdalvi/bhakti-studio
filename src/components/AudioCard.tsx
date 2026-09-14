@@ -55,20 +55,24 @@ export const AudioCard: React.FC<AudioCardProps> = ({
   return (
     <article
       id={`audio-card-${audio.id}`}
-      className="group bg-white border border-amber-200/80 hover:border-amber-400 rounded-2xl shadow-xs hover:shadow-md p-3.5 transition-all flex flex-col justify-between relative"
+      className={`group bg-white/95 border transition-all rounded-2xl p-3.5 flex flex-col justify-between relative shadow-xs hover:shadow-md ${
+        isPlaying
+          ? 'border-yellow-400 ring-2 ring-yellow-400/50 bg-yellow-50/40'
+          : 'border-yellow-200/90 hover:border-yellow-400'
+      }`}
     >
       <div>
         {/* Audio Banner / Disc Cover */}
         <div
-          className="aspect-video bg-gradient-to-br from-amber-950 via-stone-900 to-amber-900 mb-3 relative overflow-hidden cursor-pointer rounded-xl border border-amber-900/30 flex items-center justify-center group/cover"
+          className="aspect-video bg-gradient-to-br from-amber-100 via-yellow-100 to-amber-200/80 mb-3 relative overflow-hidden cursor-pointer rounded-xl border border-yellow-300 flex items-center justify-center group/cover shadow-inner"
           onClick={() => onPlay(audio)}
         >
           {/* Subtle spinning vinyl or glowing note */}
           <div className={`relative flex items-center justify-center transition-transform duration-700 ${isPlaying ? 'scale-105' : 'group-hover/cover:scale-105'}`}>
-            <div className={`w-16 h-16 rounded-full bg-amber-500/20 border-2 border-amber-400/40 flex items-center justify-center backdrop-blur-sm ${isPlaying ? 'animate-spin' : ''}`} style={{ animationDuration: '4s' }}>
-              <Disc3 className="w-9 h-9 text-amber-300" />
+            <div className={`w-16 h-16 rounded-full bg-yellow-400/40 border-2 border-yellow-500/50 flex items-center justify-center backdrop-blur-xs ${isPlaying ? 'animate-spin' : ''}`} style={{ animationDuration: '4s' }}>
+              <Disc3 className="w-9 h-9 text-amber-950" />
             </div>
-            <div className="absolute w-8 h-8 rounded-full bg-amber-400/90 text-stone-950 flex items-center justify-center shadow-lg group-hover/cover:scale-110 transition-transform">
+            <div className="absolute w-8 h-8 rounded-full bg-yellow-400 text-stone-950 flex items-center justify-center shadow-md group-hover/cover:scale-110 transition-transform">
               {isPlaying ? (
                 <Pause className="w-4 h-4 fill-stone-950" />
               ) : (
@@ -78,15 +82,15 @@ export const AudioCard: React.FC<AudioCardProps> = ({
           </div>
 
           {/* Audio Badge */}
-          <div className="absolute top-2 left-2 flex items-center gap-1 bg-black/60 backdrop-blur-xs px-2 py-0.5 rounded-full text-[10px] text-amber-300 font-semibold border border-amber-500/30">
+          <div className="absolute top-2 left-2 flex items-center gap-1 bg-white/85 backdrop-blur-xs px-2 py-0.5 rounded-full text-[10px] text-amber-950 font-semibold border border-yellow-300/80 shadow-2xs">
             {isLocalAudio ? (
               <>
-                <HardDrive className="w-3 h-3 text-amber-400" />
+                <HardDrive className="w-3 h-3 text-amber-700" />
                 <span>Device Audio</span>
               </>
             ) : (
               <>
-                <Music className="w-3 h-3 text-amber-400" />
+                <Music className="w-3 h-3 text-amber-700" />
                 <span>Drive Audio</span>
               </>
             )}
@@ -99,13 +103,14 @@ export const AudioCard: React.FC<AudioCardProps> = ({
                 e.stopPropagation();
                 onToggleFavorite(audio.id);
               }}
-              className={`p-1.5 rounded-lg backdrop-blur-md transition-colors ${
+              className={`p-1.5 rounded-lg border transition-colors cursor-pointer ${
                 audio.isFavorite
-                  ? 'bg-amber-500 text-white shadow-xs'
-                  : 'bg-black/40 text-amber-200 hover:bg-black/60'
+                  ? 'bg-yellow-400 text-amber-950 border-yellow-500 shadow-xs'
+                  : 'bg-white/80 text-amber-700 hover:text-amber-950 hover:bg-yellow-100 border-yellow-300/80 shadow-2xs'
               }`}
               title={audio.isFavorite ? 'Starred Favorite' : 'Mark Favorite'}
             >
+              <Star className={`w-3.5 h-3.5 ${audio.isFavorite ? 'fill-amber-950' : ''}`} />
             </button>
           </div>
         </div>
@@ -113,7 +118,7 @@ export const AudioCard: React.FC<AudioCardProps> = ({
         {/* Title */}
         <h4
           onClick={() => onPlay(audio)}
-          className="text-base font-serif font-bold leading-snug mb-1 text-stone-900 group-hover:text-amber-700 transition-colors cursor-pointer line-clamp-2"
+          className="text-base font-serif font-bold leading-snug mb-1 text-amber-950 group-hover:text-amber-700 transition-colors cursor-pointer line-clamp-2"
           title={audio.title}
         >
           {audio.title}
@@ -121,17 +126,17 @@ export const AudioCard: React.FC<AudioCardProps> = ({
 
         {/* Artist/Source & Category */}
         <div className="flex items-center gap-2 mb-2 flex-wrap">
-          <p className="text-[11px] font-medium text-stone-500 truncate max-w-[140px]">
+          <p className="text-[11px] font-semibold text-amber-800/90 truncate max-w-[140px]">
             {audio.artistOrSource || (isLocalAudio ? 'Device Audio' : 'Google Drive Audio')}
           </p>
           {audio.fileSize && (
-            <span className="text-[9.5px] font-mono text-stone-400 px-1 py-0.2 rounded bg-stone-100">
+            <span className="text-[9.5px] font-mono text-amber-900 px-1 py-0.2 rounded bg-yellow-100 border border-yellow-200">
               {audio.fileSize}
             </span>
           )}
           {audio.category && (
-            <span className="text-[9.5px] font-semibold text-amber-900 bg-amber-50 border border-amber-200/90 px-1.5 py-0.2 rounded-md flex items-center gap-1 shrink-0">
-              <Tag className="w-2.5 h-2.5 text-amber-600" />
+            <span className="text-[9.5px] font-semibold text-amber-950 bg-yellow-100 border border-yellow-300 px-1.5 py-0.2 rounded-md flex items-center gap-1 shrink-0">
+              <Tag className="w-2.5 h-2.5 text-amber-700" />
               <span>{translateCategoryToMarathi(audio.category)}</span>
             </span>
           )}
@@ -139,22 +144,22 @@ export const AudioCard: React.FC<AudioCardProps> = ({
 
         {/* Notes preview */}
         {audio.notes && (
-          <p className="text-xs leading-relaxed text-stone-600 line-clamp-2 font-serif italic mb-2 bg-amber-50/40 p-2 rounded-lg border border-amber-100/60">
+          <p className="text-xs leading-relaxed text-amber-900/90 line-clamp-2 font-serif italic mb-2 bg-yellow-50/80 p-2 rounded-lg border border-yellow-200/80">
             "{audio.notes}"
           </p>
         )}
       </div>
 
       {/* Footer Controls */}
-      <div className="mt-2 pt-2.5 border-t border-amber-100 flex items-center justify-between text-[10px] text-stone-400">
-        <span className="font-medium text-stone-400">Added {formattedDate}</span>
+      <div className="mt-2 pt-2.5 border-t border-yellow-200 flex items-center justify-between text-[10px] text-amber-800/80">
+        <span className="font-medium text-amber-800/70">Added {formattedDate}</span>
 
         <div className="flex items-center gap-2">
           <button
             onClick={() => onPlay(audio)}
-            className="flex items-center gap-1 text-[11px] font-semibold text-amber-700 hover:text-amber-800 bg-amber-50 px-2.5 py-1 rounded-lg border border-amber-200/80 transition-colors cursor-pointer"
+            className="flex items-center gap-1 text-[11px] font-semibold text-amber-950 hover:text-amber-800 bg-yellow-100 hover:bg-yellow-200 px-2.5 py-1 rounded-lg border border-yellow-300 transition-colors cursor-pointer shadow-2xs"
           >
-            {isPlaying ? <Pause className="w-3 h-3 fill-amber-700" /> : <Play className="w-3 h-3 fill-amber-700" />}
+            {isPlaying ? <Pause className="w-3 h-3 fill-amber-900" /> : <Play className="w-3 h-3 fill-amber-900" />}
             <span>{isPlaying ? 'Playing' : 'Listen'}</span>
           </button>
 
@@ -162,7 +167,7 @@ export const AudioCard: React.FC<AudioCardProps> = ({
           <div className="relative">
             <button
               onClick={() => setShowMenu(!showMenu)}
-              className="p-1 text-stone-400 hover:text-stone-800 transition-colors rounded-md hover:bg-amber-50 cursor-pointer"
+              className="p-1 text-amber-700 hover:text-amber-950 transition-colors rounded-md hover:bg-yellow-100 cursor-pointer"
               title="More"
             >
               <MoreVertical className="w-3.5 h-3.5" />
@@ -174,14 +179,14 @@ export const AudioCard: React.FC<AudioCardProps> = ({
                   className="fixed inset-0 z-10"
                   onClick={() => setShowMenu(false)}
                 />
-                <div className="absolute right-0 bottom-full mb-1 w-44 bg-white border border-amber-200 rounded-xl shadow-lg z-20 py-1 text-xs text-stone-800 font-medium">
+                <div className="absolute right-0 bottom-full mb-1 w-44 bg-[#fffdf0] border border-yellow-300 rounded-xl shadow-lg z-20 py-1 text-xs text-amber-950 font-medium">
                   {!isLocalAudio && (
                     <>
                       <button
                         onClick={handleCopyLink}
-                        className="w-full px-3 py-2 text-left hover:bg-amber-50 flex items-center gap-2 cursor-pointer"
+                        className="w-full px-3 py-2 text-left hover:bg-yellow-100 flex items-center gap-2 cursor-pointer"
                       >
-                        {copied ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Share2 className="w-3.5 h-3.5 text-stone-500" />}
+                        {copied ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Share2 className="w-3.5 h-3.5 text-amber-700" />}
                         <span>{copied ? 'Copied Link' : 'Copy Drive Link'}</span>
                       </button>
 
@@ -190,9 +195,9 @@ export const AudioCard: React.FC<AudioCardProps> = ({
                         target="_blank"
                         rel="noopener noreferrer"
                         onClick={() => setShowMenu(false)}
-                        className="w-full px-3 py-2 text-left hover:bg-amber-50 flex items-center gap-2 cursor-pointer"
+                        className="w-full px-3 py-2 text-left hover:bg-yellow-100 flex items-center gap-2 cursor-pointer"
                       >
-                        <ExternalLink className="w-3.5 h-3.5 text-stone-500" />
+                        <ExternalLink className="w-3.5 h-3.5 text-amber-700" />
                         <span>Open in Drive</span>
                       </a>
                     </>
@@ -204,9 +209,9 @@ export const AudioCard: React.FC<AudioCardProps> = ({
                         setShowMenu(false);
                         onPlay(audio);
                       }}
-                      className="w-full px-3 py-2 text-left hover:bg-amber-50 flex items-center gap-2 cursor-pointer"
+                      className="w-full px-3 py-2 text-left hover:bg-yellow-100 flex items-center gap-2 cursor-pointer"
                     >
-                      <Play className="w-3.5 h-3.5 text-stone-500" />
+                      <Play className="w-3.5 h-3.5 text-amber-700" />
                       <span>Play Audio</span>
                     </button>
                   )}
@@ -216,13 +221,13 @@ export const AudioCard: React.FC<AudioCardProps> = ({
                       setShowMenu(false);
                       if (onEdit) onEdit(audio);
                     }}
-                    className="w-full px-3 py-2 text-left hover:bg-amber-50 flex items-center gap-2 cursor-pointer"
+                    className="w-full px-3 py-2 text-left hover:bg-yellow-100 flex items-center gap-2 cursor-pointer"
                   >
-                    <Edit2 className="w-3.5 h-3.5 text-stone-500" />
+                    <Edit2 className="w-3.5 h-3.5 text-amber-700" />
                     <span>Edit Track</span>
                   </button>
 
-                  <div className="h-px bg-amber-100 my-1" />
+                  <div className="h-px bg-yellow-200 my-1" />
 
                   <button
                     onClick={() => {

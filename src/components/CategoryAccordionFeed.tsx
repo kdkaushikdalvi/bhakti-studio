@@ -73,7 +73,14 @@ export const CategoryAccordionFeed: React.FC<CategoryAccordionFeedProps> = ({
   // Helper to filter videos for a specific category based on current filters
   const getVideosForCategory = (catName: string): VideoItem[] => {
     const targetNorm = normalizeCategory(catName);
-    let result = videos.filter((v) => normalizeCategory(v.category || '') === targetNorm);
+    let result = videos.filter((v) => {
+      const catNorm = normalizeCategory(v.category || '');
+      if (catNorm === targetNorm) return true;
+      if (v.tags && v.tags.some((t) => normalizeCategory(t) === targetNorm)) {
+        return true;
+      }
+      return false;
+    });
 
     // Apply search query if present
     if (searchQuery.trim()) {

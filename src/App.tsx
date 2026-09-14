@@ -89,24 +89,22 @@ const DEFAULT_SETTINGS: AppSettings = {
   enableVibrations: true,
 };
 
+const isAartiCategory = (cat?: string) => {
+  if (!cat) return false;
+  const n = cat.toLowerCase().trim();
+  return n === 'आरती' || n === 'aarti' || n === 'aarati' || n === 'arti';
+};
+
 export function App() {
   // Dual-layer state - initial load from fast LocalStorage
   const [videos, setVideos] = useState<VideoItem[]>(() => {
     const loaded = getInitialFromLocalStorage<VideoItem[]>(STORAGE_KEY_VIDEOS, INITIAL_VIDEOS);
     if (!loaded || loaded.length === 0) return INITIAL_VIDEOS;
-    let updated = loaded.map((v) => {
-      if (v.id === 'vid-aarti-preetam-pyari-ki' || v.youtubeId === 'Ywd9xNcvAFM') {
-        return INITIAL_VIDEOS[0];
-      }
-      return v;
-    });
-    const hasAartiDefault = updated.some(
-      (v) => v.youtubeId === 'Fql0RCRyFO0' || v.id === 'vid-aarti-preetam-pyari-ki'
+    const targetAartiYtIds = new Set(['Ywd9xNcvAFM', 'Fql0RCRyFO0', 'A4JcViRiWvE']);
+    const nonAarti = loaded.filter(
+      (v) => !isAartiCategory(v.category) && !targetAartiYtIds.has(v.youtubeId)
     );
-    if (!hasAartiDefault && INITIAL_VIDEOS.length > 0) {
-      updated = [...INITIAL_VIDEOS, ...updated];
-    }
-    return updated;
+    return [...INITIAL_VIDEOS, ...nonAarti];
   });
 
   const [photos, setPhotos] = useState<PhotoItem[]>(() =>
@@ -272,19 +270,11 @@ export function App() {
         if (idbVideos && Array.isArray(idbVideos) && idbVideos.length > 0) {
           setVideos((prev) => {
             const merged = mergeItemsById(prev, idbVideos);
-            let updated = merged.map((v) => {
-              if (v.id === 'vid-aarti-preetam-pyari-ki' || v.youtubeId === 'Ywd9xNcvAFM') {
-                return INITIAL_VIDEOS[0];
-              }
-              return v;
-            });
-            const hasAartiDefault = updated.some(
-              (v) => v.youtubeId === 'Fql0RCRyFO0' || v.id === 'vid-aarti-preetam-pyari-ki'
+            const targetAartiYtIds = new Set(['Ywd9xNcvAFM', 'Fql0RCRyFO0', 'A4JcViRiWvE']);
+            const nonAarti = merged.filter(
+              (v) => !isAartiCategory(v.category) && !targetAartiYtIds.has(v.youtubeId)
             );
-            if (!hasAartiDefault && INITIAL_VIDEOS.length > 0) {
-              updated = [...INITIAL_VIDEOS, ...updated];
-            }
-            return updated;
+            return [...INITIAL_VIDEOS, ...nonAarti];
           });
         }
         if (idbPhotos && Array.isArray(idbPhotos) && idbPhotos.length > 0) {
@@ -401,9 +391,13 @@ export function App() {
     // Filter by Category (All or specific category)
     if (filterState.selectedCategory && normalizeCategory(filterState.selectedCategory) !== 'all') {
       const selectedNorm = normalizeCategory(filterState.selectedCategory);
-      result = result.filter(
-        (item) => normalizeCategory(item.category || '') === selectedNorm
-      );
+      result = result.filter((item) => {
+        if (normalizeCategory(item.category || '') === selectedNorm) return true;
+        if (item.mediaType === 'video' && item.tags?.some((t) => normalizeCategory(t) === selectedNorm)) {
+          return true;
+        }
+        return false;
+      });
     }
 
     // Filter by Queue / Watch Later (videos only)
@@ -919,17 +913,17 @@ export function App() {
   return (
     <div className={`min-h-screen flex justify-center selection:bg-rose-200 selection:text-rose-950 font-sans transition-colors duration-300 ${
       filterState.mediaType === 'photos'
-        ? 'bg-gradient-to-br from-[#120421] via-[#21093d] to-[#0e031a] text-purple-50'
+        ? 'bg-gradient-to-br from-[#f0fdf4] via-[#dcfce7] to-[#bbf7d0] text-emerald-950 selection:bg-emerald-200 selection:text-emerald-950'
         : filterState.mediaType === 'audio'
-        ? 'bg-gradient-to-br from-[#1b0c02] via-[#2d1403] to-[#120701] text-amber-50'
+        ? 'bg-gradient-to-br from-[#fefce8] via-[#fef9c3] to-[#fef08a] text-amber-950 selection:bg-yellow-200 selection:text-amber-950'
         : 'bg-gradient-to-br from-[#fff1f2] via-[#ffe4e6] to-[#fff5f5] text-stone-900'
     }`}>
       {/* Mobile-first Constrained Container max-w-[600px] */}
       <div className={`w-full max-w-[600px] min-h-screen flex flex-col shadow-2xl border-x relative transition-colors duration-300 ${
         filterState.mediaType === 'photos'
-          ? 'bg-[#16062b]/95 border-purple-800/40 text-purple-50'
+          ? 'bg-[#f4fdf6]/95 border-emerald-300/80 text-emerald-950'
           : filterState.mediaType === 'audio'
-          ? 'bg-[#1a0b02]/95 border-amber-800/40 text-amber-50'
+          ? 'bg-[#fffdf0]/95 border-yellow-300/80 text-amber-950'
           : 'bg-[#fff5f5]/95 border-rose-200 text-stone-900'
       }`}>
         {/* Small Top Header with 3-lines menu, brand & refresh */}
@@ -947,7 +941,7 @@ export function App() {
             <span className="flex items-center gap-1.5">
               <span className={`w-2 h-2 rounded-full ${
                 filterState.mediaType === 'photos'
-                  ? 'bg-purple-400 shadow-purple-500/50'
+                  ? 'bg-emerald-500 shadow-emerald-500/50'
                   : filterState.mediaType === 'audio'
                   ? 'bg-amber-400 shadow-amber-500/50'
                   : 'bg-rose-500 shadow-rose-500/50'
@@ -1033,10 +1027,10 @@ export function App() {
               ).map((categoryName) => {
                 const isExpanded = !!expandedCategory?.split('|').some((name) => normalizeCategory(name) === normalizeCategory(categoryName));
                 const items = photos.filter((p) => normalizeCategory(p.category || '') === normalizeCategory(categoryName));
-                return <div key={categoryName} className={`rounded-2xl border overflow-hidden transition-colors ${isExpanded ? 'border-purple-400/80 bg-purple-900/40' : 'border-purple-800/40 bg-[#16062b]/80'}`}>
+                return <div key={categoryName} className={`rounded-2xl border overflow-hidden transition-colors ${isExpanded ? 'border-emerald-400 bg-emerald-100/90 shadow-2xs' : 'border-emerald-200/80 bg-emerald-50/70'}`}>
                   <button type="button" onClick={(e) => { e.stopPropagation(); handleToggleCategory(categoryName); }} aria-expanded={isExpanded} className="w-full flex items-center justify-between px-4 py-4 text-left cursor-pointer">
-                    <span className="font-sans font-semibold text-purple-50">{categoryName}</span>
-                    <span className="flex items-center gap-2"><span className="w-8 h-8 flex items-center justify-center rounded-full border border-purple-700/60 text-xs text-purple-300/80">{items.length}</span><ChevronDown className={`w-5 h-5 text-purple-400 transition-transform ${isExpanded ? 'rotate-180' : ''}`} /></span>
+                    <span className="font-sans font-bold text-emerald-950">{categoryName}</span>
+                    <span className="flex items-center gap-2"><span className="w-8 h-8 flex items-center justify-center rounded-full border border-emerald-300 bg-emerald-200/70 text-xs font-bold text-emerald-900">{items.length}</span><ChevronDown className={`w-5 h-5 text-emerald-800 transition-transform ${isExpanded ? 'rotate-180' : ''}`} /></span>
                   </button>
                   {isExpanded && items.length > 0 && <div className="px-3 pb-3 space-y-2">{items.map((item) => <PhotoListItem key={item.id} photo={item} onView={(p) => setActivePhoto(p)} onToggleFavorite={handleToggleFavoritePhoto} onDelete={handleDeletePhoto} />)}</div>}
                 </div>;
@@ -1050,10 +1044,10 @@ export function App() {
               ).map((categoryName) => {
                 const isExpanded = !!expandedCategory?.split('|').some((name) => normalizeCategory(name) === normalizeCategory(categoryName));
                 const items = audios.filter((a) => normalizeCategory(a.category || '') === normalizeCategory(categoryName));
-                return <div key={categoryName} className={`rounded-2xl border overflow-hidden transition-colors ${isExpanded ? 'border-amber-400/80 bg-amber-900/40' : 'border-amber-800/40 bg-[#1a0b02]/80'}`}>
+                return <div key={categoryName} className={`rounded-2xl border overflow-hidden transition-colors ${isExpanded ? 'border-yellow-400 bg-yellow-100/90 shadow-2xs' : 'border-yellow-200/80 bg-yellow-50/70'}`}>
                   <button type="button" onClick={(e) => { e.stopPropagation(); handleToggleCategory(categoryName); }} aria-expanded={isExpanded} className="w-full flex items-center justify-between px-4 py-4 text-left cursor-pointer">
-                    <span className="font-sans font-semibold text-amber-50">{categoryName}</span>
-                    <span className="flex items-center gap-2"><span className="w-8 h-8 flex items-center justify-center rounded-full border border-amber-700/60 text-xs text-amber-300/80">{items.length}</span><ChevronDown className={`w-5 h-5 text-amber-400 transition-transform ${isExpanded ? 'rotate-180' : ''}`} /></span>
+                    <span className="font-sans font-bold text-amber-950">{categoryName}</span>
+                    <span className="flex items-center gap-2"><span className="w-8 h-8 flex items-center justify-center rounded-full border border-yellow-300 bg-yellow-200/70 text-xs font-bold text-amber-900">{items.length}</span><ChevronDown className={`w-5 h-5 text-amber-800 transition-transform ${isExpanded ? 'rotate-180' : ''}`} /></span>
                   </button>
                   {isExpanded && items.length > 0 && <div className="px-3 pb-3 space-y-2">{items.map((item) => <AudioListItem key={item.id} audio={item} isPlaying={activePlaybackAudio?.id === item.id} onPlay={handlePlayAudio} onToggleFavorite={handleToggleFavoriteAudio} onDelete={handleDeleteAudio} />)}</div>}
                 </div>;
@@ -1063,7 +1057,9 @@ export function App() {
             <div className="py-14 px-4 text-center flex flex-col items-center justify-center space-y-3">
               <div className={`w-12 h-12 rounded-2xl flex items-center justify-center shadow-2xs ${
                 filterState.mediaType === 'photos'
-                  ? 'bg-purple-500/10 text-purple-400'
+                  ? 'bg-emerald-200 text-emerald-900 border border-emerald-300'
+                  : filterState.mediaType === 'audio'
+                  ? 'bg-yellow-200 text-amber-900 border border-yellow-300'
                   : 'bg-amber-500/10 text-amber-400'
               }`}>
                 {filterState.mediaType === 'photos' ? (
@@ -1073,12 +1069,24 @@ export function App() {
                 )}
               </div>
               <div className="space-y-1">
-                <h3 className="text-sm font-bold font-serif text-stone-100">
+                <h3 className={`text-sm font-bold font-serif ${
+                  filterState.mediaType === 'photos'
+                    ? 'text-emerald-950'
+                    : filterState.mediaType === 'audio'
+                    ? 'text-amber-950'
+                    : 'text-stone-100'
+                }`}>
                   {filterState.selectedCategory && normalizeCategory(filterState.selectedCategory) !== 'all'
                     ? `No ${filterState.mediaType === 'photos' ? 'Photos' : 'Audio Tracks'} in "${translateCategoryToMarathi(filterState.selectedCategory)}"`
                     : `No ${filterState.mediaType === 'photos' ? 'Photos' : 'Audio Tracks'} Found`}
                 </h3>
-                <p className="text-xs text-stone-400 max-w-[280px] mx-auto">
+                <p className={`text-xs max-w-[280px] mx-auto ${
+                  filterState.mediaType === 'photos'
+                    ? 'text-emerald-800/80'
+                    : filterState.mediaType === 'audio'
+                    ? 'text-amber-800/80'
+                    : 'text-stone-400'
+                }`}>
                   {filterState.selectedCategory && normalizeCategory(filterState.selectedCategory) !== 'all'
                     ? `Tap "सर्व" to view all items, or tap "+" below to add sacred ${filterState.mediaType === 'photos' ? 'photos' : 'audio'} to this category.`
                     : filterState.mediaType === 'photos'
@@ -1094,7 +1102,13 @@ export function App() {
                       selectedCategory: 'all',
                     }))
                   }
-                  className="text-xs font-semibold text-orange-400 bg-stone-800/80 px-3.5 py-1.5 rounded-full border border-stone-700 hover:bg-stone-750 transition-colors cursor-pointer"
+                  className={`text-xs font-semibold px-3.5 py-1.5 rounded-full border transition-colors cursor-pointer ${
+                    filterState.mediaType === 'photos'
+                      ? 'text-emerald-950 bg-emerald-200 border-emerald-400 hover:bg-emerald-300'
+                      : filterState.mediaType === 'audio'
+                      ? 'text-amber-950 bg-yellow-200 border-yellow-400 hover:bg-yellow-300'
+                      : 'text-orange-400 bg-stone-800/80 border-stone-700 hover:bg-stone-750'
+                  }`}
                 >
                   Show All Categories
                 </button>

@@ -531,15 +531,19 @@ export const AppleAddMediaBottomSheet: React.FC<AppleAddMediaBottomSheetProps> =
             animate={{ y: 0, opacity: 1 }}
             exit={{ y: '100%', opacity: 0 }}
             transition={{ type: 'spring', damping: 30, stiffness: 320 }}
-            className="relative z-10 w-full max-w-[540px] max-h-[90vh] flex flex-col bg-[#FFFDFB] rounded-t-[32px] sm:rounded-[32px] shadow-[0_-10px_40px_rgba(0,0,0,0.15)] border-t sm:border border-white/80 overflow-hidden"
+            className={`relative z-10 w-full max-w-[540px] max-h-[90vh] flex flex-col rounded-t-[32px] sm:rounded-[32px] shadow-[0_-10px_40px_rgba(0,0,0,0.15)] border-t sm:border overflow-hidden transition-colors ${
+              activeTab === 'audio'
+                ? 'bg-[#fffdf0] text-amber-950 border-yellow-300'
+                : 'bg-[#FFFDFB] text-stone-900 border-white/80'
+            }`}
           >
             {/* Top Handle Pill */}
             <div className="pt-3 pb-1 flex justify-center cursor-grab active:cursor-grabbing">
-              <div className="w-10 h-1.5 rounded-full bg-stone-300/80" />
+              <div className={`w-10 h-1.5 rounded-full ${activeTab === 'audio' ? 'bg-yellow-300' : 'bg-stone-300/80'}`} />
             </div>
 
             {/* Header: current section is selected automatically by the app */}
-            <div className="px-5 pt-2 pb-3 border-b border-stone-100 flex items-center justify-end">
+            <div className={`px-5 pt-2 pb-3 border-b flex items-center justify-end ${activeTab === 'audio' ? 'border-yellow-200 bg-yellow-50/50' : 'border-stone-100'}`}>
               {activeTab === 'video' && (
                 <button
                   id="btn-submit-video-header"
@@ -559,12 +563,37 @@ export const AppleAddMediaBottomSheet: React.FC<AppleAddMediaBottomSheetProps> =
                   <button type="button" onClick={() => fileInputRef.current?.click()} className="mr-2 px-5 py-2 bg-stone-900 hover:bg-stone-800 text-white rounded-xl text-xs font-semibold shadow-xs transition-all flex items-center justify-center gap-1.5 cursor-pointer"><ImageIcon className="w-3.5 h-3.5" /><span>Upload Photo</span></button>
                 )
               )}
+              {activeTab === 'audio' && (
+                <button
+                  id="btn-submit-audio-header"
+                  type="button"
+                  onClick={() => {
+                    if (audioSourceMode === 'device') {
+                      if (!localAudioFile) {
+                        audioFileInputRef.current?.click();
+                      } else {
+                        (document.getElementById('device-audio-form') as HTMLFormElement | null)?.requestSubmit();
+                      }
+                    } else {
+                      (document.getElementById('drive-audio-form') as HTMLFormElement | null)?.requestSubmit();
+                    }
+                  }}
+                  className="mr-2 px-4 py-2 bg-yellow-400 hover:bg-yellow-500 text-amber-950 font-bold rounded-xl text-xs shadow-xs border border-yellow-500/40 transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+                >
+                  <Music className="w-3.5 h-3.5" />
+                  <span>{audioSourceMode === 'device' && !localAudioFile ? 'Select Audio' : 'Add Audio'}</span>
+                </button>
+              )}
               {/* Close Button */}
               <button
                 id="btn-close-bottom-sheet"
                 onClick={onClose}
                 type="button"
-                className="w-8 h-8 rounded-full bg-stone-100 hover:bg-stone-200 text-stone-500 hover:text-stone-800 flex items-center justify-center transition-colors cursor-pointer shrink-0"
+                className={`w-8 h-8 rounded-full flex items-center justify-center transition-colors cursor-pointer shrink-0 ${
+                  activeTab === 'audio'
+                    ? 'bg-yellow-100 hover:bg-yellow-200 text-amber-900'
+                    : 'bg-stone-100 hover:bg-stone-200 text-stone-500 hover:text-stone-800'
+                }`}
                 aria-label="Close sheet"
               >
                 <X className="w-4 h-4" />
@@ -844,7 +873,7 @@ export const AppleAddMediaBottomSheet: React.FC<AppleAddMediaBottomSheetProps> =
                   />
 
                   {/* Audio Source Mode Switcher: Device vs Google Drive */}
-                  <div className="flex bg-stone-100 p-1 rounded-xl border border-stone-200/80">
+                  <div className="flex bg-yellow-100/70 p-1 rounded-xl border border-yellow-200">
                     <button
                       type="button"
                       onClick={() => {
@@ -853,13 +882,13 @@ export const AppleAddMediaBottomSheet: React.FC<AppleAddMediaBottomSheetProps> =
                       }}
                       className={`flex-1 py-1.5 px-3 rounded-lg text-xs font-semibold flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
                         audioSourceMode === 'device'
-                          ? 'bg-white text-amber-900 shadow-2xs font-bold border border-amber-200/70'
-                          : 'text-stone-600 hover:text-stone-900'
+                          ? 'bg-yellow-400 text-amber-950 shadow-2xs font-bold border border-yellow-500/40'
+                          : 'text-amber-800 hover:text-amber-950'
                       }`}
                     >
-                      <HardDrive className="w-3.5 h-3.5 text-amber-600" />
+                      <HardDrive className="w-3.5 h-3.5 text-amber-900" />
                       <span>Device Storage</span>
-                      <span className="text-[10px] px-1 py-0.2 bg-amber-100 text-amber-800 rounded font-normal hidden sm:inline">
+                      <span className="text-[10px] px-1 py-0.2 bg-yellow-200 text-amber-950 rounded font-normal hidden sm:inline">
                         PC / Mobile
                       </span>
                     </button>
@@ -872,18 +901,18 @@ export const AppleAddMediaBottomSheet: React.FC<AppleAddMediaBottomSheetProps> =
                       }}
                       className={`flex-1 py-1.5 px-3 rounded-lg text-xs font-semibold flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
                         audioSourceMode === 'drive'
-                          ? 'bg-white text-amber-900 shadow-2xs font-bold border border-amber-200/70'
-                          : 'text-stone-600 hover:text-stone-900'
+                          ? 'bg-yellow-400 text-amber-950 shadow-2xs font-bold border border-yellow-500/40'
+                          : 'text-amber-800 hover:text-amber-950'
                       }`}
                     >
-                      <UploadCloud className="w-3.5 h-3.5 text-amber-600" />
+                      <UploadCloud className="w-3.5 h-3.5 text-amber-900" />
                       <span>Google Drive Link</span>
                     </button>
                   </div>
 
                   {/* SUB-FORM A: Device Audio Upload (Local Computer or Phone Storage) */}
                   {audioSourceMode === 'device' ? (
-                    <form onSubmit={handleAddDeviceAudioSubmit} className="space-y-4">
+                    <form id="device-audio-form" onSubmit={handleAddDeviceAudioSubmit} className="space-y-4">
                       {!localAudioFile ? (
                         /* Drag and drop / browse box */
                         <div
@@ -896,11 +925,11 @@ export const AppleAddMediaBottomSheet: React.FC<AppleAddMediaBottomSheetProps> =
                           onClick={() => audioFileInputRef.current?.click()}
                           className={`border-2 border-dashed rounded-2xl p-6 sm:p-8 text-center transition-all cursor-pointer flex flex-col items-center justify-center gap-3 ${
                             isAudioDraggingOver
-                              ? 'border-amber-500 bg-amber-50/70 scale-[1.01]'
-                              : 'border-amber-300/80 bg-amber-50/30 hover:bg-amber-50/60 hover:border-amber-400'
+                              ? 'border-yellow-500 bg-yellow-100/80 scale-[1.01]'
+                              : 'border-yellow-300 bg-yellow-50/60 hover:bg-yellow-100/60 hover:border-yellow-400'
                           }`}
                         >
-                          <div className="w-14 h-14 rounded-2xl bg-gradient-to-tr from-amber-600 to-amber-400 flex items-center justify-center text-white shadow-md shadow-amber-500/20">
+                          <div className="w-14 h-14 rounded-2xl bg-gradient-to-tr from-amber-400 via-yellow-400 to-amber-500 border border-yellow-300 flex items-center justify-center text-amber-950 shadow-md">
                             {isProcessingAudio ? (
                               <Loader2 className="w-7 h-7 animate-spin" />
                             ) : (
@@ -909,68 +938,68 @@ export const AppleAddMediaBottomSheet: React.FC<AppleAddMediaBottomSheetProps> =
                           </div>
 
                           <div>
-                            <p className="text-xs font-bold text-stone-800">
+                            <p className="text-xs font-bold text-amber-950">
                               {isProcessingAudio
                                 ? 'Reading Audio File...'
                                 : 'Attach from Computer or Mobile Storage'}
                             </p>
-                            <p className="text-[11px] text-stone-500 mt-1 max-w-xs mx-auto">
+                            <p className="text-[11px] text-amber-800 mt-1 max-w-xs mx-auto">
                               Tap to browse device storage or drag & drop devotional audio
                             </p>
                           </div>
 
-                          <div className="flex items-center gap-2 text-[10px] text-amber-800 font-medium bg-amber-100/70 px-2.5 py-1 rounded-full border border-amber-200">
-                            <Smartphone className="w-3 h-3" />
+                          <div className="flex items-center gap-2 text-[10px] text-amber-950 font-medium bg-yellow-100 px-2.5 py-1 rounded-full border border-yellow-300">
+                            <Smartphone className="w-3 h-3 text-amber-800" />
                             <span>Phones & Tablets</span>
-                            <span className="text-amber-300">•</span>
-                            <Laptop className="w-3 h-3" />
+                            <span className="text-yellow-400">•</span>
+                            <Laptop className="w-3 h-3 text-amber-800" />
                             <span>PC & Mac</span>
                           </div>
 
-                          <span className="text-[9.5px] font-mono text-stone-400">
+                          <span className="text-[9.5px] font-mono text-amber-700/80">
                             Supports MP3, M4A, WAV, AAC, OGG, FLAC
                           </span>
                         </div>
                       ) : (
                         /* Selected Audio Preview Card */
-                        <div className="p-3.5 bg-amber-50/60 border border-amber-200/90 rounded-2xl space-y-3 animate-fadeIn">
+                        <div className="p-3.5 bg-yellow-50/80 border border-yellow-200 rounded-2xl space-y-3 animate-fadeIn">
                           <div className="flex items-center gap-3">
                             {/* Mini Vinyl Record with Preview Play Button */}
                             <button
                               type="button"
                               onClick={handleToggleAudioPreview}
-                              className="relative w-14 h-14 rounded-xl bg-gradient-to-br from-amber-950 via-stone-900 to-amber-900 flex items-center justify-center shadow-md border border-amber-800/40 shrink-0 cursor-pointer group"
+                              className="relative w-14 h-14 rounded-xl bg-yellow-300 flex items-center justify-center shadow-md border border-yellow-400 shrink-0 cursor-pointer group"
                               title={isPlayingAudioPreview ? 'Pause Preview' : 'Listen Preview'}
                             >
                               <Disc3
-                                className={`w-8 h-8 text-amber-300 transition-transform ${
+                                className={`w-8 h-8 text-amber-950 transition-transform ${
                                   isPlayingAudioPreview ? 'animate-spin' : 'group-hover:scale-110'
                                 }`}
                                 style={{ animationDuration: '3s' }}
                               />
-                              <div className="absolute inset-0 bg-black/25 flex items-center justify-center rounded-xl">
+                              <div className="absolute inset-0 bg-black/20 flex items-center justify-center rounded-xl">
                                 {isPlayingAudioPreview ? (
-                                  <Pause className="w-5 h-5 text-white fill-white" />
+                                  <Pause className="w-5 h-5 text-amber-950 fill-amber-950" />
                                 ) : (
-                                  <Play className="w-5 h-5 text-white fill-white ml-0.5" />
+                                  <Play className="w-5 h-5 text-amber-950 fill-amber-950 ml-0.5" />
                                 )}
                               </div>
                             </button>
 
                             <div className="min-w-0 flex-1">
                               <div className="flex items-center gap-1.5 flex-wrap">
-                                <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-emerald-100 text-[10px] font-bold text-emerald-800 border border-emerald-300/60">
-                                  <HardDrive className="w-2.5 h-2.5 text-emerald-700" />
+                                <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-yellow-200 text-[10px] font-bold text-amber-950 border border-yellow-300">
+                                  <HardDrive className="w-2.5 h-2.5 text-amber-800" />
                                   <span>Device File Attached</span>
                                 </span>
                                 {localAudioFileSize && (
-                                  <span className="text-[9.5px] font-mono text-stone-500 bg-white/80 px-1.5 py-0.5 rounded border border-stone-200">
+                                  <span className="text-[9.5px] font-mono text-amber-900 bg-white/90 px-1.5 py-0.5 rounded border border-yellow-200">
                                     {localAudioFileSize}
                                   </span>
                                 )}
                               </div>
 
-                              <p className="text-[11px] font-medium text-stone-700 truncate mt-1">
+                              <p className="text-[11px] font-semibold text-amber-950 truncate mt-1">
                                 {localAudioFile.name}
                               </p>
 
@@ -978,15 +1007,15 @@ export const AppleAddMediaBottomSheet: React.FC<AppleAddMediaBottomSheetProps> =
                                 <button
                                   type="button"
                                   onClick={() => audioFileInputRef.current?.click()}
-                                  className="text-[10px] font-semibold text-amber-700 hover:text-amber-800 underline cursor-pointer"
+                                  className="text-[10px] font-bold text-amber-900 hover:text-amber-950 underline cursor-pointer"
                                 >
                                   Change file
                                 </button>
-                                <span className="text-stone-300">•</span>
+                                <span className="text-yellow-400">•</span>
                                 <button
                                   type="button"
                                   onClick={handleClearLocalAudio}
-                                  className="text-[10px] font-semibold text-rose-600 hover:text-rose-700 cursor-pointer"
+                                  className="text-[10px] font-bold text-rose-700 hover:text-rose-800 cursor-pointer"
                                 >
                                   Remove
                                 </button>
@@ -998,7 +1027,7 @@ export const AppleAddMediaBottomSheet: React.FC<AppleAddMediaBottomSheetProps> =
                           <div>
                             <label
                               htmlFor="local-audio-title-field"
-                              className="block text-[11px] font-semibold text-stone-600 mb-1"
+                              className="block text-[11px] font-bold text-amber-950 mb-1"
                             >
                               Track Title
                             </label>
@@ -1008,7 +1037,7 @@ export const AppleAddMediaBottomSheet: React.FC<AppleAddMediaBottomSheetProps> =
                               value={localAudioTitle}
                               onChange={(e) => setLocalAudioTitle(e.target.value)}
                               placeholder="e.g. Gayatri Mantra 108 Times"
-                              className="w-full px-3 py-2 bg-white border border-stone-200 focus:border-amber-600 rounded-xl text-xs text-stone-900 placeholder:text-stone-400 focus:outline-none transition-all"
+                              className="w-full px-3 py-2 bg-white border border-yellow-200 focus:border-yellow-400 rounded-xl text-xs text-amber-950 placeholder:text-amber-800/40 focus:outline-none transition-all"
                               required
                             />
                           </div>
@@ -1017,7 +1046,7 @@ export const AppleAddMediaBottomSheet: React.FC<AppleAddMediaBottomSheetProps> =
                           <div>
                             <label
                               htmlFor="local-audio-artist-field"
-                              className="block text-[11px] font-semibold text-stone-600 mb-1"
+                              className="block text-[11px] font-bold text-amber-950 mb-1"
                             >
                               Singer / Source (Optional)
                             </label>
@@ -1027,13 +1056,13 @@ export const AppleAddMediaBottomSheet: React.FC<AppleAddMediaBottomSheetProps> =
                               value={localAudioArtist}
                               onChange={(e) => setLocalAudioArtist(e.target.value)}
                               placeholder="e.g. Anuradha Paudwal / Morning Kirtan"
-                              className="w-full px-3 py-2 bg-white border border-stone-200 focus:border-amber-600 rounded-xl text-xs text-stone-900 placeholder:text-stone-400 focus:outline-none transition-all"
+                              className="w-full px-3 py-2 bg-white border border-yellow-200 focus:border-yellow-400 rounded-xl text-xs text-amber-950 placeholder:text-amber-800/40 focus:outline-none transition-all"
                             />
                           </div>
 
                           {/* Category Pills */}
                           <div>
-                            <span className="block text-[11px] font-semibold text-stone-600 mb-1.5">
+                            <span className="block text-[11px] font-bold text-amber-950 mb-1.5">
                               Category
                             </span>
                             <div className="flex flex-wrap gap-1.5 max-h-24 overflow-y-auto pr-1">
@@ -1046,8 +1075,8 @@ export const AppleAddMediaBottomSheet: React.FC<AppleAddMediaBottomSheetProps> =
                                     onClick={() => setLocalAudioCategory(cat)}
                                     className={`px-2.5 py-1 rounded-lg text-xs font-medium transition-all cursor-pointer ${
                                       isSelected
-                                        ? 'bg-amber-600 text-white shadow-2xs font-semibold'
-                                        : 'bg-white text-stone-600 border border-stone-200 hover:border-amber-300'
+                                        ? 'bg-yellow-400 text-amber-950 border border-yellow-500 font-bold shadow-2xs'
+                                        : 'bg-white text-amber-900 border border-yellow-200 hover:border-yellow-300'
                                     }`}
                                   >
                                     {cat}
@@ -1066,7 +1095,7 @@ export const AppleAddMediaBottomSheet: React.FC<AppleAddMediaBottomSheetProps> =
                             id="btn-submit-device-audio"
                             type="submit"
                             disabled={isSuccess}
-                            className="w-full py-2.5 bg-amber-600 hover:bg-amber-700 text-white rounded-xl text-xs font-semibold shadow-md shadow-amber-600/20 transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+                            className="w-full py-2.5 bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-400 hover:from-amber-300 hover:to-yellow-300 text-amber-950 font-bold rounded-xl text-xs shadow-md border border-yellow-400/60 transition-all flex items-center justify-center gap-1.5 cursor-pointer"
                           >
                             <Music className="w-3.5 h-3.5" />
                             <span>Add Audio to Vault</span>
@@ -1075,7 +1104,7 @@ export const AppleAddMediaBottomSheet: React.FC<AppleAddMediaBottomSheetProps> =
                           <button
                             type="button"
                             onClick={() => audioFileInputRef.current?.click()}
-                            className="w-full py-2.5 bg-amber-600 hover:bg-amber-700 text-white rounded-xl text-xs font-semibold shadow-md shadow-amber-600/20 transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+                            className="w-full py-2.5 bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-400 hover:from-amber-300 hover:to-yellow-300 text-amber-950 font-bold rounded-xl text-xs shadow-md border border-yellow-400/60 transition-all flex items-center justify-center gap-1.5 cursor-pointer"
                           >
                             <HardDrive className="w-3.5 h-3.5" />
                             <span>Choose Audio from Device</span>
@@ -1085,12 +1114,12 @@ export const AppleAddMediaBottomSheet: React.FC<AppleAddMediaBottomSheetProps> =
                     </form>
                   ) : (
                     /* SUB-FORM B: Google Drive Audio Form */
-                    <form onSubmit={handleAddDriveAudioSubmit} className="space-y-4">
+                    <form id="drive-audio-form" onSubmit={handleAddDriveAudioSubmit} className="space-y-4">
                       {/* Google Drive Link Input Area */}
                       <div>
                         <label
                           htmlFor="audio-drive-url-field"
-                          className="block text-xs font-semibold text-stone-700 mb-1.5"
+                          className="block text-xs font-bold text-amber-950 mb-1.5"
                         >
                           Paste Google Drive Audio Link
                         </label>
@@ -1102,7 +1131,7 @@ export const AppleAddMediaBottomSheet: React.FC<AppleAddMediaBottomSheetProps> =
                             value={audioUrl}
                             onChange={(e) => setAudioUrl(e.target.value)}
                             placeholder="https://drive.google.com/file/d/..."
-                            className="w-full pl-3 pr-20 py-2.5 bg-stone-50 border border-stone-200 focus:border-amber-600 focus:bg-white rounded-xl text-xs text-stone-900 placeholder:text-stone-400 focus:outline-none transition-all"
+                            className="w-full pl-3 pr-20 py-2.5 bg-white border border-yellow-200 focus:border-yellow-400 rounded-xl text-xs text-amber-950 placeholder:text-amber-800/40 focus:outline-none transition-all"
                             autoFocus
                           />
 
@@ -1111,7 +1140,7 @@ export const AppleAddMediaBottomSheet: React.FC<AppleAddMediaBottomSheetProps> =
                               <button
                                 type="button"
                                 onClick={() => setAudioUrl('')}
-                                className="p-1.5 text-stone-400 hover:text-stone-700 rounded-lg hover:bg-stone-200/60 cursor-pointer"
+                                className="p-1.5 text-amber-700 hover:text-amber-950 rounded-lg hover:bg-yellow-100 cursor-pointer"
                                 title="Clear"
                               >
                                 <X className="w-3.5 h-3.5" />
@@ -1121,35 +1150,35 @@ export const AppleAddMediaBottomSheet: React.FC<AppleAddMediaBottomSheetProps> =
                             <button
                               type="button"
                               onClick={handlePasteAudioClipboard}
-                              className="px-2.5 py-1 bg-white hover:bg-stone-100 text-stone-700 border border-stone-200 rounded-lg text-[11px] font-medium flex items-center gap-1 shadow-2xs transition-colors cursor-pointer"
+                              className="px-2.5 py-1 bg-yellow-100 hover:bg-yellow-200 text-amber-950 border border-yellow-300 rounded-lg text-[11px] font-bold flex items-center gap-1 shadow-2xs transition-colors cursor-pointer"
                               title="Paste from clipboard"
                             >
-                              <ClipboardPaste className="w-3 h-3 text-stone-500" />
+                              <ClipboardPaste className="w-3 h-3 text-amber-800" />
                               <span>Paste</span>
                             </button>
                           </div>
                         </div>
 
-                        <p className="mt-1 text-[10.5px] text-stone-400">
+                        <p className="mt-1 text-[10.5px] text-amber-800 font-medium">
                           Supports audio links from Google Drive (e.g. Bhajan, Aarti, Mantra audio).
                         </p>
                       </div>
 
                       {/* Audio Preview Card and Customization */}
                       {isValidDriveUrl && driveId && (
-                        <div className="p-3.5 bg-amber-50/50 border border-amber-200/80 rounded-2xl space-y-3 animate-fadeIn">
+                        <div className="p-3.5 bg-yellow-50/80 border border-yellow-200 rounded-2xl space-y-3 animate-fadeIn">
                           <div className="flex items-center gap-3">
-                            <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-amber-900 via-stone-900 to-amber-950 flex items-center justify-center shadow-xs shrink-0 border border-amber-800/40">
-                              <Disc3 className="w-8 h-8 text-amber-300" />
+                            <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-yellow-200 via-amber-200 to-yellow-300 flex items-center justify-center shadow-xs shrink-0 border border-yellow-400">
+                              <Disc3 className="w-8 h-8 text-amber-950" />
                             </div>
 
                             <div className="min-w-0 flex-1">
-                              <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-amber-100/90 text-[10px] font-bold text-amber-800 border border-amber-300/60">
-                                <Disc3 className="w-2.5 h-2.5 text-amber-700" />
+                              <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-yellow-200 text-[10px] font-bold text-amber-950 border border-yellow-300">
+                                <Disc3 className="w-2.5 h-2.5 text-amber-800" />
                                 <span>Drive Audio Ready</span>
                               </span>
 
-                              <p className="text-[10px] text-stone-400 font-mono mt-0.5 truncate">
+                              <p className="text-[10px] text-amber-800/80 font-mono mt-0.5 truncate">
                                 File ID: {driveId}
                               </p>
                             </div>
@@ -1159,7 +1188,7 @@ export const AppleAddMediaBottomSheet: React.FC<AppleAddMediaBottomSheetProps> =
                           <div>
                             <label
                               htmlFor="audio-title-field"
-                              className="block text-[11px] font-semibold text-stone-600 mb-1"
+                              className="block text-[11px] font-bold text-amber-950 mb-1"
                             >
                               Audio Title / Track Name
                             </label>
@@ -1169,7 +1198,7 @@ export const AppleAddMediaBottomSheet: React.FC<AppleAddMediaBottomSheetProps> =
                               value={audioTitle}
                               onChange={(e) => setAudioTitle(e.target.value)}
                               placeholder="e.g. Shri Krishna Govind Hare Murari"
-                              className="w-full px-3 py-2 bg-white border border-stone-200 focus:border-amber-600 rounded-xl text-xs text-stone-900 placeholder:text-stone-400 focus:outline-none transition-all"
+                              className="w-full px-3 py-2 bg-white border border-yellow-200 focus:border-yellow-400 rounded-xl text-xs text-amber-950 placeholder:text-amber-800/40 focus:outline-none transition-all"
                             />
                           </div>
 
@@ -1177,7 +1206,7 @@ export const AppleAddMediaBottomSheet: React.FC<AppleAddMediaBottomSheetProps> =
                           <div>
                             <label
                               htmlFor="audio-artist-field"
-                              className="block text-[11px] font-semibold text-stone-600 mb-1"
+                              className="block text-[11px] font-bold text-amber-950 mb-1"
                             >
                               Singer / Source (Optional)
                             </label>
@@ -1187,13 +1216,13 @@ export const AppleAddMediaBottomSheet: React.FC<AppleAddMediaBottomSheetProps> =
                               value={audioArtist}
                               onChange={(e) => setAudioArtist(e.target.value)}
                               placeholder="e.g. Jagjit Singh / Radha Krishna Kirtan"
-                              className="w-full px-3 py-2 bg-white border border-stone-200 focus:border-amber-600 rounded-xl text-xs text-stone-900 placeholder:text-stone-400 focus:outline-none transition-all"
+                              className="w-full px-3 py-2 bg-white border border-yellow-200 focus:border-yellow-400 rounded-xl text-xs text-amber-950 placeholder:text-amber-800/40 focus:outline-none transition-all"
                             />
                           </div>
 
                           {/* Category Pills */}
                           <div>
-                            <span className="block text-[11px] font-semibold text-stone-600 mb-1.5">
+                            <span className="block text-[11px] font-bold text-amber-950 mb-1.5">
                               Category
                             </span>
                             <div className="flex flex-wrap gap-1.5 max-h-24 overflow-y-auto pr-1">
@@ -1206,8 +1235,8 @@ export const AppleAddMediaBottomSheet: React.FC<AppleAddMediaBottomSheetProps> =
                                     onClick={() => setAudioCategory(cat)}
                                     className={`px-2.5 py-1 rounded-lg text-xs font-medium transition-all cursor-pointer ${
                                       isSelected
-                                        ? 'bg-amber-600 text-white shadow-2xs font-semibold'
-                                        : 'bg-white text-stone-600 border border-stone-200 hover:border-amber-300'
+                                        ? 'bg-yellow-400 text-amber-950 border border-yellow-500 font-bold shadow-2xs'
+                                        : 'bg-white text-amber-900 border border-yellow-200 hover:border-yellow-300'
                                     }`}
                                   >
                                     {cat}
@@ -1225,10 +1254,10 @@ export const AppleAddMediaBottomSheet: React.FC<AppleAddMediaBottomSheetProps> =
                           id="btn-submit-audio"
                           type="submit"
                           disabled={!isValidDriveUrl || isSuccess}
-                          className={`w-full py-2.5 rounded-xl text-xs font-semibold shadow-xs transition-all flex items-center justify-center gap-1.5 ${
+                          className={`w-full py-2.5 rounded-xl text-xs font-bold shadow-xs transition-all flex items-center justify-center gap-1.5 ${
                             isValidDriveUrl && !isSuccess
-                              ? 'bg-amber-600 hover:bg-amber-700 text-white cursor-pointer shadow-amber-600/20 shadow-md'
-                              : 'bg-stone-200 text-stone-400 cursor-not-allowed'
+                              ? 'bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-400 hover:from-amber-300 hover:to-yellow-300 text-amber-950 cursor-pointer shadow-md border border-yellow-400/60'
+                              : 'bg-yellow-100/80 text-amber-900/40 border border-yellow-200/60 cursor-not-allowed'
                           }`}
                         >
                           <Music className="w-3.5 h-3.5" />

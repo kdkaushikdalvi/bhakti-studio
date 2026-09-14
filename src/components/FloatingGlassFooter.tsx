@@ -65,8 +65,8 @@ export const FloatingGlassFooter: React.FC<FloatingGlassFooterProps> = ({
           isVideos
             ? 'bg-gradient-to-r from-rose-500 via-red-500 to-rose-600 text-white border-rose-300 ring-rose-400/80 ring-offset-rose-950/20 shadow-[0_8px_24px_rgba(244,63,94,0.4)]'
             : isPhotos
-            ? 'bg-gradient-to-r from-purple-600 via-violet-600 to-indigo-600 text-white border-purple-300 ring-purple-400/80 ring-offset-purple-950/40 shadow-[0_8px_24px_rgba(147,51,234,0.45)]'
-            : 'bg-gradient-to-r from-amber-600 via-yellow-600 to-amber-500 text-white border-amber-300 ring-amber-400/80 ring-offset-amber-950/40 shadow-[0_8px_24px_rgba(217,119,6,0.45)]'
+            ? 'bg-gradient-to-r from-emerald-400 via-green-400 to-emerald-400 text-emerald-950 border-emerald-200 ring-emerald-400/80 ring-offset-emerald-100 shadow-[0_8px_24px_rgba(16,185,129,0.35)]'
+            : 'bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-400 text-amber-950 border-yellow-200 ring-yellow-400/80 ring-offset-yellow-100 shadow-[0_8px_24px_rgba(234,179,8,0.35)]'
         }`}
       >
         {/* Left Side: Circular Icon + Title + Devanagari/Sub Badge */}
@@ -78,14 +78,20 @@ export const FloatingGlassFooter: React.FC<FloatingGlassFooterProps> = ({
               animate={{ rotate: 0, scale: 1, opacity: 1 }}
               exit={{ rotate: 30, scale: 0.7, opacity: 0 }}
               transition={{ duration: 0.2 }}
-              className="w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center shrink-0 border border-white/30 shadow-inner"
+              className={`w-8 h-8 sm:w-9 sm:h-9 rounded-full backdrop-blur-md flex items-center justify-center shrink-0 border shadow-inner ${
+                isAudio
+                  ? 'bg-amber-950/15 border-amber-950/20'
+                  : isPhotos
+                  ? 'bg-emerald-950/15 border-emerald-950/20'
+                  : 'bg-white/20 border-white/30'
+              }`}
             >
               {isVideos ? (
                 <Video className="w-4 h-4 text-white" />
               ) : isPhotos ? (
-                <ImageIcon className="w-4 h-4 text-white" />
+                <ImageIcon className="w-4 h-4 text-emerald-950" />
               ) : (
-                <Disc3 className="w-4 h-4 text-white animate-spin" style={{ animationDuration: '4s' }} />
+                <Disc3 className="w-4 h-4 text-amber-950 animate-spin" style={{ animationDuration: '4s' }} />
               )}
             </motion.div>
           </AnimatePresence>
@@ -98,7 +104,13 @@ export const FloatingGlassFooter: React.FC<FloatingGlassFooterProps> = ({
                 animate={{ y: 0, opacity: 1 }}
                 exit={{ y: -8, opacity: 0 }}
                 transition={{ duration: 0.18 }}
-                className="font-bold text-sm sm:text-base font-sans tracking-tight text-white drop-shadow-xs"
+                className={`font-bold text-sm sm:text-base font-sans tracking-tight drop-shadow-xs ${
+                  isAudio
+                    ? 'text-amber-950'
+                    : isPhotos
+                    ? 'text-emerald-950'
+                    : 'text-white'
+                }`}
               >
                 {isVideos ? 'Videos' : isPhotos ? 'Photos' : 'Audio'}
               </motion.span>
@@ -108,7 +120,13 @@ export const FloatingGlassFooter: React.FC<FloatingGlassFooterProps> = ({
 
         {/* Right Side: Next -> Target Action Pill */}
         <div
-          className="flex items-center gap-1 bg-black/25 hover:bg-black/35 backdrop-blur-md border border-white/20 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full text-[11px] sm:text-xs font-bold text-white shrink-0 transition-colors shadow-inner"
+          className={`flex items-center gap-1 backdrop-blur-md border px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full text-[11px] sm:text-xs font-bold shrink-0 transition-colors shadow-inner ${
+            isAudio
+              ? 'bg-amber-950/15 hover:bg-amber-950/25 border-amber-950/20 text-amber-950'
+              : isPhotos
+              ? 'bg-emerald-950/15 hover:bg-emerald-950/25 border-emerald-950/20 text-emerald-950'
+              : 'bg-black/25 hover:bg-black/35 border-white/20 text-white'
+          }`}
         >
           <AnimatePresence mode="wait">
             <motion.span
@@ -120,7 +138,7 @@ export const FloatingGlassFooter: React.FC<FloatingGlassFooterProps> = ({
               className="flex items-center gap-1.5 whitespace-nowrap"
             >
               <span>Next ➔ {nextLabel}</span>
-              <ArrowRightLeft className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-white/90 shrink-0" />
+              <ArrowRightLeft className={`w-3 h-3 sm:w-3.5 sm:h-3.5 shrink-0 ${isAudio ? 'text-amber-950' : isPhotos ? 'text-emerald-950' : 'text-white/90'}`} />
             </motion.span>
           </AnimatePresence>
         </div>
@@ -141,8 +159,8 @@ export const FloatingGlassFooter: React.FC<FloatingGlassFooterProps> = ({
           isVideos
             ? 'bg-gradient-to-tr from-rose-600 via-red-500 to-rose-600 text-white border-rose-300 shadow-[0_8px_24px_rgba(244,63,94,0.4)] ring-2 ring-rose-300/60 focus:ring-rose-300/60'
             : isPhotos
-            ? 'bg-gradient-to-tr from-[#250942] via-[#3a0d66] to-[#250942] text-purple-300 border-purple-500/50 shadow-[0_8px_24px_rgba(59,7,100,0.6)] ring-2 ring-purple-400/40 focus:ring-purple-300/60'
-            : 'bg-gradient-to-tr from-[#2d1603] via-[#422006] to-[#2d1603] text-amber-300 border-amber-500/50 shadow-[0_8px_24px_rgba(69,26,3,0.6)] ring-2 ring-amber-400/40 focus:ring-amber-300/60'
+            ? 'bg-gradient-to-tr from-emerald-400 via-green-300 to-emerald-400 text-emerald-950 border-emerald-200 shadow-[0_8px_24px_rgba(16,185,129,0.4)] ring-2 ring-emerald-400/60 focus:ring-emerald-300/60'
+            : 'bg-gradient-to-tr from-amber-400 via-yellow-300 to-yellow-400 text-amber-950 border-yellow-200 shadow-[0_8px_24px_rgba(234,179,8,0.4)] ring-2 ring-yellow-400/60 focus:ring-yellow-300/60'
         }`}
         title={
           selectedCategory && selectedCategory !== 'all'
@@ -169,12 +187,12 @@ export const FloatingGlassFooter: React.FC<FloatingGlassFooterProps> = ({
         transition={{ type: 'spring', stiffness: 420, damping: 26 }}
         onClick={onOpenPlusMenu}
         aria-label="Add Media"
-        className={`pointer-events-auto flex items-center justify-center w-11 h-11 sm:w-12 sm:h-12 rounded-full text-white cursor-pointer focus:outline-none focus:ring-4 shrink-0 shadow-xl border border-white/30 ${
+        className={`pointer-events-auto flex items-center justify-center w-11 h-11 sm:w-12 sm:h-12 rounded-full cursor-pointer focus:outline-none focus:ring-4 shrink-0 shadow-xl border ${
           isVideos
-            ? 'bg-gradient-to-tr from-rose-500 via-red-500 to-rose-600 shadow-[0_8px_24px_rgba(244,63,94,0.45)] ring-2 ring-rose-300/60 focus:ring-rose-300/60'
+            ? 'bg-gradient-to-tr from-rose-500 via-red-500 to-rose-600 text-white border-white/30 shadow-[0_8px_24px_rgba(244,63,94,0.45)] ring-2 ring-rose-300/60 focus:ring-rose-300/60'
             : isPhotos
-            ? 'bg-gradient-to-tr from-purple-600 via-violet-600 to-indigo-600 shadow-[0_8px_24px_rgba(147,51,234,0.45)] ring-2 ring-purple-300/60 focus:ring-purple-300/60'
-            : 'bg-gradient-to-tr from-amber-600 via-yellow-500 to-amber-600 shadow-[0_8px_24px_rgba(217,119,6,0.45)] ring-2 ring-amber-300/60 focus:ring-amber-300/60'
+            ? 'bg-gradient-to-tr from-emerald-400 via-green-400 to-emerald-500 text-emerald-950 border-emerald-200 shadow-[0_8px_24px_rgba(16,185,129,0.4)] ring-2 ring-emerald-400/60 focus:ring-emerald-300/60'
+            : 'bg-gradient-to-tr from-amber-400 via-yellow-400 to-amber-500 text-amber-950 border-yellow-200 shadow-[0_8px_24px_rgba(234,179,8,0.4)] ring-2 ring-yellow-400/60 focus:ring-yellow-300/60'
         }`}
         title={`Add New ${isVideos ? 'Video' : isPhotos ? 'Photo' : 'Audio'}`}
       >
