@@ -104,7 +104,9 @@ export function App() {
     const nonAarti = loaded.filter(
       (v) => !isAartiCategory(v.category) && !targetAartiYtIds.has(v.youtubeId)
     );
-    return [...INITIAL_VIDEOS, ...nonAarti];
+    const uniqueVideos = new Map<string, VideoItem>();
+    [...INITIAL_VIDEOS, ...nonAarti].forEach((video) => uniqueVideos.set(video.youtubeId || video.id, video));
+    return Array.from(uniqueVideos.values());
   });
 
   const [photos, setPhotos] = useState<PhotoItem[]>(() =>
@@ -118,7 +120,10 @@ export function App() {
       'audio-other-drive-2': 'Marriage – Depression',
       'audio-other-drive-3': 'Maharajis on Marriage',
     };
-    return loaded.map((audio) => titles[audio.id] ? { ...audio, title: titles[audio.id] } : audio);
+    const merged = [...INITIAL_AUDIOS, ...loaded].map((audio) => titles[audio.id] ? { ...audio, title: titles[audio.id] } : audio);
+    const unique = new Map<string, AudioItem>();
+    merged.forEach((audio) => unique.set(audio.driveId || audio.id, audio));
+    return Array.from(unique.values());
   });
 
   const [categories, setCategories] = useState<CategoryInfo[]>(() => {
@@ -297,7 +302,9 @@ export function App() {
             const nonAarti = merged.filter(
               (v) => !isAartiCategory(v.category) && !targetAartiYtIds.has(v.youtubeId)
             );
-            return [...INITIAL_VIDEOS, ...nonAarti];
+            const uniqueVideos = new Map<string, VideoItem>();
+            [...INITIAL_VIDEOS, ...nonAarti].forEach((video) => uniqueVideos.set(video.youtubeId || video.id, video));
+            return Array.from(uniqueVideos.values());
           });
         }
         if (idbPhotos && Array.isArray(idbPhotos) && idbPhotos.length > 0) {
@@ -863,13 +870,25 @@ export function App() {
     }
   };
 
-  const handleClearCache = () => {
+  const handleClearCache = async () => {
     try {
-      // Purge only temporary session items; NEVER clear user vault data or PWA offline assets
+      // Clear temporary browser/PWA caches only; preserve vault media and settings.
       sessionStorage.clear();
-      showToast('Temporary cache purged (All your media remains safe) 🧹✨');
+      if ('caches' in window) {
+        const cacheKeys = await window.caches.keys();
+        await Promise.all(cacheKeys.map((key) => window.caches.delete(key)));
+      }
+      if ('serviceWorker' in navigator) {
+        const registrations = await navigator.serviceWorker.getRegistrations();
+        await Promise.all(registrations.map((registration) => registration.unregister().catch(() => false)));
+      }
+      showToast('Temporary cache cleared. Your media is safe 🧹✨');
+      window.setTimeout(() => {
+        const separator = window.location.pathname.includes('?') ? '&' : '?';
+        window.location.href = `${window.location.pathname}${separator}cacheBust=${Date.now()}`;
+      }, 250);
     } catch {
-      // Fallback
+      showToast('Cache could not be fully cleared');
     }
   };
 

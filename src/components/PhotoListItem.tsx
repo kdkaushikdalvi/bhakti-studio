@@ -1,9 +1,7 @@
 import React, { useState } from 'react';
 import {
-  Star,
-  Trash2,
-  Maximize2,
   Image as ImageIcon,
+  Maximize2,
   MoreVertical,
 } from 'lucide-react';
 import { PhotoItem } from '../types';
@@ -71,29 +69,6 @@ export const PhotoListItem: React.FC<PhotoListItemProps> = ({
 
       {/* Right Action Controls */}
       <div className="flex items-center gap-1 shrink-0">
-        {/* Favorite Button */}
-        <button
-          type="button"
-          onClick={() => onToggleFavorite(photo.id)}
-          className={`p-1.5 border transition-colors rounded-lg cursor-pointer ${
-            photo.isFavorite
-              ? 'bg-orange-500 text-white border-orange-500 shadow-2xs'
-              : 'border-orange-100 dark:border-stone-700 bg-white dark:bg-stone-800 text-stone-400 hover:text-orange-500 hover:bg-orange-50 dark:hover:bg-stone-700'
-          }`}
-          title={photo.isFavorite ? 'Remove Favorite' : 'Mark as Favorite'}
-        >
-        </button>
-
-        {/* View / Fullscreen Button */}
-        <button
-          type="button"
-          onClick={() => onView(photo)}
-          className="p-1.5 bg-gradient-to-r from-orange-500 to-amber-500 dark:from-cyan-600 dark:to-blue-600 text-white text-xs font-semibold rounded-lg shadow-2xs hover:opacity-90 transition-all flex items-center gap-1 cursor-pointer"
-          title="View in Fullscreen"
-        >
-          <Maximize2 className="w-3.5 h-3.5" />
-        </button>
-
         {/* More actions */}
         <button
           type="button"
