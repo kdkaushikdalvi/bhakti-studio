@@ -1,15 +1,13 @@
 import React from 'react';
-import { motion, AnimatePresence } from 'motion/react';
-import { Video, Image as ImageIcon, Disc3, Plus, ArrowRightLeft, Layers } from 'lucide-react';
+import { motion } from 'motion/react';
+import { Video, Image as ImageIcon, Disc3, Plus } from 'lucide-react';
 import { MediaTypeFilter, ThemeMode } from '../types';
 
 interface FloatingGlassFooterProps {
   currentMediaType: MediaTypeFilter;
   onSelectMediaType: (type: MediaTypeFilter) => void;
   onOpenPlusMenu: () => void;
-  onOpenCategorySwitch?: () => void;
-  selectedCategory?: string;
-  defaultCategory?: string;
+  isAddSectionOpen?: boolean;
   videoCount?: number;
   photoCount?: number;
   audioCount?: number;
@@ -20,183 +18,124 @@ export const FloatingGlassFooter: React.FC<FloatingGlassFooterProps> = ({
   currentMediaType,
   onSelectMediaType,
   onOpenPlusMenu,
-  onOpenCategorySwitch,
-  selectedCategory = 'all',
-  defaultCategory = '',
+  isAddSectionOpen = false,
   videoCount = 0,
   photoCount = 0,
   audioCount = 0,
-  theme = 'blue',
 }) => {
   const isVideos = currentMediaType === 'videos';
   const isPhotos = currentMediaType === 'photos';
-  const isAudio = currentMediaType === 'audio';
 
-  const getNextMediaType = (): MediaTypeFilter => {
-    if (isVideos) return 'audio';
-    if (isAudio) return 'photos';
-    return 'videos';
-  };
-
-  const nextType = getNextMediaType();
-  const nextLabel = nextType === 'videos' ? 'Videos' : nextType === 'audio' ? 'Audio' : 'Photos';
-
-  const handleToggle = () => {
-    onSelectMediaType(nextType);
-  };
+  const tabs: {
+    type: MediaTypeFilter;
+    label: string;
+    icon: React.FC<{ className?: string; style?: React.CSSProperties }>;
+    count: number;
+  }[] = [
+    { type: 'videos', label: 'Videos', icon: Video, count: videoCount },
+    { type: 'photos', label: 'Photos', icon: ImageIcon, count: photoCount },
+    { type: 'audio', label: 'Audio', icon: Disc3, count: audioCount },
+  ];
 
   return (
     <div
       id="floating-glass-footer-container"
-      className="fixed bottom-6 left-1/2 -translate-x-1/2 z-40 w-full max-w-[520px] px-3.5 pointer-events-none select-none flex items-center justify-center gap-2 sm:gap-2.5"
+      className="fixed bottom-5 left-1/2 -translate-x-1/2 z-40 w-full max-w-[520px] px-3.5 pointer-events-none select-none flex items-center justify-center gap-2 sm:gap-2.5"
     >
-      {/* Single Dynamic Media Toggle Capsule */}
-      <motion.button
-        id="single-media-toggle-pill"
-        type="button"
-        onClick={handleToggle}
-        whileHover={{ scale: 1.02 }}
-        whileTap={{ scale: 0.97 }}
-        initial={{ y: 24, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        transition={{ type: 'spring', stiffness: 420, damping: 28 }}
-        aria-label={`Current: ${isVideos ? 'Videos' : isPhotos ? 'Photos' : 'Audio'}. Click to switch to ${nextLabel}`}
-        className={`pointer-events-auto flex-1 flex items-center justify-between gap-2 px-3 py-2 sm:px-4 sm:py-2.5 rounded-full cursor-pointer transition-all duration-300 shadow-xl border-2 ring-2 ring-offset-1 select-none overflow-hidden relative ${
+      {/* 3-Tab Segmented Selection Bar */}
+      <div
+        id="media-tabs-bottom-bar"
+        className={`pointer-events-auto flex-1 flex items-center p-1 sm:p-1.5 rounded-full border shadow-xl backdrop-blur-md transition-colors duration-300 ${
           isVideos
-            ? 'bg-gradient-to-r from-rose-500 via-red-500 to-rose-600 text-white border-rose-300 ring-rose-400/80 ring-offset-rose-950/20 shadow-[0_8px_24px_rgba(244,63,94,0.4)]'
+            ? 'bg-white/95 border-rose-200/90 shadow-[0_8px_24px_rgba(244,63,94,0.16)] ring-1 ring-rose-300/40'
             : isPhotos
-            ? 'bg-gradient-to-r from-emerald-400 via-green-400 to-emerald-400 text-emerald-950 border-emerald-200 ring-emerald-400/80 ring-offset-emerald-100 shadow-[0_8px_24px_rgba(16,185,129,0.35)]'
-            : 'bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-400 text-amber-950 border-yellow-200 ring-yellow-400/80 ring-offset-yellow-100 shadow-[0_8px_24px_rgba(234,179,8,0.35)]'
+            ? 'bg-white/95 border-emerald-200/90 shadow-[0_8px_24px_rgba(16,185,129,0.16)] ring-1 ring-emerald-300/40'
+            : 'bg-white/95 border-yellow-200/90 shadow-[0_8px_24px_rgba(234,179,8,0.16)] ring-1 ring-yellow-300/40'
         }`}
       >
-        {/* Left Side: Circular Icon + Title + Devanagari/Sub Badge */}
-        <div className="flex items-center gap-2 sm:gap-2.5 min-w-0">
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={currentMediaType}
-              initial={{ rotate: -30, scale: 0.7, opacity: 0 }}
-              animate={{ rotate: 0, scale: 1, opacity: 1 }}
-              exit={{ rotate: 30, scale: 0.7, opacity: 0 }}
-              transition={{ duration: 0.2 }}
-              className={`w-8 h-8 sm:w-9 sm:h-9 rounded-full backdrop-blur-md flex items-center justify-center shrink-0 border shadow-inner ${
-                isAudio
-                  ? 'bg-amber-950/15 border-amber-950/20'
-                  : isPhotos
-                  ? 'bg-emerald-950/15 border-emerald-950/20'
-                  : 'bg-white/20 border-white/30'
+        {tabs.map((tab) => {
+          const isActive = currentMediaType === tab.type;
+          const Icon = tab.icon;
+
+          return (
+            <button
+              key={tab.type}
+              type="button"
+              onClick={() => onSelectMediaType(tab.type)}
+              className={`relative flex-1 flex items-center justify-center gap-1 sm:gap-1.5 py-1.5 sm:py-2 px-1.5 sm:px-2 rounded-full text-xs font-bold transition-all duration-200 cursor-pointer select-none ${
+                isActive
+                  ? tab.type === 'videos'
+                    ? 'text-white shadow-xs'
+                    : tab.type === 'photos'
+                    ? 'text-white shadow-xs'
+                    : 'text-amber-950 shadow-xs'
+                  : 'text-stone-600 hover:text-stone-900 hover:bg-stone-100/60'
               }`}
             >
-              {isVideos ? (
-                <Video className="w-4 h-4 text-white" />
-              ) : isPhotos ? (
-                <ImageIcon className="w-4 h-4 text-emerald-950" />
-              ) : (
-                <Disc3 className="w-4 h-4 text-amber-950 animate-spin" style={{ animationDuration: '4s' }} />
+              {isActive && (
+                <motion.div
+                  layoutId="activeBottomTabPill"
+                  transition={{ type: 'spring', stiffness: 450, damping: 32 }}
+                  className={`absolute inset-0 rounded-full ${
+                    tab.type === 'videos'
+                      ? 'bg-gradient-to-r from-rose-500 via-red-500 to-rose-600 shadow-md shadow-rose-900/25'
+                      : tab.type === 'photos'
+                      ? 'bg-gradient-to-r from-emerald-500 via-green-500 to-emerald-600 shadow-md shadow-emerald-900/25'
+                      : 'bg-gradient-to-r from-amber-400 via-yellow-400 to-amber-400 shadow-md shadow-amber-900/15'
+                  }`}
+                />
               )}
-            </motion.div>
-          </AnimatePresence>
+              <span className="relative z-10 flex items-center gap-1 sm:gap-1.5">
+                <Icon
+                  className={`w-3.5 h-3.5 shrink-0 ${
+                    tab.type === 'audio' && isActive ? 'animate-spin' : ''
+                  }`}
+                  style={
+                    tab.type === 'audio' && isActive
+                      ? { animationDuration: '4s' }
+                      : undefined
+                  }
+                />
+                <span className="text-[11px] sm:text-xs font-sans tracking-tight">
+                  {tab.label}
+                </span>
+                {tab.count > 0 && (
+                  <span
+                    className={`text-[9px] px-1 sm:px-1.5 py-0.2 rounded-full font-bold transition-colors ${
+                      isActive
+                        ? tab.type === 'audio'
+                          ? 'bg-amber-950/20 text-amber-950'
+                          : 'bg-white/25 text-white'
+                        : 'bg-stone-200/70 text-stone-700'
+                    }`}
+                  >
+                    {tab.count}
+                  </span>
+                )}
+              </span>
+            </button>
+          );
+        })}
+      </div>
 
-          <div className="flex items-center gap-1.5 sm:gap-2 min-w-0">
-            <AnimatePresence mode="wait">
-              <motion.span
-                key={currentMediaType}
-                initial={{ y: 8, opacity: 0 }}
-                animate={{ y: 0, opacity: 1 }}
-                exit={{ y: -8, opacity: 0 }}
-                transition={{ duration: 0.18 }}
-                className={`font-bold text-sm sm:text-base font-sans tracking-tight drop-shadow-xs ${
-                  isAudio
-                    ? 'text-amber-950'
-                    : isPhotos
-                    ? 'text-emerald-950'
-                    : 'text-white'
-                }`}
-              >
-                {isVideos ? 'Videos' : isPhotos ? 'Photos' : 'Audio'}
-              </motion.span>
-            </AnimatePresence>
-          </div>
-        </div>
-
-        {/* Right Side: Next -> Target Action Pill */}
-        <div
-          className={`flex items-center gap-1 backdrop-blur-md border px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full text-[11px] sm:text-xs font-bold shrink-0 transition-colors shadow-inner ${
-            isAudio
-              ? 'bg-amber-950/15 hover:bg-amber-950/25 border-amber-950/20 text-amber-950'
-              : isPhotos
-              ? 'bg-emerald-950/15 hover:bg-emerald-950/25 border-emerald-950/20 text-emerald-950'
-              : 'bg-black/25 hover:bg-black/35 border-white/20 text-white'
-          }`}
-        >
-          <AnimatePresence mode="wait">
-            <motion.span
-              key={`next-${nextType}`}
-              initial={{ x: 6, opacity: 0 }}
-              animate={{ x: 0, opacity: 1 }}
-              exit={{ x: -6, opacity: 0 }}
-              transition={{ duration: 0.18 }}
-              className="flex items-center gap-1.5 whitespace-nowrap"
-            >
-              <span>Next ➔ {nextLabel}</span>
-              <ArrowRightLeft className={`w-3 h-3 sm:w-3.5 sm:h-3.5 shrink-0 ${isAudio ? 'text-amber-950' : isPhotos ? 'text-emerald-950' : 'text-white/90'}`} />
-            </motion.span>
-          </AnimatePresence>
-        </div>
-      </motion.button>
-
-      {/* Floating Category Icon Button (Next to + Add Button) */}
-      <motion.button
-        id="footer-btn-category-switch"
-        type="button"
-        initial={{ y: 24, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        whileHover={{ scale: 1.08 }}
-        whileTap={{ scale: 0.92 }}
-        transition={{ type: 'spring', stiffness: 420, damping: 26 }}
-        onClick={onOpenCategorySwitch}
-        aria-label="Switch Category"
-        className={`pointer-events-auto flex items-center justify-center w-11 h-11 sm:w-12 sm:h-12 rounded-full cursor-pointer focus:outline-none focus:ring-4 shrink-0 shadow-xl border select-none relative ${
-          isVideos
-            ? 'bg-gradient-to-tr from-rose-600 via-red-500 to-rose-600 text-white border-rose-300 shadow-[0_8px_24px_rgba(244,63,94,0.4)] ring-2 ring-rose-300/60 focus:ring-rose-300/60'
-            : isPhotos
-            ? 'bg-gradient-to-tr from-emerald-400 via-green-300 to-emerald-400 text-emerald-950 border-emerald-200 shadow-[0_8px_24px_rgba(16,185,129,0.4)] ring-2 ring-emerald-400/60 focus:ring-emerald-300/60'
-            : 'bg-gradient-to-tr from-amber-400 via-yellow-300 to-yellow-400 text-amber-950 border-yellow-200 shadow-[0_8px_24px_rgba(234,179,8,0.4)] ring-2 ring-yellow-400/60 focus:ring-yellow-300/60'
-        }`}
-        title={
-          selectedCategory && selectedCategory !== 'all'
-            ? `Category: ${selectedCategory} (Click to switch or pin)`
-            : 'Categories (Click to switch or pin default)'
-        }
-      >
-        <Layers className="w-5 h-5 stroke-[2.2]" />
-        {defaultCategory && defaultCategory !== 'all' && (
-          <span className="absolute -top-1 -right-1 w-4 h-4 bg-amber-400 text-slate-950 rounded-full flex items-center justify-center text-[9px] font-bold shadow-xs border border-white">
-            📌
-          </span>
-        )}
-      </motion.button>
-
-      {/* Modern Floating Circular Add Button */}
+      {/* Floating Plus Add Button */}
       <motion.button
         id="footer-btn-plus"
         type="button"
-        initial={{ y: 24, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        whileHover={{ scale: 1.08 }}
-        whileTap={{ scale: 0.92 }}
-        transition={{ type: 'spring', stiffness: 420, damping: 26 }}
+        whileHover={{ scale: 1.06 }}
+        whileTap={{ scale: 0.94 }}
         onClick={onOpenPlusMenu}
         aria-label="Add Media"
-        className={`pointer-events-auto flex items-center justify-center w-11 h-11 sm:w-12 sm:h-12 rounded-full cursor-pointer focus:outline-none focus:ring-4 shrink-0 shadow-xl border ${
+        className={`pointer-events-auto flex items-center justify-center w-10 h-10 sm:w-11 sm:h-11 rounded-full cursor-pointer focus:outline-none focus:ring-2 shrink-0 shadow-lg border text-white transition-all ${
           isVideos
-            ? 'bg-gradient-to-tr from-rose-500 via-red-500 to-rose-600 text-white border-white/30 shadow-[0_8px_24px_rgba(244,63,94,0.45)] ring-2 ring-rose-300/60 focus:ring-rose-300/60'
+            ? 'bg-gradient-to-tr from-rose-500 to-red-600 border-rose-300 shadow-[0_6px_20px_rgba(244,63,94,0.35)]'
             : isPhotos
-            ? 'bg-gradient-to-tr from-emerald-400 via-green-400 to-emerald-500 text-emerald-950 border-emerald-200 shadow-[0_8px_24px_rgba(16,185,129,0.4)] ring-2 ring-emerald-400/60 focus:ring-emerald-300/60'
-            : 'bg-gradient-to-tr from-amber-400 via-yellow-400 to-amber-500 text-amber-950 border-yellow-200 shadow-[0_8px_24px_rgba(234,179,8,0.4)] ring-2 ring-yellow-400/60 focus:ring-yellow-300/60'
+            ? 'bg-gradient-to-tr from-emerald-500 to-green-600 border-emerald-300 shadow-[0_6px_20px_rgba(16,185,129,0.35)]'
+            : 'bg-gradient-to-tr from-amber-400 to-yellow-500 border-yellow-200 text-amber-950 shadow-[0_6px_20px_rgba(234,179,8,0.35)]'
         }`}
-        title={`Add New ${isVideos ? 'Video' : isPhotos ? 'Photo' : 'Audio'}`}
+        title={isAddSectionOpen ? 'Close Add Section' : `Add ${isVideos ? 'Video' : isPhotos ? 'Photo' : 'Audio'}`}
       >
-        <Plus className="w-5 h-5 stroke-[2.5]" />
+        <Plus className={`w-4 h-4 stroke-[2.6] transition-transform duration-200 ${isAddSectionOpen ? 'rotate-45' : ''}`} />
       </motion.button>
     </div>
   );

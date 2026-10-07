@@ -4,12 +4,12 @@ export interface VideoItem {
   url: string;
   title: string;
   channelTitle?: string;
-  category: string;
   tags: string[];
   notes?: string;
   timestamps?: { time: number; label: string }[];
   isFavorite: boolean;
   isWatchLater: boolean;
+  isPinned?: boolean;
   createdAt: string; // ISO string
   thumbnailUrl: string;
 }
@@ -17,7 +17,6 @@ export interface VideoItem {
 export interface PhotoItem {
   id: string;
   title: string;
-  category: string;
   photoUrl: string; // Data URL or Web URL
   thumbnailUrl?: string;
   isFavorite: boolean;
@@ -38,7 +37,6 @@ export interface AudioItem {
   title: string;
   artistOrSource?: string;
   artist?: string;
-  category: string;
   tags?: string[];
   notes?: string;
   isFavorite: boolean;
@@ -51,23 +49,14 @@ export type MediaItem =
   | (PhotoItem & { mediaType: 'photo' })
   | (AudioItem & { mediaType: 'audio' });
 
-export interface CategoryInfo {
-  id: string;
-  name: string;
-  color: string; // Tailwind color or hex
-  description?: string;
-  iconName?: string;
-}
-
-export type ViewMode = 'list' | 'grid' | 'split';
+export type ViewMode = 'list';
 
 export type MediaTypeFilter = 'videos' | 'photos' | 'audio';
 
-export type SortOption = 'newest' | 'oldest' | 'title_asc' | 'title_desc' | 'category_asc';
+export type SortOption = 'newest' | 'oldest' | 'title_asc' | 'title_desc';
 
 export interface FilterState {
   searchQuery: string;
-  selectedCategory: string; // 'all' or category name
   mediaType: MediaTypeFilter;
   onlyFavorites: boolean;
   onlyWatchLater: boolean;
@@ -87,12 +76,6 @@ export interface AppSettings {
   autoPlayNext: boolean;
   compactCards: boolean;
   timeFormat: '12h' | '24h';
-  defaultCategory: string;
-  defaultVideoCategory?: string;
-  defaultPhotoCategory?: string;
-  defaultAudioCategory?: string;
   enableVibrations: boolean;
   theme?: ThemeMode;
 }
-
-

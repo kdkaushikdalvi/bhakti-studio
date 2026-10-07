@@ -2,50 +2,23 @@ import React, { useState } from 'react';
 import {
   X,
   Trash2,
-  Tag,
 } from 'lucide-react';
-import { VideoItem, CategoryInfo } from '../types';
-import { translateCategoryToMarathi, normalizeCategory } from './CategoryPillsRow';
+import { VideoItem } from '../types';
 
 interface EditVideoModalProps {
   video: VideoItem;
-  categories?: CategoryInfo[];
   onSave: (updated: VideoItem) => void;
   onClose: () => void;
 }
 
-const DEFAULT_CATEGORIES = [
-  'भजन',
-  'अभंग',
-  'कीर्तन',
-  'प्रवचन',
-  'आरती',
-  'हरिपाठ',
-  'स्तोत्र',
-  'ध्यान',
-  'मंत्र',
-  'दर्शन',
-  'कथा',
-];
-
 export const EditVideoModal: React.FC<EditVideoModalProps> = ({
   video,
-  categories,
   onSave,
   onClose,
 }) => {
   const [title, setTitle] = useState(video.title);
   const [channelTitle, setChannelTitle] = useState(video.channelTitle || '');
-  const [category, setCategory] = useState(translateCategoryToMarathi(video.category || 'भजन'));
   const [notes, setNotes] = useState(video.notes || '');
-
-  const availableCategories = React.useMemo(() => {
-    if (!categories || categories.length === 0) return DEFAULT_CATEGORIES;
-    const names = categories
-      .map((c) => translateCategoryToMarathi(c.name))
-      .filter((n) => n && normalizeCategory(n) !== 'all');
-    return names.length > 0 ? Array.from(new Set(names)) : DEFAULT_CATEGORIES;
-  }, [categories]);
   
   // Tags
   const [tags, setTags] = useState<string[]>(video.tags || []);
@@ -98,7 +71,6 @@ export const EditVideoModal: React.FC<EditVideoModalProps> = ({
       ...video,
       title: title.trim() || video.title,
       channelTitle: channelTitle.trim() || video.channelTitle,
-      category: category.trim() || video.category || 'भजन',
       tags,
       notes: notes.trim(),
       timestamps,
@@ -153,29 +125,6 @@ export const EditVideoModal: React.FC<EditVideoModalProps> = ({
               placeholder="Speaker or Channel"
               className="w-full bg-orange-50/30 border border-orange-200 rounded-xl px-3 py-2 text-base sm:text-xs text-stone-900 focus:outline-none focus:ring-2 focus:ring-orange-400"
             />
-          </div>
-
-          {/* Category */}
-          <div>
-            <label className="block text-[11px] uppercase tracking-wider text-orange-800 mb-1 font-bold">
-              Category
-            </label>
-            <div className="flex flex-wrap gap-1.5 p-2 bg-orange-50/30 border border-orange-200 rounded-xl max-h-28 overflow-y-auto">
-              {availableCategories.map((c) => (
-                <button
-                  key={c}
-                  type="button"
-                  onClick={() => setCategory(c)}
-                  className={`px-2.5 py-1 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
-                    normalizeCategory(category) === normalizeCategory(c)
-                      ? 'bg-orange-600 text-white shadow-2xs'
-                      : 'bg-white text-stone-700 hover:bg-orange-100/60 border border-orange-200/70'
-                  }`}
-                >
-                  {c}
-                </button>
-              ))}
-            </div>
           </div>
 
           {/* Tags */}

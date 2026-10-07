@@ -14,7 +14,6 @@ import {
   VideoItem,
   PhotoItem,
   AudioItem,
-  CategoryInfo,
   UserProfile,
   AppSettings,
   ThemeMode,
@@ -294,7 +293,6 @@ export interface VaultBackupSnapshot {
   videos: VideoItem[];
   photos: PhotoItem[];
   audios: AudioItem[];
-  categories: CategoryInfo[];
   userProfile?: UserProfile;
   appSettings?: AppSettings;
 }
@@ -308,7 +306,7 @@ export function exportVaultDataToFile(snapshot: VaultBackupSnapshot): void {
   const url = URL.createObjectURL(blob);
   const anchor = document.createElement('a');
   anchor.href = url;
-  anchor.download = `Bhakti_Vault_Backup_${new Date().toISOString().split('T')[0]}.json`;
+  anchor.download = `Bhakti_Backup_${new Date().toISOString().split('T')[0]}.json`;
   document.body.appendChild(anchor);
   anchor.click();
   document.body.removeChild(anchor);

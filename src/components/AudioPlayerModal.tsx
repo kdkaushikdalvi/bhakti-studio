@@ -17,7 +17,6 @@ import {
   HardDrive,
 } from 'lucide-react';
 import { AudioItem } from '../types';
-import { translateCategoryToMarathi } from './CategoryPillsRow';
 import {
   getGoogleDriveStreamUrl,
   getGoogleDrivePreviewUrl,
@@ -266,12 +265,6 @@ export const AudioPlayerModal: React.FC<AudioPlayerModalProps> = ({
                   <span className="text-xs text-amber-800 font-semibold">
                     {audio.artistOrSource || 'Spiritual Audio'}
                   </span>
-                  {audio.category && (
-                    <span className="text-[10px] px-2 py-0.5 rounded-full bg-yellow-200 border border-yellow-400 text-amber-950 font-bold flex items-center gap-1 shadow-2xs">
-                      <Tag className="w-2.5 h-2.5 text-amber-800" />
-                      <span>{translateCategoryToMarathi(audio.category)}</span>
-                    </span>
-                  )}
                 </div>
               </div>
 

@@ -11,22 +11,17 @@ import {
   MediaItem,
   FilterState,
   MediaTypeFilter,
-  ViewMode,
   UserProfile,
   AppSettings,
   ThemeMode,
 } from './types';
-import { VideoCard } from './components/VideoCard';
 import { VideoListItem } from './components/VideoListItem';
-import { PhotoCard } from './components/PhotoCard';
 import { PhotoListItem } from './components/PhotoListItem';
-import { AudioCard } from './components/AudioCard';
 import { AudioListItem } from './components/AudioListItem';
 import { AudioPlayerModal } from './components/AudioPlayerModal';
-import { SplitPlayerView } from './components/SplitPlayerView';
 import { Navbar } from './components/Navbar';
 import { FloatingGlassFooter } from './components/FloatingGlassFooter';
-import { AppleAddMediaBottomSheet } from './components/AppleAddMediaBottomSheet';
+import { InlineAddMediaSection } from './components/InlineAddMediaSection';
 import { VideoPlayerModal } from './components/VideoPlayerModal';
 import { EditVideoModal } from './components/EditVideoModal';
 import { PhotoLightboxModal } from './components/PhotoLightboxModal';
@@ -34,11 +29,6 @@ import { SidebarDrawer } from './components/SidebarDrawer';
 import { InstallPwaModal } from './components/InstallPwaModal';
 import { ProfileModal } from './components/ProfileModal';
 import { SettingsModal } from './components/SettingsModal';
-import { CategoryManagerModal } from './components/CategoryManagerModal';
-import { CategorySwitchBottomSheet } from './components/CategorySwitchBottomSheet';
-import { CategoryAccordionFeed } from './components/CategoryAccordionFeed';
-import { normalizeCategory, DEFAULT_PRESET_CATEGORIES, translateCategoryToMarathi } from './components/CategoryPillsRow';
-import { CategoryInfo } from './types';
 import {
   saveLocalAudioFile,
   deleteLocalAudioFile,
@@ -48,11 +38,9 @@ import {
   STORAGE_KEY_VIDEOS,
   STORAGE_KEY_PHOTOS,
   STORAGE_KEY_AUDIOS,
-  STORAGE_KEY_CATEGORIES,
   STORAGE_KEY_PROFILE,
   STORAGE_KEY_SETTINGS,
   STORAGE_KEY_THEME,
-  STORAGE_KEY_VIEW_MODE,
   STORE_VAULT_RECORDS,
   openMasterDatabase,
   persistVaultCollection,
@@ -82,17 +70,45 @@ const DEFAULT_SETTINGS: AppSettings = {
   autoPlayNext: true,
   compactCards: false,
   timeFormat: '12h',
-  defaultCategory: '',
-  defaultVideoCategory: '',
-  defaultPhotoCategory: '',
-  defaultAudioCategory: '',
   enableVibrations: true,
 };
 
-const isAartiCategory = (cat?: string) => {
-  if (!cat) return false;
-  const n = cat.toLowerCase().trim();
-  return n === 'आरती' || n === 'aarti' || n === 'aarati' || n === 'arti';
+const cleanAndSequencePhotos = (rawList: PhotoItem[]): PhotoItem[] => {
+  const filtered = (rawList || []).filter(
+    (p) =>
+      p &&
+      p.id !== 'photo-swami-darshan' &&
+      p.id !== 'photo-darshan' &&
+      !p.title?.toLowerCase().includes('swami darshan')
+  );
+
+  const mapped = filtered.map((p) => {
+    if (p.id === 'photo-swami-blessing') return { ...p, id: 'photo-1', title: 'Photo 1' };
+    if (p.id === 'photo-swami-divine') return { ...p, id: 'photo-2', title: 'Photo 2' };
+    if (p.id === 'photo-mind-state') return { ...p, id: 'photo-3', title: 'Photo 3' };
+    if (p.id === 'photo-self-pleasure') return { ...p, id: 'photo-4', title: 'Photo 4' };
+    return p;
+  });
+
+  const unique = new Map<string, PhotoItem>();
+  [...INITIAL_PHOTOS, ...mapped].forEach((p) => {
+    if (!unique.has(p.id)) {
+      unique.set(p.id, p);
+    }
+  });
+
+  return Array.from(unique.values()).map((p, idx) => ({
+    ...p,
+    title:
+      !p.title ||
+      p.title.startsWith('Photo') ||
+      p.title === 'Paramahamsa Vishwananda' ||
+      p.title.includes('Darshan') ||
+      p.title === 'Mind-State' ||
+      p.title === 'Self-Pleasure'
+        ? `Photo ${idx + 1}`
+        : p.title,
+  }));
 };
 
 export function App() {
@@ -100,18 +116,15 @@ export function App() {
   const [videos, setVideos] = useState<VideoItem[]>(() => {
     const loaded = getInitialFromLocalStorage<VideoItem[]>(STORAGE_KEY_VIDEOS, INITIAL_VIDEOS);
     if (!loaded || loaded.length === 0) return INITIAL_VIDEOS;
-    const targetAartiYtIds = new Set(['Ywd9xNcvAFM', 'Fql0RCRyFO0', 'A4JcViRiWvE']);
-    const nonAarti = loaded.filter(
-      (v) => !isAartiCategory(v.category) && !targetAartiYtIds.has(v.youtubeId)
-    );
     const uniqueVideos = new Map<string, VideoItem>();
-    [...INITIAL_VIDEOS, ...nonAarti].forEach((video) => uniqueVideos.set(video.youtubeId || video.id, video));
+    [...INITIAL_VIDEOS, ...loaded].forEach((video) => uniqueVideos.set(video.youtubeId || video.id, video));
     return Array.from(uniqueVideos.values());
   });
 
-  const [photos, setPhotos] = useState<PhotoItem[]>(() =>
-    getInitialFromLocalStorage<PhotoItem[]>(STORAGE_KEY_PHOTOS, INITIAL_PHOTOS)
-  );
+  const [photos, setPhotos] = useState<PhotoItem[]>(() => {
+    const loaded = getInitialFromLocalStorage<PhotoItem[]>(STORAGE_KEY_PHOTOS, INITIAL_PHOTOS);
+    return cleanAndSequencePhotos(loaded);
+  });
 
   const [audios, setAudios] = useState<AudioItem[]>(() => {
     const loaded = getInitialFromLocalStorage<AudioItem[]>(STORAGE_KEY_AUDIOS, INITIAL_AUDIOS);
@@ -126,38 +139,6 @@ export function App() {
     return Array.from(unique.values());
   });
 
-  const [categories, setCategories] = useState<CategoryInfo[]>(() => {
-    const loaded = getInitialFromLocalStorage<CategoryInfo[]>(STORAGE_KEY_CATEGORIES, DEFAULT_PRESET_CATEGORIES);
-    if (!loaded || loaded.length === 0) return DEFAULT_PRESET_CATEGORIES;
-    const legacySystemIds = new Set([
-      'cat-all', 'cat-bhajans', 'cat-abhang', 'cat-lectures', 'cat-haripath',
-      'cat-stotra', 'cat-meditation', 'cat-mantras', 'cat-darshan', 'cat-katha',
-    ]);
-    const legacySystemNames = new Set([
-      'abhang', 'lecture', 'haripath', 'stotra', 'meditation', 'mantra', 'darshan', 'katha',
-    ]);
-    const normalized = loaded.filter((cat) =>
-      !legacySystemIds.has(cat.id) && !legacySystemNames.has(normalizeCategory(cat.name))
-    ).map((cat) => ({
-      ...cat,
-      name: translateCategoryToMarathi(cat.name),
-    }));
-    const preferredOrder = DEFAULT_PRESET_CATEGORIES.map((cat) => normalizeCategory(cat.name));
-    normalized.sort((a, b) => {
-      const aIndex = preferredOrder.indexOf(normalizeCategory(a.name));
-      const bIndex = preferredOrder.indexOf(normalizeCategory(b.name));
-      if (aIndex === -1 && bIndex === -1) return 0;
-      if (aIndex === -1) return 1;
-      if (bIndex === -1) return -1;
-      return aIndex - bIndex;
-    });
-    // Keep exactly the six shared system categories available across all media types.
-    const existing = new Set(normalized.map((cat) => normalizeCategory(cat.name)));
-    return [...normalized, ...DEFAULT_PRESET_CATEGORIES.filter((cat) =>
-      !existing.has(normalizeCategory(cat.name)) && cat.id !== 'cat-all'
-    )];
-  });
-
   const [userProfile, setUserProfile] = useState<UserProfile>(() =>
     getInitialFromLocalStorage<UserProfile>(STORAGE_KEY_PROFILE, DEFAULT_PROFILE)
   );
@@ -166,21 +147,13 @@ export function App() {
     getInitialFromLocalStorage<AppSettings>(STORAGE_KEY_SETTINGS, DEFAULT_SETTINGS)
   );
 
-  // UI state
-  const [viewMode, setViewMode] = useState<ViewMode>(() =>
-    getInitialFromLocalStorage<ViewMode>(STORAGE_KEY_VIEW_MODE, 'list')
-  );
-
   // Track hydration from IndexedDB so we don't overwrite user records on cold boot
   const [isHydrated, setIsHydrated] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
-  const [addModalTab, setAddModalTab] = useState<'video' | 'photo' | 'audio'>('video');
+  const [isAddSectionOpen, setIsAddSectionOpen] = useState(false);
   const [isInstallPwaOpen, setIsInstallPwaOpen] = useState(false);
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
   const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
-  const [isCategoryManagerOpen, setIsCategoryManagerOpen] = useState(false);
-  const [isCategorySwitchOpen, setIsCategorySwitchOpen] = useState(false);
   const [editingVideo, setEditingVideo] = useState<VideoItem | null>(null);
   const [activePhoto, setActivePhoto] = useState<PhotoItem | null>(null);
   
@@ -191,89 +164,14 @@ export function App() {
 
   // Filter & Sort State
   const [filterState, setFilterState] = useState<FilterState>(() => {
-    let initialCat = 'all';
-    try {
-      const saved = localStorage.getItem(STORAGE_KEY_SETTINGS);
-      if (saved) {
-        const parsed = JSON.parse(saved);
-        const pinned = parsed.defaultVideoCategory || parsed.defaultCategory;
-        if (pinned) {
-          initialCat = pinned;
-        }
-      }
-    } catch {
-      // Fallback
-    }
     return {
       searchQuery: '',
-      selectedCategory: initialCat,
       onlyFavorites: false,
       onlyWatchLater: false,
       mediaType: 'videos',
       sortBy: 'newest',
     };
   });
-
-  // Accordion Interaction Behavior:
-  // - Display all categories as accordion sections on the video feed
-  // - By default, all accordion sections should be collapsed/closed (null)
-  // - Clicking category header expands; clicking again collapses
-  // - Only the selected category should expand; others remain collapsed
-  // - Preserves expanded/collapsed state across feed navigation
-  const [expandedCategory, setExpandedCategory] = useState<string | null>(() => {
-    return null;
-  });
-
-  const [addModalInitialCategory, setAddModalInitialCategory] = useState<string | undefined>(undefined);
-  const autoExpandedOnce = useRef(false);
-
-  useEffect(() => {
-    if (expandedCategory || autoExpandedOnce.current) return;
-    const mediaCategories = filterState.mediaType === 'audio'
-      ? ['निखिलानंद महाराज', 'महाराज', 'प्रभुपाद', 'इतर']
-      : filterState.mediaType === 'photos'
-      ? ['आरती', 'जेकेपी', 'भक्ती मार्ग', 'कीर्तन', 'भजन', 'इतर']
-      : categories.map((category) => category.name).filter((name) => normalizeCategory(name) !== 'all');
-    const firstWithItems = mediaCategories.find((category) => {
-      const normalized = normalizeCategory(category);
-      return filterState.mediaType === 'audio'
-        ? audios.some((item) => normalizeCategory(item.category || '') === normalized)
-        : filterState.mediaType === 'photos'
-        ? photos.some((item) => normalizeCategory(item.category || '') === normalized)
-        : videos.some((item) => normalizeCategory(item.category || '') === normalized);
-    });
-    if (firstWithItems) {
-      autoExpandedOnce.current = true;
-      setExpandedCategory(firstWithItems);
-    }
-  }, [audios, photos, videos, categories, filterState.mediaType, expandedCategory]);
-
-  const handleToggleCategory = useCallback((categoryName: string) => {
-    setExpandedCategory((prev) => {
-      const current = prev ? prev.split('|').filter(Boolean) : [];
-      const target = normalizeCategory(categoryName);
-      const nextItems = current.some((item) => normalizeCategory(item) === target)
-        ? current.filter((item) => normalizeCategory(item) !== target)
-        : [...current, categoryName];
-      const next = nextItems.length ? nextItems.join('|') : null;
-      try {
-        if (next) {
-          sessionStorage.setItem('bhakti_expanded_category_video', next);
-        } else {
-          sessionStorage.removeItem('bhakti_expanded_category_video');
-        }
-      } catch {
-        // Fallback
-      }
-      return next;
-    });
-  }, []);
-
-  const handleAddVideoToCategory = (catName: string) => {
-    setAddModalTab('video');
-    setAddModalInitialCategory(catName);
-    setIsAddModalOpen(true);
-  };
 
   // Dual-Layer Hydration: Reconcile state from high-capacity IndexedDB on startup
   useEffect(() => {
@@ -283,11 +181,10 @@ export function App() {
       try {
         await enablePersistentStorage();
 
-        const [idbVideos, idbPhotos, idbAudios, idbCats, idbProf, idbSettings] = await Promise.all([
+        const [idbVideos, idbPhotos, idbAudios, idbProf, idbSettings] = await Promise.all([
           getRecordFromIndexedDb<VideoItem[]>(STORAGE_KEY_VIDEOS),
           getRecordFromIndexedDb<PhotoItem[]>(STORAGE_KEY_PHOTOS),
           getRecordFromIndexedDb<AudioItem[]>(STORAGE_KEY_AUDIOS),
-          getRecordFromIndexedDb<CategoryInfo[]>(STORAGE_KEY_CATEGORIES),
           getRecordFromIndexedDb<UserProfile>(STORAGE_KEY_PROFILE),
           getRecordFromIndexedDb<AppSettings>(STORAGE_KEY_SETTINGS),
         ]);
@@ -298,17 +195,13 @@ export function App() {
         if (idbVideos && Array.isArray(idbVideos) && idbVideos.length > 0) {
           setVideos((prev) => {
             const merged = mergeItemsById(prev, idbVideos);
-            const targetAartiYtIds = new Set(['Ywd9xNcvAFM', 'Fql0RCRyFO0', 'A4JcViRiWvE']);
-            const nonAarti = merged.filter(
-              (v) => !isAartiCategory(v.category) && !targetAartiYtIds.has(v.youtubeId)
-            );
             const uniqueVideos = new Map<string, VideoItem>();
-            [...INITIAL_VIDEOS, ...nonAarti].forEach((video) => uniqueVideos.set(video.youtubeId || video.id, video));
+            [...INITIAL_VIDEOS, ...merged].forEach((video) => uniqueVideos.set(video.youtubeId || video.id, video));
             return Array.from(uniqueVideos.values());
           });
         }
         if (idbPhotos && Array.isArray(idbPhotos) && idbPhotos.length > 0) {
-          setPhotos((prev) => mergeItemsById(prev, idbPhotos));
+          setPhotos((prev) => cleanAndSequencePhotos(mergeItemsById(prev, idbPhotos)));
         }
         if (idbAudios && Array.isArray(idbAudios) && idbAudios.length > 0) {
           setAudios((prev) => mergeItemsById(prev, idbAudios).map((audio) => ({
@@ -318,13 +211,6 @@ export function App() {
               : audio.id === 'audio-other-drive-3' ? 'Maharajis on Marriage'
               : audio.title,
           })));
-        }
-        if (idbCats && Array.isArray(idbCats) && idbCats.length > 0) {
-          const marathiIdbCats = idbCats.map((cat) => ({
-            ...cat,
-            name: translateCategoryToMarathi(cat.name),
-          }));
-          setCategories((prev) => mergeItemsById(prev, marathiIdbCats));
         }
         if (idbProf) {
           setUserProfile((prev) => ({ ...prev, ...idbProf }));
@@ -366,11 +252,6 @@ export function App() {
 
   useEffect(() => {
     if (!isHydrated) return;
-    persistVaultCollection(STORAGE_KEY_CATEGORIES, categories);
-  }, [categories, isHydrated]);
-
-  useEffect(() => {
-    if (!isHydrated) return;
     persistVaultCollection(STORAGE_KEY_PROFILE, userProfile);
   }, [userProfile, isHydrated]);
 
@@ -379,12 +260,7 @@ export function App() {
     persistVaultCollection(STORAGE_KEY_SETTINGS, appSettings);
   }, [appSettings, isHydrated]);
 
-  useEffect(() => {
-    if (!isHydrated) return;
-    persistVaultCollection(STORAGE_KEY_VIEW_MODE, viewMode);
-  }, [viewMode, isHydrated]);
-
-  // Unified Media list combining Videos, Photos, and Audio
+  // Unified Media list combining Videos, Photos, and Audio as a Single List
   const unifiedMediaItems: MediaItem[] = useMemo(() => {
     let result: MediaItem[] = [];
 
@@ -392,7 +268,7 @@ export function App() {
     const mappedPhotos: MediaItem[] = photos.map((p) => ({ ...p, mediaType: 'photo' as const }));
     const mappedAudios: MediaItem[] = audios.map((a) => ({ ...a, mediaType: 'audio' as const }));
 
-    // Filter by media type (Never mix Videos, Photos, and Audio in the same view)
+    // Filter by active media type (Videos, Photos, or Audio)
     if (filterState.mediaType === 'photos') {
       result = [...mappedPhotos];
     } else if (filterState.mediaType === 'audio') {
@@ -424,18 +300,6 @@ export function App() {
       result = result.filter((item) => item.isFavorite);
     }
 
-    // Filter by Category (All or specific category)
-    if (filterState.selectedCategory && normalizeCategory(filterState.selectedCategory) !== 'all') {
-      const selectedNorm = normalizeCategory(filterState.selectedCategory);
-      result = result.filter((item) => {
-        if (normalizeCategory(item.category || '') === selectedNorm) return true;
-        if (item.mediaType === 'video' && item.tags?.some((t) => normalizeCategory(t) === selectedNorm)) {
-          return true;
-        }
-        return false;
-      });
-    }
-
     // Filter by Queue / Watch Later (videos only)
     if (filterState.onlyWatchLater) {
       result = result.filter((item) => item.mediaType === 'video' && item.isWatchLater);
@@ -443,6 +307,14 @@ export function App() {
 
     // Sort order
     return result.sort((a, b) => {
+      // Prioritize pinned videos
+      if (a.mediaType === 'video' && b.mediaType === 'video') {
+        const aPinned = !!(a as VideoItem).isPinned;
+        const bPinned = !!(b as VideoItem).isPinned;
+        if (aPinned && !bPinned) return -1;
+        if (!aPinned && bPinned) return 1;
+      }
+
       if (filterState.sortBy === 'newest') {
         return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
       } else if (filterState.sortBy === 'oldest') {
@@ -456,104 +328,14 @@ export function App() {
     });
   }, [videos, photos, audios, filterState]);
 
-  // Counts
-  const favoriteCount = useMemo(() => {
-    const vidFavs = videos.filter((v) => v.isFavorite).length;
-    const photoFavs = photos.filter((p) => p.isFavorite).length;
-    const audioFavs = audios.filter((a) => a.isFavorite).length;
-    return vidFavs + photoFavs + audioFavs;
-  }, [videos, photos, audios]);
-
-  const watchLaterCount = useMemo(() => {
-    return videos.filter((v) => v.isWatchLater).length;
-  }, [videos]);
-
-  const activeCategoriesForFeed = useMemo(() => {
-    if (normalizeCategory(filterState.selectedCategory) === 'all') {
-      return categories;
-    }
-    return categories.filter((c) => normalizeCategory(c.name) === normalizeCategory(filterState.selectedCategory));
-  }, [categories, filterState.selectedCategory]);
-
-  // Category Actions
-  const handleAddCategory = (newCat: CategoryInfo) => {
-    setCategories((prev) => [...prev, newCat]);
-    showToast(`Category "${newCat.name}" added ✨`);
-  };
-
-  const handleUpdateCategory = (id: string, updated: Partial<CategoryInfo>, previousName: string) => {
-    setCategories((prev) =>
-      prev.map((c) => (c.id === id ? { ...c, ...updated } : c))
-    );
-
-    // If category name changed, cascade rename to all videos, photos, and audios
-    if (updated.name && updated.name !== previousName) {
-      const prevNorm = normalizeCategory(previousName);
-      const nextName = updated.name;
-
-      setVideos((prevVideos) =>
-        prevVideos.map((v) =>
-          normalizeCategory(v.category || '') === prevNorm
-            ? { ...v, category: nextName }
-            : v
-        )
-      );
-
-      setPhotos((prevPhotos) =>
-        prevPhotos.map((p) =>
-          normalizeCategory(p.category || '') === prevNorm
-            ? { ...p, category: nextName }
-            : p
-        )
-      );
-
-      setAudios((prevAudios) =>
-        prevAudios.map((a) =>
-          normalizeCategory(a.category || '') === prevNorm
-            ? { ...a, category: nextName }
-            : a
-        )
-      );
-
-      // If active filter is on this category, update filter selection
-      if (normalizeCategory(filterState.selectedCategory) === prevNorm) {
-        setFilterState((prev) => ({
-          ...prev,
-          selectedCategory: nextName,
-        }));
-      }
-    }
-
-    showToast(`Category updated ✨`);
-  };
-
-  const handleDeleteCategory = (catToDelete: CategoryInfo) => {
-    if (DEFAULT_PRESET_CATEGORIES.some((cat) => cat.id === catToDelete.id)) {
-      showToast('Default categories cannot be deleted');
-      return;
-    }
-    const norm = normalizeCategory(catToDelete.name);
-    const assigned = videos.filter((v) => normalizeCategory(v.category || '') === norm).length
-      + photos.filter((p) => normalizeCategory(p.category || '') === norm).length
-      + audios.filter((a) => normalizeCategory(a.category || '') === norm).length;
-    if (assigned > 0) {
-      window.alert(`Cannot delete "${catToDelete.name}". Move ${assigned} assigned media item${assigned === 1 ? '' : 's'} to another category first.`);
-      return;
-    }
-    setCategories((prev) => prev.filter((c) => c.id !== catToDelete.id));
-
-    // Reset filter if deleting active category
-    if (normalizeCategory(filterState.selectedCategory) === normalizeCategory(catToDelete.name)) {
-      setFilterState((prev) => ({
-        ...prev,
-        selectedCategory: 'all',
-      }));
-    }
-
-    showToast(`Category "${catToDelete.name}" deleted`);
-  };
-
   // Video Actions
+  const handleTogglePinVideo = (id: string) => {
+    setVideos((prev) =>
+      prev.map((v) => (v.id === id ? { ...v, isPinned: !v.isPinned } : v))
+    );
+    const target = videos.find((v) => v.id === id);
+    showToast(target?.isPinned ? 'Video unpinned' : 'Video pinned to top 📌');
+  };
   const handleAddVideo = (newVideo: Omit<VideoItem, 'id' | 'createdAt' | 'isFavorite' | 'isWatchLater'>) => {
     const videoToAdd: VideoItem = {
       ...newVideo,
@@ -563,17 +345,8 @@ export function App() {
       isWatchLater: false,
     };
     setVideos([videoToAdd, ...videos]);
-    setIsAddModalOpen(false);
-    setAddModalInitialCategory(undefined);
-    if (videoToAdd.category) {
-      setExpandedCategory(videoToAdd.category);
-      try {
-        sessionStorage.setItem('bhakti_expanded_category_video', videoToAdd.category);
-      } catch {
-        // Ignore
-      }
-    }
-    showToast(`Video added to ${videoToAdd.category || 'Vault'} ✨`);
+    setIsAddSectionOpen(false);
+    showToast(`Video added ✨`);
   };
 
   const handleUpdateVideo = (updated: VideoItem) => {
@@ -588,6 +361,7 @@ export function App() {
     if (activePlaybackVideo?.id === id) {
       setActivePlaybackVideo(null);
     }
+    showToast('Video deleted');
   };
 
   const handleToggleFavoriteVideo = (id: string) => {
@@ -616,16 +390,47 @@ export function App() {
     );
   };
 
+  const handlePlayVideo = (video: VideoItem, startTimestamp: number = 0) => {
+    setActivePlaybackVideo(video);
+    setPlaybackStartTimestamp(startTimestamp);
+  };
+
+  const handleUpdateNotes = (videoId: string, notes: string) => {
+    setVideos(
+      videos.map((v) => (v.id === videoId ? { ...v, notes } : v))
+    );
+    if (activePlaybackVideo?.id === videoId) {
+      setActivePlaybackVideo((prev) => (prev ? { ...prev, notes } : null));
+    }
+  };
+
+  const handleAddTimestamp = (videoId: string, label: string, time: number) => {
+    setVideos(
+      videos.map((v) => {
+        if (v.id === videoId) {
+          const timestamps = [...(v.timestamps || []), { label, time }].sort(
+            (a, b) => a.time - b.time
+          );
+          const updated = { ...v, timestamps };
+          if (activePlaybackVideo?.id === videoId) setActivePlaybackVideo(updated);
+          return updated;
+        }
+        return v;
+      })
+    );
+  };
+
   // Photo Actions
-  const handleAddPhoto = (photoData: Omit<PhotoItem, 'id' | 'createdAt' | 'isFavorite'>) => {
+  const handleAddPhoto = (newPhoto: Omit<PhotoItem, 'id' | 'createdAt' | 'isFavorite'>) => {
     const photoToAdd: PhotoItem = {
-      ...photoData,
+      ...newPhoto,
       id: 'photo_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5),
       createdAt: new Date().toISOString(),
       isFavorite: false,
     };
     setPhotos([photoToAdd, ...photos]);
-    setIsAddModalOpen(false);
+    setIsAddSectionOpen(false);
+    showToast(`Photo added ✨`);
   };
 
   const handleDeletePhoto = (id: string) => {
@@ -637,199 +442,97 @@ export function App() {
 
   const handleToggleFavoritePhoto = (id: string) => {
     setPhotos(
-      photos.map((p) => {
-        if (p.id === id) {
-          const updated = { ...p, isFavorite: !p.isFavorite };
-          if (activePhoto?.id === id) setActivePhoto(updated);
-          return updated;
-        }
-        return p;
-      })
+      photos.map((p) => (p.id === id ? { ...p, isFavorite: !p.isFavorite } : p))
     );
   };
 
   // Audio Actions
   const handleAddAudio = async (
-    audioData: Omit<AudioItem, 'id' | 'createdAt' | 'isFavorite'>,
+    newAudio: Omit<AudioItem, 'id' | 'createdAt' | 'isFavorite'>,
     audioBlob?: Blob
   ) => {
     const newId = 'audio_' + Date.now() + '_' + Math.random().toString(36).substr(2, 5);
+    let localBlobId: string | undefined;
+
     if (audioBlob) {
       try {
-        await saveLocalAudioFile(newId, audioBlob);
+        localBlobId = `blob_${newId}`;
+        await saveLocalAudioFile(localBlobId, audioBlob);
       } catch (err) {
-        console.warn('Failed to save audio file to IndexedDB', err);
+        console.error('Failed to store audio file locally:', err);
       }
     }
 
     const audioToAdd: AudioItem = {
-      ...audioData,
+      ...newAudio,
       id: newId,
-      localBlobId: audioBlob ? newId : undefined,
-      sourceType: audioBlob ? 'local' : (audioData.sourceType || 'drive'),
+      localBlobId,
       createdAt: new Date().toISOString(),
       isFavorite: false,
     };
+
     setAudios([audioToAdd, ...audios]);
-    setIsAddModalOpen(false);
-    showToast(`Audio "${audioData.title}" added to Vault ✨`);
+    setIsAddSectionOpen(false);
+    showToast(`Audio added ✨`);
   };
 
   const handleDeleteAudio = async (id: string) => {
-    setAudios(audios.filter((a) => a.id !== id));
-    try {
-      await deleteLocalAudioFile(id);
-    } catch {
-      // Ignore
+    const target = audios.find((a) => a.id === id);
+    if (target?.localBlobId) {
+      try {
+        await deleteLocalAudioFile(target.localBlobId);
+      } catch (err) {
+        console.warn('Could not remove audio blob:', err);
+      }
     }
+    setAudios(audios.filter((a) => a.id !== id));
     if (activePlaybackAudio?.id === id) {
       setActivePlaybackAudio(null);
     }
-    showToast('Audio deleted');
+    showToast('Audio track removed');
   };
 
   const handleToggleFavoriteAudio = (id: string) => {
     setAudios(
-      audios.map((a) => {
-        if (a.id === id) {
-          const updated = { ...a, isFavorite: !a.isFavorite };
-          if (activePlaybackAudio?.id === id) setActivePlaybackAudio(updated);
-          return updated;
-        }
-        return a;
-      })
+      audios.map((a) => (a.id === id ? { ...a, isFavorite: !a.isFavorite } : a))
     );
   };
 
   const handlePlayAudio = (audio: AudioItem) => {
-    setActivePlaybackAudio(audio);
-  };
-
-  // Video Notes & Timestamps
-  const handleUpdateNotes = (id: string, notes: string) => {
-    setVideos(
-      videos.map((v) => {
-        if (v.id === id) {
-          const updated = { ...v, notes };
-          if (activePlaybackVideo?.id === id) setActivePlaybackVideo(updated);
-          return updated;
-        }
-        return v;
-      })
-    );
-  };
-
-  const handleAddTimestamp = (id: string, timestamp: { time: number; label: string }) => {
-    setVideos(
-      videos.map((v) => {
-        if (v.id === id) {
-          const updated = {
-            ...v,
-            timestamps: [...(v.timestamps || []), timestamp],
-          };
-          if (activePlaybackVideo?.id === id) setActivePlaybackVideo(updated);
-          return updated;
-        }
-        return v;
-      })
-    );
-  };
-
-  // Playback Trigger
-  const handlePlayVideo = (video: VideoItem, startTimestamp = 0) => {
-    setActivePlaybackVideo(video);
-    setPlaybackStartTimestamp(startTimestamp);
-  };
-
-  // Theme State
-  const [theme, setTheme] = useState<ThemeMode>(() => {
-    try {
-      const savedTheme = localStorage.getItem(STORAGE_KEY_THEME);
-      if (savedTheme === 'light' || savedTheme === 'warm' || savedTheme === 'dark' || savedTheme === 'blue') {
-        return savedTheme;
-      }
-    } catch {
-      // Fallback
+    if (activePlaybackAudio?.id === audio.id) {
+      setActivePlaybackAudio(null);
+    } else {
+      setActivePlaybackAudio(audio);
     }
-    return 'blue';
-  });
+  };
 
+  // Toast feedback state
   const [toastNotice, setToastNotice] = useState<string | null>(null);
-
   const showToast = (msg: string) => {
     setToastNotice(msg);
-    setTimeout(() => setToastNotice(null), 3000);
+    setTimeout(() => setToastNotice(null), 2500);
   };
 
-  const handleToggleTheme = (specificTheme?: ThemeMode) => {
-    let nextTheme: ThemeMode;
-    if (specificTheme) {
-      nextTheme = specificTheme;
-    } else {
-      nextTheme =
-        theme === 'blue'
-          ? 'warm'
-          : theme === 'warm'
-          ? 'light'
-          : theme === 'light'
-          ? 'dark'
-          : 'blue';
-    }
-    setTheme(nextTheme);
-    try {
-      localStorage.setItem(STORAGE_KEY_THEME, nextTheme);
-    } catch {
-      // Ignore
-    }
-    showToast(`Switched to ${nextTheme.toUpperCase()} theme ✨`);
-  };
+  // Theme support
+  const [theme, setTheme] = useState<ThemeMode>(() => {
+    return (localStorage.getItem(STORAGE_KEY_THEME) as ThemeMode) || 'light';
+  });
 
-  // Pin category as default on app launch separately for Videos, Photos & Audio
-  const handleSetDefaultCategory = (catName: string) => {
-    const isPhoto = filterState.mediaType === 'photos';
-    const isAudio = filterState.mediaType === 'audio';
-    const updatedSettings: AppSettings = {
-      ...appSettings,
-      ...(isPhoto
-        ? { defaultPhotoCategory: catName }
-        : isAudio
-        ? { defaultAudioCategory: catName }
-        : { defaultVideoCategory: catName, defaultCategory: catName }),
-    };
-    setAppSettings(updatedSettings);
-    try {
-      localStorage.setItem(STORAGE_KEY_SETTINGS, JSON.stringify(updatedSettings));
-    } catch {
-      // Ignore
-    }
-    const mediaLabel = isPhoto ? 'Photos' : isAudio ? 'Audio' : 'Videos';
-    if (catName && catName !== 'all') {
-      showToast(`Pinned "${catName}" as Default for ${mediaLabel} 📌`);
-    } else {
-      showToast(`Cleared default category pin for ${mediaLabel} 📌`);
-    }
-  };
-
-  // Switch between Videos, Photos, and Audio (and load its corresponding pinned category)
+  // Switch between Videos, Photos, and Audio
   const handleSwitchMediaType = (type: MediaTypeFilter) => {
-    autoExpandedOnce.current = false;
-    setExpandedCategory(null);
     setFilterState((prev) => ({
       ...prev,
       mediaType: type,
-      selectedCategory: 'all',
     }));
   };
 
   // Data Management Handlers
   const handleRefreshApp = async () => {
     try {
-      // Re-read and reconcile from both localStorage and IndexedDB
-      const [idbVideos, idbPhotos, idbAudios, idbCats, idbProf, idbSettings] = await Promise.all([
+      const [idbVideos, idbPhotos, idbAudios, idbProf, idbSettings] = await Promise.all([
         getRecordFromIndexedDb<VideoItem[]>(STORAGE_KEY_VIDEOS),
         getRecordFromIndexedDb<PhotoItem[]>(STORAGE_KEY_PHOTOS),
         getRecordFromIndexedDb<AudioItem[]>(STORAGE_KEY_AUDIOS),
-        getRecordFromIndexedDb<CategoryInfo[]>(STORAGE_KEY_CATEGORIES),
         getRecordFromIndexedDb<UserProfile>(STORAGE_KEY_PROFILE),
         getRecordFromIndexedDb<AppSettings>(STORAGE_KEY_SETTINGS),
       ]);
@@ -838,15 +541,16 @@ export function App() {
       const lsPhotos = getInitialFromLocalStorage<PhotoItem[]>(STORAGE_KEY_PHOTOS, []);
       const lsAudios = getInitialFromLocalStorage<AudioItem[]>(STORAGE_KEY_AUDIOS, []);
 
-      // Merge safely so existing user items are NEVER dropped on refresh
       setVideos((prev) => {
         const merged = mergeItemsById(prev, mergeItemsById(lsVids, idbVideos || []));
-        return merged.length > 0 ? merged : prev;
+        const uniqueVideos = new Map<string, VideoItem>();
+        [...INITIAL_VIDEOS, ...merged].forEach((video) => uniqueVideos.set(video.youtubeId || video.id, video));
+        return Array.from(uniqueVideos.values());
       });
 
       setPhotos((prev) => {
         const merged = mergeItemsById(prev, mergeItemsById(lsPhotos, idbPhotos || []));
-        return merged.length > 0 ? merged : prev;
+        return cleanAndSequencePhotos(merged);
       });
 
       setAudios((prev) => {
@@ -854,49 +558,32 @@ export function App() {
         return merged.length > 0 ? merged : prev;
       });
 
-      if (idbCats && idbCats.length > 0) {
-        setCategories((prev) => mergeItemsById(prev, idbCats));
-      }
       if (idbProf) {
         setUserProfile((prev) => ({ ...prev, ...idbProf }));
       }
       if (idbSettings) {
         setAppSettings((prev) => ({ ...prev, ...idbSettings }));
       }
-
-      showToast('Vault refreshed & media verified safe ✨');
+      showToast('Refreshed ✨');
     } catch {
-      showToast('Vault refreshed ✨');
+      showToast('Reloaded');
     }
   };
 
   const handleClearCache = async () => {
     try {
-      // Clear temporary browser/PWA caches only; preserve vault media and settings.
-      sessionStorage.clear();
       if ('caches' in window) {
-        const cacheKeys = await window.caches.keys();
-        await Promise.all(cacheKeys.map((key) => window.caches.delete(key)));
+        const cacheNames = await caches.keys();
+        await Promise.all(cacheNames.map((name) => caches.delete(name)));
       }
-      if ('serviceWorker' in navigator) {
-        const registrations = await navigator.serviceWorker.getRegistrations();
-        await Promise.all(registrations.map((registration) => registration.unregister().catch(() => false)));
-      }
-      showToast('Temporary cache cleared. Your media is safe 🧹✨');
-      window.setTimeout(() => {
-        const separator = window.location.pathname.includes('?') ? '&' : '?';
-        window.location.href = `${window.location.pathname}${separator}cacheBust=${Date.now()}`;
-      }, 250);
+      showToast('Cache refreshed ✨');
     } catch {
-      showToast('Cache could not be fully cleared');
+      showToast('Cache cleared ✨');
     }
   };
 
   const handleDeleteAllData = async () => {
-    const confirmation = window.confirm(
-      'Are you sure you want to clear ALL media and saved settings? This cannot be undone.'
-    );
-    if (confirmation) {
+    if (window.confirm('Delete all data? This will reset all your saved items.')) {
       setVideos([]);
       setPhotos([]);
       setAudios([]);
@@ -931,11 +618,10 @@ export function App() {
       videos,
       photos,
       audios,
-      categories,
       userProfile,
       appSettings,
     });
-    showToast('Vault backup file downloaded 📦✨');
+    showToast('Backup file downloaded 📦✨');
   };
 
   const handleImportBackup = async (file: File) => {
@@ -944,10 +630,9 @@ export function App() {
       if (Array.isArray(data.videos)) setVideos(data.videos);
       if (Array.isArray(data.photos)) setPhotos(data.photos);
       if (Array.isArray(data.audios)) setAudios(data.audios);
-      if (Array.isArray(data.categories) && data.categories.length > 0) setCategories(data.categories);
       if (data.userProfile) setUserProfile(data.userProfile);
       if (data.appSettings) setAppSettings(data.appSettings);
-      showToast('Vault backup restored successfully 🎉');
+      showToast('Backup restored successfully 🎉');
     } catch {
       showToast('Failed to import backup: invalid file');
     }
@@ -979,136 +664,68 @@ export function App() {
 
         {/* Main Content Area */}
         <main className="flex-1 px-3.5 sm:px-4 py-2 space-y-3 pb-28">
-          {/* Active Category & Item Count Status Bar */}
-          <div className="flex items-center justify-between px-1 text-xs opacity-75 font-medium">
-            <span className="flex items-center gap-1.5">
+          {/* Top Level Bar with Pill matching user's design */}
+          <div className="flex items-center justify-between px-0.5 pt-1">
+            <button
+              type="button"
+              onClick={() => setIsAddSectionOpen((prev) => !prev)}
+              className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-2xl bg-white border border-stone-200/90 shadow-2xs hover:shadow-xs hover:border-stone-300 transition-all cursor-pointer select-none group"
+              title={isAddSectionOpen ? 'Close Add Section' : 'Open Add Section'}
+              aria-expanded={isAddSectionOpen}
+            >
               <span className={`w-2 h-2 rounded-full ${
                 filterState.mediaType === 'photos'
                   ? 'bg-emerald-500 shadow-emerald-500/50'
                   : filterState.mediaType === 'audio'
                   ? 'bg-amber-400 shadow-amber-500/50'
                   : 'bg-rose-500 shadow-rose-500/50'
-              } shadow-xs`} />
-              <span>
-                {filterState.mediaType === 'videos' ? (
-                  expandedCategory ? (
-                    <>
-                      <span className="font-semibold text-rose-700">{expandedCategory.split('|').join(' • ')}</span>
-                      {' • '}
-                      {videos.filter((v) => expandedCategory.split('|').some((category) => normalizeCategory(v.category || '') === normalizeCategory(category))).length} videos
-                    </>
-                  ) : (
-                    <>
-                      {categories.filter((c) => normalizeCategory(c.name) !== 'all').length} categories • {videos.length} videos (all closed)
-                    </>
-                  )
-                ) : (
-                  <>
-                    {filterState.selectedCategory && normalizeCategory(filterState.selectedCategory) !== 'all'
-                      ? `${translateCategoryToMarathi(filterState.selectedCategory)} • `
-                      : ''}
-                    {unifiedMediaItems.length} {filterState.mediaType === 'photos'
-                      ? (unifiedMediaItems.length === 1 ? 'photo' : 'photos')
-                      : (unifiedMediaItems.length === 1 ? 'audio track' : 'audio tracks')}
-                  </>
-                )}
+              } shadow-xs shrink-0`} />
+              
+              <span className="text-xs font-bold text-stone-900">
+                All
               </span>
-            </span>
+
+              <span className="text-[10px] font-bold px-1.5 py-0.2 rounded-md bg-stone-100 text-stone-700 border border-stone-200/60">
+                {unifiedMediaItems.length}
+              </span>
+
+              <ChevronDown className={`w-3.5 h-3.5 text-stone-500 transition-transform duration-200 ${isAddSectionOpen ? 'rotate-180 text-stone-800' : 'group-hover:text-stone-700'}`} />
+            </button>
+
             {filterState.searchQuery && (
-              <span className="text-[11px] opacity-80 truncate max-w-[140px]">
+              <span className="text-[11px] opacity-80 truncate max-w-[140px] text-stone-600 font-medium">
                 Search: "{filterState.searchQuery}"
               </span>
             )}
           </div>
 
-          {/* Dynamic Media Feed: Accordion Category Feed for Videos / Grid / List / Split */}
-          {filterState.mediaType === 'videos' ? (
-            viewMode === 'split' ? (
-              <SplitPlayerView
-                videos={
-                  unifiedMediaItems.filter(
-                    (i): i is VideoItem & { mediaType: 'video' } => i.mediaType === 'video'
-                  ).length > 0
-                    ? (unifiedMediaItems.filter(
-                        (i): i is VideoItem & { mediaType: 'video' } => i.mediaType === 'video'
-                      ) as VideoItem[])
-                    : videos
-                }
-                activeVideo={activePlaybackVideo}
-                onSelectVideo={(v, ts) => handlePlayVideo(v, ts)}
-                onToggleFavorite={handleToggleFavoriteVideo}
-                onToggleWatchLater={handleToggleWatchLater}
-                onUpdateNotes={handleUpdateNotes}
-                onAddTimestamp={handleAddTimestamp}
-              />
-            ) : (
-              <CategoryAccordionFeed
-                categories={activeCategoriesForFeed}
-                videos={videos}
-                expandedCategory={normalizeCategory(filterState.selectedCategory) === 'all'
-                  ? expandedCategory
-                  : filterState.selectedCategory}
-                onToggleCategory={handleToggleCategory}
-                viewMode={viewMode}
-                searchQuery={filterState.searchQuery}
-                onlyFavorites={filterState.onlyFavorites}
-                onlyWatchLater={filterState.onlyWatchLater}
-                sortBy={filterState.sortBy}
-                onPlayVideo={(v, ts) => handlePlayVideo(v, ts)}
-                onToggleFavoriteVideo={handleToggleFavoriteVideo}
-                onToggleWatchLater={handleToggleWatchLater}
-                onEditVideo={(v) => setEditingVideo(v)}
-                onDeleteVideo={handleDeleteVideo}
-                onAddVideoToCategory={handleAddVideoToCategory}
-              />
-            )
-          ) : filterState.mediaType === 'photos' ? (
-            <div className="space-y-2.5">
-              {(normalizeCategory(filterState.selectedCategory) === 'all'
-                ? ['आरती', 'जेकेपी', 'भक्ती मार्ग', 'कीर्तन', 'भजन', 'इतर'].sort((a, b) => photos.filter((p) => normalizeCategory(p.category || '') === normalizeCategory(b)).length - photos.filter((p) => normalizeCategory(p.category || '') === normalizeCategory(a)).length)
-                : [translateCategoryToMarathi(filterState.selectedCategory)]
-              ).map((categoryName) => {
-                const items = photos.filter((p) => normalizeCategory(p.category || '') === normalizeCategory(categoryName));
-                const isExpanded = !!expandedCategory?.split('|').some((name) => normalizeCategory(name) === normalizeCategory(categoryName));
-                return <div key={categoryName} className={`rounded-2xl border overflow-hidden transition-colors ${isExpanded ? 'border-emerald-400 bg-emerald-100/90 shadow-2xs' : 'border-emerald-200/80 bg-emerald-50/70'}`}>
-                  <button type="button" onClick={(e) => { e.stopPropagation(); handleToggleCategory(categoryName); }} aria-expanded={isExpanded} className="w-full flex items-center justify-between px-4 py-4 text-left cursor-pointer">
-                    <span className="font-sans font-bold text-emerald-950">{categoryName}</span>
-                    <span className="flex items-center gap-2"><span className="w-8 h-8 flex items-center justify-center rounded-full border border-emerald-300 bg-emerald-200/70 text-xs font-bold text-emerald-900">{items.length}</span><ChevronDown className={`w-5 h-5 text-emerald-800 transition-transform ${isExpanded ? 'rotate-180' : ''}`} /></span>
-                  </button>
-                  {isExpanded && items.length > 0 && <div className="px-3 pb-3 space-y-2">{items.map((item) => <PhotoListItem key={item.id} photo={item} onView={(p) => setActivePhoto(p)} onToggleFavorite={handleToggleFavoritePhoto} onDelete={handleDeletePhoto} />)}</div>}
-                </div>;
-              })}
-            </div>
-          ) : filterState.mediaType === 'audio' ? (
-            <div className="space-y-2.5">
-              {(normalizeCategory(filterState.selectedCategory) === 'all'
-                ? ['निखिलानंद महाराज', 'महाराज', 'प्रभुपाद', 'इतर'].sort((a, b) => audios.filter((x) => normalizeCategory(x.category || '') === normalizeCategory(b)).length - audios.filter((x) => normalizeCategory(x.category || '') === normalizeCategory(a)).length)
-                : [translateCategoryToMarathi(filterState.selectedCategory)]
-              ).map((categoryName) => {
-                const items = audios.filter((a) => normalizeCategory(a.category || '') === normalizeCategory(categoryName));
-                const isExpanded = !!expandedCategory?.split('|').some((name) => normalizeCategory(name) === normalizeCategory(categoryName));
-                return <div key={categoryName} className={`rounded-2xl border overflow-hidden transition-colors ${isExpanded ? 'border-yellow-400 bg-yellow-100/90 shadow-2xs' : 'border-yellow-200/80 bg-yellow-50/70'}`}>
-                  <button type="button" onClick={(e) => { e.stopPropagation(); handleToggleCategory(categoryName); }} aria-expanded={isExpanded} className="w-full flex items-center justify-between px-4 py-4 text-left cursor-pointer">
-                    <span className="font-sans font-bold text-amber-950">{categoryName}</span>
-                    <span className="flex items-center gap-2"><span className="w-8 h-8 flex items-center justify-center rounded-full border border-yellow-300 bg-yellow-200/70 text-xs font-bold text-amber-900">{items.length}</span><ChevronDown className={`w-5 h-5 text-amber-800 transition-transform ${isExpanded ? 'rotate-180' : ''}`} /></span>
-                  </button>
-                  {isExpanded && items.length > 0 && <div className="px-3 pb-3 space-y-2">{items.map((item) => <AudioListItem key={item.id} audio={item} isPlaying={activePlaybackAudio?.id === item.id} onPlay={handlePlayAudio} onToggleFavorite={handleToggleFavoriteAudio} onDelete={handleDeleteAudio} />)}</div>}
-                </div>;
-              })}
-            </div>
-          ) : unifiedMediaItems.length === 0 ? (
+          {/* Inline Add Media Section on same page level (No popup!) */}
+          <InlineAddMediaSection
+            isOpen={isAddSectionOpen}
+            onClose={() => setIsAddSectionOpen(false)}
+            mediaType={filterState.mediaType}
+            onSelectMediaType={handleSwitchMediaType}
+            onAddVideo={handleAddVideo}
+            onAddPhoto={handleAddPhoto}
+            onAddAudio={handleAddAudio}
+          />
+
+          {/* Dynamic Media Feed: Always List View */}
+          {unifiedMediaItems.length === 0 ? (
             <div className="py-14 px-4 text-center flex flex-col items-center justify-center space-y-3">
               <div className={`w-12 h-12 rounded-2xl flex items-center justify-center shadow-2xs ${
                 filterState.mediaType === 'photos'
                   ? 'bg-emerald-200 text-emerald-900 border border-emerald-300'
                   : filterState.mediaType === 'audio'
                   ? 'bg-yellow-200 text-amber-900 border border-yellow-300'
-                  : 'bg-amber-500/10 text-amber-400'
+                  : 'bg-rose-100 text-rose-600 border border-rose-200'
               }`}>
                 {filterState.mediaType === 'photos' ? (
                   <ImageIcon className="w-6 h-6" />
-                ) : (
+                ) : filterState.mediaType === 'audio' ? (
                   <Disc3 className="w-6 h-6" />
+                ) : (
+                  <Youtube className="w-6 h-6" />
                 )}
               </div>
               <div className="space-y-1">
@@ -1117,58 +734,39 @@ export function App() {
                     ? 'text-emerald-950'
                     : filterState.mediaType === 'audio'
                     ? 'text-amber-950'
-                    : 'text-stone-100'
+                    : 'text-stone-900'
                 }`}>
-                  {filterState.selectedCategory && normalizeCategory(filterState.selectedCategory) !== 'all'
-                    ? `No ${filterState.mediaType === 'photos' ? 'Photos' : 'Audio Tracks'} in "${translateCategoryToMarathi(filterState.selectedCategory)}"`
-                    : `No ${filterState.mediaType === 'photos' ? 'Photos' : 'Audio Tracks'} Found`}
+                  {`No ${filterState.mediaType === 'photos' ? 'Photos' : filterState.mediaType === 'audio' ? 'Audio Tracks' : 'Videos'} Found`}
                 </h3>
                 <p className={`text-xs max-w-[280px] mx-auto ${
                   filterState.mediaType === 'photos'
                     ? 'text-emerald-800/80'
                     : filterState.mediaType === 'audio'
                     ? 'text-amber-800/80'
-                    : 'text-stone-400'
+                    : 'text-stone-500'
                 }`}>
-                  {filterState.selectedCategory && normalizeCategory(filterState.selectedCategory) !== 'all'
-                    ? `Tap "सर्व" to view all items, or tap "+" below to add sacred ${filterState.mediaType === 'photos' ? 'photos' : 'audio'} to this category.`
-                    : filterState.mediaType === 'photos'
-                    ? `Tap the "+" button below to add your sacred photos.`
-                    : `Tap the "+" button below to paste your Google Drive audio track link.`}
+                  {filterState.mediaType === 'photos'
+                    ? 'Tap the "+" button below to add your sacred photos.'
+                    : filterState.mediaType === 'audio'
+                    ? 'Tap the "+" button below to add your audio track.'
+                    : 'Tap the "+" button below to add a YouTube video.'}
                 </p>
               </div>
-              {filterState.selectedCategory && normalizeCategory(filterState.selectedCategory) !== 'all' && (
-                <button
-                  onClick={() =>
-                    setFilterState((prev) => ({
-                      ...prev,
-                      selectedCategory: 'all',
-                    }))
-                  }
-                  className={`text-xs font-semibold px-3.5 py-1.5 rounded-full border transition-colors cursor-pointer ${
-                    filterState.mediaType === 'photos'
-                      ? 'text-emerald-950 bg-emerald-200 border-emerald-400 hover:bg-emerald-300'
-                      : filterState.mediaType === 'audio'
-                      ? 'text-amber-950 bg-yellow-200 border-yellow-400 hover:bg-yellow-300'
-                      : 'text-orange-400 bg-stone-800/80 border-stone-700 hover:bg-stone-750'
-                  }`}
-                >
-                  Show All Categories
-                </button>
-              )}
             </div>
-          ) : viewMode === 'list' ? (
+          ) : (
             <div className="space-y-2.5">
               {unifiedMediaItems.map((item) => {
-                if (item.mediaType === 'audio') {
+                if (item.mediaType === 'video') {
                   return (
-                    <AudioListItem
+                    <VideoListItem
                       key={item.id}
-                      audio={item}
-                      isPlaying={activePlaybackAudio?.id === item.id}
-                      onPlay={handlePlayAudio}
-                      onToggleFavorite={handleToggleFavoriteAudio}
-                      onDelete={handleDeleteAudio}
+                      video={item}
+                      onPlay={(v, ts) => handlePlayVideo(v, ts)}
+                      onToggleFavorite={handleToggleFavoriteVideo}
+                      onToggleWatchLater={handleToggleWatchLater}
+                      onTogglePin={handleTogglePinVideo}
+                      onEdit={(v) => setEditingVideo(v)}
+                      onDelete={handleDeleteVideo}
                     />
                   );
                 } else if (item.mediaType === 'photo') {
@@ -1181,32 +779,15 @@ export function App() {
                       onDelete={handleDeletePhoto}
                     />
                   );
-                }
-                return null;
-              })}
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
-              {unifiedMediaItems.map((item) => {
-                if (item.mediaType === 'audio') {
+                } else if (item.mediaType === 'audio') {
                   return (
-                    <AudioCard
+                    <AudioListItem
                       key={item.id}
                       audio={item}
                       isPlaying={activePlaybackAudio?.id === item.id}
                       onPlay={handlePlayAudio}
                       onToggleFavorite={handleToggleFavoriteAudio}
                       onDelete={handleDeleteAudio}
-                    />
-                  );
-                } else if (item.mediaType === 'photo') {
-                  return (
-                    <PhotoCard
-                      key={item.id}
-                      photo={item}
-                      onView={(p) => setActivePhoto(p)}
-                      onToggleFavorite={handleToggleFavoritePhoto}
-                      onDelete={handleDeletePhoto}
                     />
                   );
                 }
@@ -1229,33 +810,14 @@ export function App() {
           isOpen={isSidebarOpen}
           onClose={() => setIsSidebarOpen(false)}
           theme={theme}
-          viewMode={viewMode}
-          onViewModeChange={(mode) => setViewMode(mode)}
           currentMediaType={filterState.mediaType}
           videoCount={videos.length}
           photoCount={photos.length}
           audioCount={audios.length}
           onOpenInstallPwa={() => setIsInstallPwaOpen(true)}
-          onOpenCategoryManager={() => setIsCategoryManagerOpen(true)}
-          onRefreshApp={handleRefreshApp}
           onClearCache={handleClearCache}
-          onDeleteAllData={handleDeleteAllData}
           onFilterMediaType={handleSwitchMediaType}
         />
-
-        {/* Category Manager Modal (Add, Edit, Rename, Delete categories) */}
-        {isCategoryManagerOpen && (
-          <CategoryManagerModal
-            categories={categories}
-            videos={videos}
-            photos={photos}
-            audios={audios}
-            onAddCategory={handleAddCategory}
-            onUpdateCategory={handleUpdateCategory}
-            onDeleteCategory={handleDeleteCategory}
-            onClose={() => setIsCategoryManagerOpen(false)}
-          />
-        )}
 
         {/* Photo Lightbox Modal */}
         {activePhoto && (
@@ -1297,7 +859,6 @@ export function App() {
         {isSettingsModalOpen && (
           <SettingsModal
             settings={appSettings}
-            categories={categories}
             onSave={(settings) => setAppSettings(settings)}
             onClose={() => setIsSettingsModalOpen(false)}
             onExportBackup={handleExportBackup}
@@ -1308,106 +869,22 @@ export function App() {
           />
         )}
 
-        {/* Apple-style Sleek Add Media Bottom Sheet */}
-        <AppleAddMediaBottomSheet
-          isOpen={isAddModalOpen}
-          onClose={() => {
-            setIsAddModalOpen(false);
-            setAddModalInitialCategory(undefined);
-          }}
-          onAddVideo={handleAddVideo}
-          onAddPhoto={handleAddPhoto}
-          onAddAudio={handleAddAudio}
-          initialTab={addModalTab}
-          initialCategory={addModalInitialCategory}
-          categories={categories}
-        />
-
-        {/* Quick Category Switcher & Pin Bottom Sheet */}
-        <CategorySwitchBottomSheet
-          isOpen={isCategorySwitchOpen}
-          onClose={() => setIsCategorySwitchOpen(false)}
-          categories={categories}
-          selectedCategory={filterState.selectedCategory}
-          onSelectCategory={(cat) => {
-            setFilterState((prev) => ({
-              ...prev,
-              selectedCategory: cat,
-            }));
-            if (filterState.mediaType === 'videos') {
-              if (normalizeCategory(cat) === 'all') {
-                setExpandedCategory(null);
-                try {
-                  sessionStorage.removeItem('bhakti_expanded_category_video');
-                } catch {
-                  // Ignore
-                }
-              } else {
-                setExpandedCategory(cat);
-                try {
-                  sessionStorage.setItem('bhakti_expanded_category_video', cat);
-                } catch {
-                  // Ignore
-                }
-              }
-            }
-          }}
-          defaultCategory={
-            filterState.mediaType === 'photos'
-              ? appSettings.defaultPhotoCategory || ''
-              : filterState.mediaType === 'audio'
-              ? appSettings.defaultAudioCategory || ''
-              : appSettings.defaultVideoCategory || appSettings.defaultCategory || ''
-          }
-          onSetDefaultCategory={handleSetDefaultCategory}
-          videos={videos}
-          photos={photos}
-          audios={audios}
-          theme={theme}
-          mediaType={filterState.mediaType}
-          onOpenCategoryManager={() => setIsCategoryManagerOpen(true)}
-          onReorderCategories={(reordered) => setCategories(reordered)}
-          onRenameCategory={(cat) => {
-            const name = window.prompt('Rename category', cat.name)?.trim();
-            if (name && normalizeCategory(name) !== normalizeCategory(cat.name) && !categories.some((c) => normalizeCategory(c.name) === normalizeCategory(name))) {
-              handleUpdateCategory(cat.id, { name }, cat.name);
-            }
-          }}
-          onDeleteCategory={handleDeleteCategory}
-          onAddCategory={handleAddCategory}
-        />
-
-        {/* Modern Floating Glassmorphism Footer: Media Cycle | Category Switch | + */}
+        {/* Modern Floating Glassmorphism Footer: Media Tabs | + */}
         <FloatingGlassFooter
           currentMediaType={filterState.mediaType}
           onSelectMediaType={handleSwitchMediaType}
-          onOpenCategorySwitch={() => setIsCategorySwitchOpen(true)}
-          selectedCategory={filterState.selectedCategory}
-          defaultCategory={
-            filterState.mediaType === 'photos'
-              ? appSettings.defaultPhotoCategory || ''
-              : filterState.mediaType === 'audio'
-              ? appSettings.defaultAudioCategory || ''
-              : appSettings.defaultVideoCategory || appSettings.defaultCategory || ''
-          }
           onOpenPlusMenu={() => {
-            setAddModalTab(
-              filterState.mediaType === 'photos'
-                ? 'photo'
-                : filterState.mediaType === 'audio'
-                ? 'audio'
-                : 'video'
-            );
-            setIsAddModalOpen(true);
+            setIsAddSectionOpen((prev) => !prev);
           }}
+          isAddSectionOpen={isAddSectionOpen}
           videoCount={videos.length}
           photoCount={photos.length}
           audioCount={audios.length}
           theme={theme}
         />
 
-        {/* Video Player Modal (for Grid & List mode playback) */}
-        {activePlaybackVideo && viewMode !== 'split' && (
+        {/* Video Player Modal (for playback) */}
+        {activePlaybackVideo && (
           <VideoPlayerModal
             video={activePlaybackVideo}
             startTimestamp={playbackStartTimestamp}
@@ -1423,7 +900,6 @@ export function App() {
         {editingVideo && (
           <EditVideoModal
             video={editingVideo}
-            categories={categories}
             onSave={handleUpdateVideo}
             onClose={() => setEditingVideo(null)}
           />

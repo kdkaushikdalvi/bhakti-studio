@@ -14,13 +14,12 @@ import {
   Upload,
   HardDrive,
 } from 'lucide-react';
-import { AppSettings, CategoryInfo } from '../types';
+import { AppSettings } from '../types';
 
 interface SettingsModalProps {
   settings: AppSettings;
   onSave: (settings: AppSettings) => void;
   onClose: () => void;
-  categories?: CategoryInfo[];
   onExportBackup?: () => void;
   onImportBackup?: (file: File) => void;
   videoCount?: number;
@@ -32,7 +31,6 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
   settings,
   onSave,
   onClose,
-  categories = [],
   onExportBackup,
   onImportBackup,
   videoCount = 0,
@@ -67,7 +65,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
             </div>
             <div>
               <h3 className="text-base font-bold font-serif leading-none">App Preferences</h3>
-              <p className="text-xs text-orange-100 mt-1">Time format, default category &amp; layout</p>
+              <p className="text-xs text-orange-100 mt-1">Time format and app playback layout</p>
             </div>
           </div>
 
@@ -81,68 +79,6 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
 
         {/* Content Body */}
         <form onSubmit={handleSubmit} className="p-5 overflow-y-auto space-y-4 text-stone-800">
-          {/* Default Launch Category for Videos */}
-          <div className="p-3.5 bg-white border border-teal-200/80 rounded-2xl space-y-2">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <Pin className="w-4 h-4 text-amber-500 fill-amber-500" />
-                <h4 className="text-xs font-bold text-stone-900">Videos Pinned Category</h4>
-              </div>
-              <span className="text-[10px] text-teal-700 font-serif font-medium">
-                {(formData.defaultVideoCategory || formData.defaultCategory) ? `Pinned: ${formData.defaultVideoCategory || formData.defaultCategory}` : 'All Categories'}
-              </span>
-            </div>
-            <p className="text-[11px] text-stone-500">
-              Default category opened when viewing Videos.
-            </p>
-            <select
-              value={formData.defaultVideoCategory ?? (formData.defaultCategory || '')}
-              onChange={(e) =>
-                setFormData({
-                  ...formData,
-                  defaultVideoCategory: e.target.value,
-                  defaultCategory: e.target.value,
-                })
-              }
-              className="w-full text-xs font-medium bg-stone-50 border border-stone-200 rounded-xl px-3 py-2 text-stone-800 focus:outline-none focus:ring-2 focus:ring-teal-400"
-            >
-              <option value="">All Categories (सर्व संग्रह)</option>
-              {categories.map((c) => (
-                <option key={c.id || c.name} value={c.name}>
-                  {c.name}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          {/* Default Launch Category for Photos */}
-          <div className="p-3.5 bg-white border border-purple-200/80 rounded-2xl space-y-2">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <Pin className="w-4 h-4 text-amber-500 fill-amber-500" />
-                <h4 className="text-xs font-bold text-stone-900">Photos Pinned Category</h4>
-              </div>
-              <span className="text-[10px] text-purple-700 font-serif font-medium">
-                {formData.defaultPhotoCategory ? `Pinned: ${formData.defaultPhotoCategory}` : 'All Categories'}
-              </span>
-            </div>
-            <p className="text-[11px] text-stone-500">
-              Default category opened when viewing Photos.
-            </p>
-            <select
-              value={formData.defaultPhotoCategory || ''}
-              onChange={(e) => setFormData({ ...formData, defaultPhotoCategory: e.target.value })}
-              className="w-full text-xs font-medium bg-stone-50 border border-stone-200 rounded-xl px-3 py-2 text-stone-800 focus:outline-none focus:ring-2 focus:ring-purple-400"
-            >
-              <option value="">All Categories (सर्व संग्रह)</option>
-              {categories.map((c) => (
-                <option key={c.id || c.name} value={c.name}>
-                  {c.name}
-                </option>
-              ))}
-            </select>
-          </div>
-
           {/* Time Format */}
           <div className="p-3.5 bg-white border border-orange-200 rounded-2xl flex items-center justify-between">
             <div>
@@ -204,7 +140,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
               </span>
             </div>
             <p className="text-[11px] text-emerald-900 leading-relaxed">
-              Your media vault is stored in high-capacity <strong>IndexedDB &amp; Persistent Local Storage</strong>.
+              Your media is stored in high-capacity <strong>IndexedDB &amp; Persistent Local Storage</strong>.
               Refreshing the page, cleaning temporary caches, or installing as a PWA will <strong>never clear your data</strong>.
             </p>
 

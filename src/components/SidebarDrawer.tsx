@@ -1,59 +1,30 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import {
-  X,
-  Download,
-  RotateCw,
-  Sparkles,
-  Trash2,
-  Youtube,
-  Image as ImageIcon,
-  Disc3,
-  Check,
-  LayoutGrid,
-  List,
-  Columns,
-  Layers,
-  Settings,
-  Tag,
-  ShieldCheck,
-} from 'lucide-react';
-import { ThemeMode, ViewMode, MediaTypeFilter } from '../types';
+import { X, Check } from 'lucide-react';
+import { MediaTypeFilter } from '../types';
 
 interface SidebarDrawerProps {
   isOpen: boolean;
   onClose: () => void;
-  theme?: ThemeMode;
-  viewMode?: ViewMode;
-  onViewModeChange?: (mode: ViewMode) => void;
   currentMediaType?: MediaTypeFilter;
   onFilterMediaType?: (type: MediaTypeFilter) => void;
   videoCount?: number;
   photoCount?: number;
   audioCount?: number;
-  onRefreshApp: () => void;
   onClearCache: () => void;
-  onDeleteAllData: () => void;
   onOpenInstallPwa: () => void;
-  onOpenCategoryManager?: () => void;
 }
 
 export const SidebarDrawer: React.FC<SidebarDrawerProps> = ({
   isOpen,
   onClose,
-  theme = 'blue',
-  viewMode = 'list',
-  onViewModeChange,
   currentMediaType = 'videos',
   onFilterMediaType,
   videoCount = 0,
   photoCount = 0,
   audioCount = 0,
-  onRefreshApp,
   onClearCache,
-  onDeleteAllData,
   onOpenInstallPwa,
-  onOpenCategoryManager,
 }) => {
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
@@ -69,405 +40,160 @@ export const SidebarDrawer: React.FC<SidebarDrawerProps> = ({
   return (
     <AnimatePresence>
       {isOpen && (
-        <div className="fixed inset-0 z-50 flex font-sans">
-          {/* Backdrop */}
+        <div id="sidebar-drawer-root" className="fixed inset-0 z-50 flex pointer-events-auto font-sans">
+          {/* Frosted Backdrop */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 0.25 }}
+            transition={{ duration: 0.2 }}
             onClick={onClose}
-            className="fixed inset-0 bg-stone-950/60 backdrop-blur-sm cursor-pointer"
+            className="fixed inset-0 bg-black/40 backdrop-blur-xs cursor-pointer"
           />
 
-          {/* Left-to-Right Drawer Container */}
+          {/* Drawer Container: Border | White BG | Black Text */}
           <motion.div
             initial={{ x: '-100%' }}
             animate={{ x: 0 }}
             exit={{ x: '-100%' }}
             transition={{ type: 'spring', damping: 28, stiffness: 300 }}
-            className={`relative w-[290px] sm:w-[330px] h-full shadow-2xl flex flex-col z-10 border-r rounded-r-[28px] overflow-hidden transition-colors ${
-              isPhotos
-                ? 'bg-gradient-to-b from-[#18082c] via-[#120421] to-[#0c0216] border-purple-800 text-purple-100 shadow-purple-950/80'
-                : isAudio
-                ? 'bg-gradient-to-b from-[#241303] via-[#1a0c02] to-[#120801] border-amber-800 text-amber-100 shadow-amber-950/80'
-                : 'bg-gradient-to-b from-[#fff1f2] via-[#ffe4e6] to-[#fff1f2] border-rose-200 text-stone-900 shadow-rose-900/20'
-            }`}
+            className="relative w-[280px] sm:w-[320px] h-full shadow-2xl flex flex-col z-10 bg-white border-r border-neutral-200 text-black overflow-hidden"
           >
-            {/* Drawer Header */}
-            <div
-              className={`relative py-2.5 px-3.5 border-b flex items-center justify-between transition-colors ${
-                isPhotos
-                  ? 'bg-purple-950/90 border-purple-800/80'
-                  : isAudio
-                  ? 'bg-amber-950/90 border-amber-800/80'
-                  : 'bg-rose-100/90 border-rose-200/80'
-              }`}
-            >
-              <div className="flex items-center gap-2">
-                <div
-                  className={`w-7 h-7 rounded-full overflow-hidden flex items-center justify-center shadow-md select-none shrink-0 ring-1.5 ${
-                    isPhotos
-                      ? 'ring-purple-400/60 shadow-purple-950/40 bg-purple-950'
-                      : isAudio
-                      ? 'ring-amber-400/60 shadow-amber-950/40 bg-amber-950'
-                      : 'ring-rose-400/60 shadow-rose-900/20 bg-white'
-                  }`}
-                >
-                  <img
-                    src="/BhaktiLogo.png"
-                    alt="Bhakti Logo"
-                    className="w-full h-full object-cover"
-                    referrerPolicy="no-referrer"
-                  />
-                </div>
-                <div className="flex flex-col">
-                  <span className="text-xs font-serif font-bold tracking-tight leading-tight">
-                    Bhakti
-                  </span>
-                  <span className={`text-[9px] font-serif italic leading-tight ${
-                    isPhotos ? 'text-purple-300' : isAudio ? 'text-amber-300' : 'text-rose-700'
-                  }`}>
-                    || भक्ती हीच माझी शक्ती ||
-                  </span>
-                </div>
-              </div>
+            {/* Header: Pure White, Clean Border, Black Text (No "Vault", No subtitle) */}
+            <div className="p-4 border-b border-neutral-200 bg-white flex items-center justify-between shrink-0">
+              <h3 className="font-serif font-bold text-base text-black tracking-wide leading-tight">
+                Bhakti
+              </h3>
 
               <button
                 onClick={onClose}
-                className="p-1 text-stone-400 hover:text-stone-800 hover:bg-black/5 rounded-lg transition-colors cursor-pointer"
-                title="Close menu"
+                className="p-1.5 rounded-lg text-neutral-500 hover:text-black hover:bg-neutral-100 transition-colors cursor-pointer"
+                aria-label="Close drawer"
               >
                 <X className="w-4 h-4" />
               </button>
             </div>
 
-            {/* Scrollable Content Body - Vertical Compact List Layout */}
-            <div className="flex-1 overflow-y-auto p-2.5 space-y-3 custom-scrollbar">
-              {/* SECTION 1: MEDIA TYPE SELECTION (Vertical List) */}
-              <div className="space-y-1.5">
-                <div className="flex items-center gap-1 px-1 text-[10px] font-bold uppercase tracking-wider opacity-60">
-                  <Layers className="w-3 h-3" />
-                  <span>Media Category</span>
+            {/* Content Body: Media Type on top, Actions at the bottom */}
+            <div className="flex-1 flex flex-col justify-between p-4 bg-white overflow-y-auto">
+              {/* SECTION: MEDIA TYPE */}
+              <div className="space-y-2">
+                <div className="text-[11px] font-bold uppercase tracking-wider text-neutral-500 px-1">
+                  MEDIA TYPE
                 </div>
 
-                <div className="space-y-1">
-                  {/* Videos Option */}
+                <div className="space-y-2">
+                  {/* Videos */}
                   <button
                     onClick={() => {
                       if (onFilterMediaType) onFilterMediaType('videos');
                       onClose();
                     }}
-                    className={`w-full py-1.5 px-2.5 rounded-xl border text-left flex items-center justify-between transition-all cursor-pointer shadow-2xs active:scale-[0.98] ${
+                    className={`w-full py-2.5 px-3.5 rounded-xl border text-left flex items-center justify-between transition-all cursor-pointer ${
                       isVideos
-                        ? 'bg-rose-500 border-rose-600 text-white shadow-rose-900/20 ring-1 ring-rose-400/40'
-                        : 'bg-rose-50/70 border-rose-200/80 hover:bg-rose-100/70 text-rose-900'
+                        ? 'bg-neutral-100 border-neutral-900 text-black font-semibold shadow-xs'
+                        : 'bg-white border-neutral-200 text-neutral-800 hover:bg-neutral-50 hover:border-neutral-300'
                     }`}
                   >
-                    <div className="flex items-center gap-2 min-w-0">
-                      <div className={`w-6 h-6 rounded-lg flex items-center justify-center shrink-0 ${
+                    <span className="text-sm font-medium">Videos</span>
+                    <span
+                      className={`text-xs px-2 py-0.5 rounded-md font-bold border transition-colors ${
                         isVideos
-                          ? 'bg-white text-rose-600 shadow-xs'
-                          : 'bg-rose-100 text-rose-600'
-                      }`}>
-                        <Youtube className="w-3.5 h-3.5" />
-                      </div>
-                      <div className="flex items-center gap-1.5 min-w-0">
-                        <span className="text-xs font-semibold truncate">Videos</span>
-                        <span className="text-[9px] px-1.5 py-0.2 rounded-md bg-white/20 opacity-90 font-semibold">
-                          {videoCount}
-                        </span>
-                      </div>
-                    </div>
-                    {isVideos && (
-                      <Check className="w-3.5 h-3.5 text-white shrink-0 ml-1 stroke-[2.5]" />
-                    )}
+                          ? 'bg-rose-600 text-white border-rose-600 shadow-xs'
+                          : 'bg-rose-50 text-rose-600 border-rose-200'
+                      }`}
+                    >
+                      {videoCount}
+                    </span>
                   </button>
 
-                  {/* Audio Option */}
+                  {/* Audio */}
                   <button
                     onClick={() => {
                       if (onFilterMediaType) onFilterMediaType('audio');
                       onClose();
                     }}
-                    className={`w-full py-1.5 px-2.5 rounded-xl border text-left flex items-center justify-between transition-all cursor-pointer shadow-2xs active:scale-[0.98] ${
+                    className={`w-full py-2.5 px-3.5 rounded-xl border text-left flex items-center justify-between transition-all cursor-pointer ${
                       isAudio
-                        ? 'bg-amber-900/60 border-amber-400 text-white shadow-amber-950/40 ring-1 ring-amber-400/40'
-                        : 'bg-amber-950/30 border-amber-900/40 hover:bg-amber-900/40 text-amber-200/70'
+                        ? 'bg-neutral-100 border-neutral-900 text-black font-semibold shadow-xs'
+                        : 'bg-white border-neutral-200 text-neutral-800 hover:bg-neutral-50 hover:border-neutral-300'
                     }`}
                   >
-                    <div className="flex items-center gap-2 min-w-0">
-                      <div className={`w-6 h-6 rounded-lg flex items-center justify-center shrink-0 ${
+                    <span className="text-sm font-medium">Audio</span>
+                    <span
+                      className={`text-xs px-2 py-0.5 rounded-md font-bold border transition-colors ${
                         isAudio
-                          ? 'bg-amber-500 text-stone-950 shadow-xs'
-                          : 'bg-amber-500/20 text-amber-400'
-                      }`}>
-                        <Disc3 className="w-3.5 h-3.5" />
-                      </div>
-                      <div className="flex items-center gap-1.5 min-w-0">
-                        <span className="text-xs font-semibold truncate">Audio</span>
-                        <span className="text-[9px] px-1.5 py-0.2 rounded-md bg-white/10 opacity-75 font-semibold">
-                          {audioCount}
-                        </span>
-                      </div>
-                    </div>
-                    {isAudio && (
-                      <Check className="w-3.5 h-3.5 text-amber-300 shrink-0 ml-1 stroke-[2.5]" />
-                    )}
+                          ? 'bg-amber-500 text-stone-950 border-amber-500 shadow-xs'
+                          : 'bg-amber-50 text-amber-700 border-amber-200'
+                      }`}
+                    >
+                      {audioCount}
+                    </span>
                   </button>
 
-                  {/* Photos Option */}
+                  {/* Photos */}
                   <button
                     onClick={() => {
                       if (onFilterMediaType) onFilterMediaType('photos');
                       onClose();
                     }}
-                    className={`w-full py-1.5 px-2.5 rounded-xl border text-left flex items-center justify-between transition-all cursor-pointer shadow-2xs active:scale-[0.98] ${
+                    className={`w-full py-2.5 px-3.5 rounded-xl border text-left flex items-center justify-between transition-all cursor-pointer ${
                       isPhotos
-                        ? 'bg-purple-900/60 border-purple-400 text-white shadow-purple-950/40 ring-1 ring-purple-400/40'
-                        : 'bg-purple-950/30 border-purple-900/40 hover:bg-purple-900/40 text-purple-200/70'
+                        ? 'bg-neutral-100 border-neutral-900 text-black font-semibold shadow-xs'
+                        : 'bg-white border-neutral-200 text-neutral-800 hover:bg-neutral-50 hover:border-neutral-300'
                     }`}
                   >
-                    <div className="flex items-center gap-2 min-w-0">
-                      <div className={`w-6 h-6 rounded-lg flex items-center justify-center shrink-0 ${
+                    <span className="text-sm font-medium">Photos</span>
+                    <span
+                      className={`text-xs px-2 py-0.5 rounded-md font-bold border transition-colors ${
                         isPhotos
-                          ? 'bg-purple-500 text-white shadow-xs'
-                          : 'bg-purple-500/20 text-purple-400'
-                      }`}>
-                        <ImageIcon className="w-3.5 h-3.5" />
-                      </div>
-                      <div className="flex items-center gap-1.5 min-w-0">
-                        <span className="text-xs font-semibold truncate">Photos</span>
-                        <span className="text-[9px] px-1.5 py-0.2 rounded-md bg-white/10 opacity-75 font-semibold">
-                          {photoCount}
-                        </span>
-                      </div>
-                    </div>
-                    {isPhotos && (
-                      <Check className="w-3.5 h-3.5 text-purple-300 shrink-0 ml-1 stroke-[2.5]" />
-                    )}
+                          ? 'bg-emerald-600 text-white border-emerald-600 shadow-xs'
+                          : 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                      }`}
+                    >
+                      {photoCount}
+                    </span>
                   </button>
                 </div>
               </div>
 
-              {/* SECTION 2: VIEW LAYOUT (LIST / GRID / SPLIT) */}
-              <div className="space-y-1.5">
-                <div className="flex items-center gap-1 px-1 text-[10px] font-bold uppercase tracking-wider opacity-60">
-                  <List className="w-3 h-3" />
-                  <span>Display Layout</span>
+              {/* SECTION: ACTIONS (Moved to bottom, no subtext) */}
+              <div className="space-y-2 pt-4 mt-auto">
+                <div className="text-[11px] font-bold uppercase tracking-wider text-neutral-500 px-1">
+                  ACTIONS
                 </div>
 
-                <div className="space-y-1">
-                  {/* List View (1st & Default) */}
-                  <button
-                    onClick={() => {
-                      if (onViewModeChange) onViewModeChange('list');
-                      showToast('Switched to List Layout 📄');
-                    }}
-                    className={`w-full py-1.5 px-2.5 rounded-xl border text-left flex items-center justify-between transition-all cursor-pointer shadow-2xs active:scale-[0.98] ${
-                      viewMode === 'list'
-                        ? currentMediaType === 'photos'
-                          ? 'bg-purple-900/70 border-purple-400 text-white ring-1 ring-purple-400/30'
-                          : 'bg-rose-500 border-rose-600 text-white ring-1 ring-rose-400/30'
-                        : currentMediaType === 'photos'
-                        ? 'bg-purple-950/40 border-purple-900/50 hover:bg-purple-900/40 text-purple-200'
-                        : 'bg-rose-50/80 border-rose-200/80 hover:bg-rose-100/70 text-rose-900'
-                    }`}
-                  >
-                    <div className="flex items-center gap-2 min-w-0">
-                      <div className="p-1 rounded-md bg-sky-500/10 text-sky-400 shrink-0">
-                        <List className="w-3.5 h-3.5" />
-                      </div>
-                      <span className="text-xs font-semibold">List Layout</span>
-                    </div>
-                    {viewMode === 'list' && (
-                      <Check className={`w-3.5 h-3.5 stroke-[2.5] ${currentMediaType === 'photos' ? 'text-purple-300' : 'text-white'}`} />
-                    )}
-                  </button>
-
-                  {/* Grid View */}
-                  <button
-                    onClick={() => {
-                      if (onViewModeChange) onViewModeChange('grid');
-                      showToast('Switched to Grid Layout 🔲');
-                    }}
-                    className={`w-full py-1.5 px-2.5 rounded-xl border text-left flex items-center justify-between transition-all cursor-pointer shadow-2xs active:scale-[0.98] ${
-                      viewMode === 'grid'
-                        ? currentMediaType === 'photos'
-                          ? 'bg-purple-900/70 border-purple-400 text-white ring-1 ring-purple-400/30'
-                          : 'bg-rose-500 border-rose-600 text-white ring-1 ring-rose-400/30'
-                        : currentMediaType === 'photos'
-                        ? 'bg-purple-950/40 border-purple-900/50 hover:bg-purple-900/40 text-purple-200'
-                        : 'bg-rose-50/80 border-rose-200/80 hover:bg-rose-100/70 text-rose-900'
-                    }`}
-                  >
-                    <div className="flex items-center gap-2 min-w-0">
-                      <div className="p-1 rounded-md bg-orange-500/10 text-orange-400 shrink-0">
-                        <LayoutGrid className="w-3.5 h-3.5" />
-                      </div>
-                      <span className="text-xs font-semibold">Grid Layout</span>
-                    </div>
-                    {viewMode === 'grid' && (
-                      <Check className={`w-3.5 h-3.5 stroke-[2.5] ${currentMediaType === 'photos' ? 'text-purple-300' : 'text-white'}`} />
-                    )}
-                  </button>
-
-                  {/* Split Player View */}
-                  <button
-                    onClick={() => {
-                      if (onViewModeChange) onViewModeChange('split');
-                      showToast('Switched to Split Player 🎬');
-                    }}
-                    className={`w-full py-1.5 px-2.5 rounded-xl border text-left flex items-center justify-between transition-all cursor-pointer shadow-2xs active:scale-[0.98] ${
-                      viewMode === 'split'
-                        ? currentMediaType === 'photos'
-                          ? 'bg-purple-900/70 border-purple-400 text-white ring-1 ring-purple-400/30'
-                          : 'bg-rose-500 border-rose-600 text-white ring-1 ring-rose-400/30'
-                        : currentMediaType === 'photos'
-                        ? 'bg-purple-950/40 border-purple-900/50 hover:bg-purple-900/40 text-purple-200'
-                        : 'bg-rose-50/80 border-rose-200/80 hover:bg-rose-100/70 text-rose-900'
-                    }`}
-                  >
-                    <div className="flex items-center gap-2 min-w-0">
-                      <div className="p-1 rounded-md bg-emerald-500/10 text-emerald-400 shrink-0">
-                        <Columns className="w-3.5 h-3.5" />
-                      </div>
-                      <span className="text-xs font-semibold">Split Workspace</span>
-                    </div>
-                    {viewMode === 'split' && (
-                      <Check className={`w-3.5 h-3.5 stroke-[2.5] ${currentMediaType === 'photos' ? 'text-purple-300' : 'text-white'}`} />
-                    )}
-                  </button>
-                </div>
-              </div>
-
-              {/* SECTION 3: SYSTEM UTILITIES (Vertical Items) */}
-              <div className="space-y-1.5">
-                <div className="flex items-center gap-1 px-1 text-[10px] font-bold uppercase tracking-wider opacity-60">
-                  <Settings className="w-3 h-3" />
-                  <span>Actions & Memory</span>
-                </div>
-
-                <div className="space-y-1">
-                  {/* Refresh App */}
-                  <button
-                    onClick={() => {
-                      onRefreshApp();
-                      showToast('Vault refreshed ✨');
-                    }}
-                    className={`w-full py-1.5 px-2.5 rounded-xl border text-left flex items-center justify-between transition-all cursor-pointer shadow-2xs active:scale-[0.98] ${
-                      currentMediaType === 'photos'
-                        ? 'bg-purple-950/40 border-purple-900/50 hover:bg-purple-900/50 text-purple-100'
-                        : 'bg-rose-50/80 border-rose-200/80 hover:bg-rose-100/70 text-rose-900'
-                    }`}
-                  >
-                    <div className="flex items-center gap-2">
-                      <div className="p-1 rounded-md bg-sky-500/15 text-sky-400 shrink-0">
-                        <RotateCw className="w-3.5 h-3.5" />
-                      </div>
-                      <span className="text-xs font-semibold">Refresh Feed</span>
-                    </div>
-                  </button>
-
-                  {/* Clear Cache (Safe) */}
+                <div className="space-y-2">
+                  {/* Option 1: Clear cache */}
                   <button
                     id="drawer-clear-cache-btn"
                     onClick={() => {
                       onClearCache();
-                      showToast('Temporary cache refreshed ✨ (Saved media safe)');
+                      showToast('Cache cleared successfully');
                     }}
-                    className={`w-full py-2 px-2.5 rounded-xl border text-left flex items-center justify-between transition-all cursor-pointer shadow-2xs active:scale-[0.98] ${
-                      currentMediaType === 'photos'
-                        ? 'bg-purple-950/40 border-purple-900/50 hover:bg-purple-900/50 text-purple-100'
-                        : 'bg-rose-50/80 border-rose-200/80 hover:bg-rose-100/70 text-rose-900'
-                    }`}
+                    className="w-full py-2.5 px-3.5 rounded-xl border border-neutral-200 bg-white hover:bg-neutral-50 hover:border-neutral-300 text-left flex items-center justify-between transition-all cursor-pointer active:scale-[0.99]"
                   >
-                    <div className="flex items-center gap-2">
-                      <div className="p-1 rounded-md bg-amber-500/15 text-amber-400 shrink-0">
-                        <Sparkles className="w-3.5 h-3.5" />
-                      </div>
-                      <div className="flex flex-col">
-                        <span className="text-xs font-semibold">Clean Temp Cache</span>
-                        <span className="text-[9px] opacity-60">Never clears your saved media</span>
-                      </div>
-                    </div>
-                    <ShieldCheck className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+                    <span className="text-sm font-semibold text-black">Clear cache</span>
                   </button>
 
-                  {/* Install PWA */}
+                  {/* Option 2: Install app [PWA] */}
                   <button
                     onClick={() => {
                       onOpenInstallPwa();
                       onClose();
                     }}
-                    className={`w-full py-2 px-2.5 rounded-xl border text-left flex items-center justify-between transition-all cursor-pointer shadow-2xs active:scale-[0.98] ${
-                      currentMediaType === 'photos'
-                        ? 'bg-purple-950/40 border-purple-900/50 hover:bg-purple-900/50 text-purple-100'
-                        : 'bg-rose-50/80 border-rose-200/80 hover:bg-rose-100/70 text-rose-900'
-                    }`}
+                    className="w-full py-2.5 px-3.5 rounded-xl border border-neutral-200 bg-white hover:bg-neutral-50 hover:border-neutral-300 text-left flex items-center justify-between transition-all cursor-pointer active:scale-[0.99]"
                   >
-                    <div className="flex items-center gap-2">
-                      <div className="p-1 rounded-md bg-emerald-500/15 text-emerald-400 shrink-0">
-                        <Download className="w-3.5 h-3.5" />
-                      </div>
-                      <div className="flex flex-col">
-                        <span className="text-xs font-semibold">Install App (PWA)</span>
-                        <span className="text-[9px] opacity-60">Persistent offline vault</span>
-                      </div>
-                    </div>
-                    <ShieldCheck className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
-                  </button>
-
-                  {/* Delete All Data */}
-                  <button
-                    onClick={() => {
-                      onDeleteAllData();
-                    }}
-                    className={`w-full py-1.5 px-2.5 rounded-xl border text-left flex items-center justify-between transition-all cursor-pointer shadow-2xs active:scale-[0.98] ${
-                      currentMediaType === 'photos'
-                        ? 'bg-rose-950/30 border-rose-900/50 hover:bg-rose-900/40 text-rose-200'
-                        : 'bg-rose-950/30 border-rose-900/50 hover:bg-rose-900/40 text-rose-200'
-                    }`}
-                  >
-                    <div className="flex items-center gap-2">
-                      <div className="p-1 rounded-md bg-rose-500/15 text-rose-500 shrink-0">
-                        <Trash2 className="w-3.5 h-3.5" />
-                      </div>
-                      <span className="text-xs font-semibold">Delete All Data</span>
-                    </div>
+                    <span className="text-sm font-semibold text-black">Install app [PWA]</span>
                   </button>
                 </div>
               </div>
             </div>
 
-            {/* Footer with Seal */}
-            <div
-              className={`py-2 px-3 border-t flex items-center justify-between text-[11px] transition-colors ${
-                currentMediaType === 'photos'
-                  ? 'bg-purple-950/80 border-purple-800/60 text-purple-300'
-                  : 'bg-rose-100/90 border-rose-200 text-rose-800'
-              }`}
-            >
-              <div className="flex items-center gap-1.5">
-                <img
-                  src="/BhaktiLogo.png"
-                  alt="Bhakti Emblem"
-                  className="w-4 h-4 rounded-full object-cover ring-1 ring-orange-400 dark:ring-cyan-400"
-                  referrerPolicy="no-referrer"
-                />
-                <span className="font-serif italic font-bold text-stone-900 dark:text-stone-200 text-[10px]">
-                  Bhakti Archive
-                </span>
-              </div>
-              <span className="text-[9px] text-cyan-400 dark:text-cyan-400 font-semibold">
-                Offline PWA
-              </span>
-            </div>
-
-            {/* Floating Toast Notice */}
+            {/* Toast Notification */}
             {toastMessage && (
-              <div className="absolute bottom-14 left-4 right-4 bg-stone-900 text-white text-xs px-3.5 py-2.5 rounded-xl shadow-lg flex items-center gap-2 animate-fadeIn z-30">
-                <Check className="w-4 h-4 text-emerald-400 shrink-0" />
+              <div className="absolute bottom-4 left-4 right-4 bg-neutral-900 text-white text-xs px-3.5 py-2.5 rounded-xl shadow-xl flex items-center gap-2 animate-fadeIn z-30">
+                <Check className="w-3.5 h-3.5 text-white shrink-0" />
                 <span>{toastMessage}</span>
               </div>
             )}

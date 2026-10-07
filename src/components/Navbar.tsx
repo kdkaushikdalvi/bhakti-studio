@@ -128,8 +128,8 @@ export const Navbar: React.FC<NavbarProps> = ({
                   ? 'bg-white/90 border-emerald-300 text-emerald-900 hover:bg-emerald-100 hover:text-emerald-950 shadow-2xs'
                   : 'bg-white/90 border-yellow-300 text-amber-900 hover:bg-yellow-100 hover:text-amber-950 shadow-2xs'
               }`}
-              title="Refresh Vault Feed"
-              aria-label="Refresh Vault Feed"
+              title="Refresh Feed"
+              aria-label="Refresh Feed"
             >
               <RotateCw
                 className={`w-3.5 h-3.5 transition-transform duration-700 ${
