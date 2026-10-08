@@ -51,31 +51,31 @@ export const SidebarDrawer: React.FC<SidebarDrawerProps> = ({
             className="fixed inset-0 bg-black/40 backdrop-blur-xs cursor-pointer"
           />
 
-          {/* Drawer Container: Border | White BG | Black Text */}
+          {/* Drawer Container: Light background */}
           <motion.div
             initial={{ x: '-100%' }}
             animate={{ x: 0 }}
             exit={{ x: '-100%' }}
             transition={{ type: 'spring', damping: 28, stiffness: 300 }}
-            className="relative w-[280px] sm:w-[320px] h-full shadow-2xl flex flex-col z-10 bg-white border-r border-neutral-200 text-black overflow-hidden"
+            className="relative w-[280px] sm:w-[320px] h-full shadow-2xl flex flex-col z-10 bg-[#FAF6EE] border-r border-stone-200 text-black overflow-hidden"
           >
-            {/* Header: Pure White, Clean Border, Black Text (No "Vault", No subtitle) */}
-            <div className="p-4 border-b border-neutral-200 bg-white flex items-center justify-between shrink-0">
+            {/* Header: Subtle light tone, Clean Border, Black Text */}
+            <div className="p-4 border-b border-stone-200/90 bg-[#F4EFE6]/80 flex items-center justify-between shrink-0">
               <h3 className="font-serif font-bold text-base text-black tracking-wide leading-tight">
                 Bhakti
               </h3>
 
               <button
                 onClick={onClose}
-                className="p-1.5 rounded-lg text-neutral-500 hover:text-black hover:bg-neutral-100 transition-colors cursor-pointer"
+                className="p-1.5 rounded-lg text-neutral-500 hover:text-black hover:bg-stone-200/60 transition-colors cursor-pointer"
                 aria-label="Close drawer"
               >
                 <X className="w-4 h-4" />
               </button>
             </div>
 
-            {/* Content Body: Media Type on top, Actions at the bottom */}
-            <div className="flex-1 flex flex-col justify-between p-4 bg-white overflow-y-auto">
+            {/* Content Body: Light background, Media Type on top, Actions at the bottom */}
+            <div className="flex-1 flex flex-col justify-between p-4 bg-[#FAF6EE] overflow-y-auto">
               {/* SECTION: MEDIA TYPE */}
               <div className="space-y-2">
                 <div className="text-[11px] font-bold uppercase tracking-wider text-neutral-500 px-1">
@@ -91,8 +91,8 @@ export const SidebarDrawer: React.FC<SidebarDrawerProps> = ({
                     }}
                     className={`w-full py-2.5 px-3.5 rounded-xl border text-left flex items-center justify-between transition-all cursor-pointer ${
                       isVideos
-                        ? 'bg-neutral-100 border-neutral-900 text-black font-semibold shadow-xs'
-                        : 'bg-white border-neutral-200 text-neutral-800 hover:bg-neutral-50 hover:border-neutral-300'
+                        ? 'bg-white border-neutral-900 text-black font-semibold shadow-xs ring-1 ring-neutral-900/10'
+                        : 'bg-white/85 border-stone-200 text-neutral-800 hover:bg-white hover:border-stone-300'
                     }`}
                   >
                     <span className="text-sm font-medium">Videos</span>
@@ -115,8 +115,8 @@ export const SidebarDrawer: React.FC<SidebarDrawerProps> = ({
                     }}
                     className={`w-full py-2.5 px-3.5 rounded-xl border text-left flex items-center justify-between transition-all cursor-pointer ${
                       isAudio
-                        ? 'bg-neutral-100 border-neutral-900 text-black font-semibold shadow-xs'
-                        : 'bg-white border-neutral-200 text-neutral-800 hover:bg-neutral-50 hover:border-neutral-300'
+                        ? 'bg-white border-neutral-900 text-black font-semibold shadow-xs ring-1 ring-neutral-900/10'
+                        : 'bg-white/85 border-stone-200 text-neutral-800 hover:bg-white hover:border-stone-300'
                     }`}
                   >
                     <span className="text-sm font-medium">Audio</span>
@@ -139,8 +139,8 @@ export const SidebarDrawer: React.FC<SidebarDrawerProps> = ({
                     }}
                     className={`w-full py-2.5 px-3.5 rounded-xl border text-left flex items-center justify-between transition-all cursor-pointer ${
                       isPhotos
-                        ? 'bg-neutral-100 border-neutral-900 text-black font-semibold shadow-xs'
-                        : 'bg-white border-neutral-200 text-neutral-800 hover:bg-neutral-50 hover:border-neutral-300'
+                        ? 'bg-white border-neutral-900 text-black font-semibold shadow-xs ring-1 ring-neutral-900/10'
+                        : 'bg-white/85 border-stone-200 text-neutral-800 hover:bg-white hover:border-stone-300'
                     }`}
                   >
                     <span className="text-sm font-medium">Photos</span>
@@ -171,7 +171,7 @@ export const SidebarDrawer: React.FC<SidebarDrawerProps> = ({
                       onClearCache();
                       showToast('Cache cleared successfully');
                     }}
-                    className="w-full py-2.5 px-3.5 rounded-xl border border-neutral-200 bg-white hover:bg-neutral-50 hover:border-neutral-300 text-left flex items-center justify-between transition-all cursor-pointer active:scale-[0.99]"
+                    className="w-full py-2.5 px-3.5 rounded-xl border border-stone-200 bg-white/85 hover:bg-white hover:border-stone-300 text-left flex items-center justify-between transition-all cursor-pointer active:scale-[0.99] shadow-2xs"
                   >
                     <span className="text-sm font-semibold text-black">Clear cache</span>
                   </button>
@@ -182,7 +182,7 @@ export const SidebarDrawer: React.FC<SidebarDrawerProps> = ({
                       onOpenInstallPwa();
                       onClose();
                     }}
-                    className="w-full py-2.5 px-3.5 rounded-xl border border-neutral-200 bg-white hover:bg-neutral-50 hover:border-neutral-300 text-left flex items-center justify-between transition-all cursor-pointer active:scale-[0.99]"
+                    className="w-full py-2.5 px-3.5 rounded-xl border border-stone-200 bg-white/85 hover:bg-white hover:border-stone-300 text-left flex items-center justify-between transition-all cursor-pointer active:scale-[0.99] shadow-2xs"
                   >
                     <span className="text-sm font-semibold text-black">Install app [PWA]</span>
                   </button>

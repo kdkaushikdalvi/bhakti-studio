@@ -82,32 +82,28 @@ const cleanAndSequencePhotos = (rawList: PhotoItem[]): PhotoItem[] => {
       !p.title?.toLowerCase().includes('swami darshan')
   );
 
-  const mapped = filtered.map((p) => {
-    if (p.id === 'photo-swami-blessing') return { ...p, id: 'photo-1', title: 'Photo 1' };
-    if (p.id === 'photo-swami-divine') return { ...p, id: 'photo-2', title: 'Photo 2' };
-    if (p.id === 'photo-mind-state') return { ...p, id: 'photo-3', title: 'Photo 3' };
-    if (p.id === 'photo-self-pleasure') return { ...p, id: 'photo-4', title: 'Photo 4' };
-    return p;
-  });
+  const initialLegacyIds = new Set([
+    'photo-1',
+    'photo-2',
+    'photo-3',
+    'photo-4',
+    'photo-5',
+    'photo-swami-blessing',
+    'photo-swami-divine',
+    'photo-swami-grace',
+    'photo-mind-state',
+    'photo-self-pleasure',
+  ]);
 
-  const unique = new Map<string, PhotoItem>();
-  [...INITIAL_PHOTOS, ...mapped].forEach((p) => {
-    if (!unique.has(p.id)) {
-      unique.set(p.id, p);
-    }
-  });
+  // Keep custom user-added photos uploaded via the Add Photo feature
+  const customUserPhotos = filtered.filter((p) => !initialLegacyIds.has(p.id));
 
-  return Array.from(unique.values()).map((p, idx) => ({
+  // Merge INITIAL_PHOTOS with any user custom photos
+  const combined = [...INITIAL_PHOTOS, ...customUserPhotos];
+
+  return combined.map((p, idx) => ({
     ...p,
-    title:
-      !p.title ||
-      p.title.startsWith('Photo') ||
-      p.title === 'Paramahamsa Vishwananda' ||
-      p.title.includes('Darshan') ||
-      p.title === 'Mind-State' ||
-      p.title === 'Self-Pleasure'
-        ? `Photo ${idx + 1}`
-        : p.title,
+    title: `Photo ${idx + 1}`,
   }));
 };
 
